@@ -15,7 +15,8 @@ function Page5() {
     address: "",
     adaCompliant: false,
   });
-
+  console.log("hello");
+  
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
     setFormData((prev) => ({
