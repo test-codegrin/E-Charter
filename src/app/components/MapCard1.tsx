@@ -1,0 +1,72 @@
+"use client";
+
+import Image from "next/image";
+import React from "react";
+
+const MapCard1: React.FC = () => {
+  return (
+    <div className="relative xl:ml-[30px] xl:mr-8 2xl:mr-0 lg:w-[100%] h-[100%] lg:mt-[10px] 2xl:w-[1100px]">
+      {/* Map Image */}
+      <div className="relative w-full h-full rounded-lg md:rounded-xl overflow-hidden">
+        <Image
+          src="/images/map.png"
+          alt="map"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-xl"
+          priority={false}
+        />
+      </div>
+
+      {/* Route Info Card */}
+      <div className="bg-white shadow-md rounded-lg px-4 py-3 absolute bottom-4 md:bottom-6 left-1/2 -translate-x-1/2 w-[95%] max-w-[1177px]">
+        {/* Icons Row */}
+        <div className="flex justify-between items-center">
+          <Image
+            src="/images/Car.png"
+            alt="car"
+            width={50}
+            height={30}
+            className="w-10 md:w-[50px] h-6 md:h-[30px] rounded-md"
+          />
+          <Image
+            src="/images/Location.png"
+            alt="pin"
+            width={20}
+            height={20}
+            className="w-4 h-4 md:w-5 md:h-5"
+          />
+        </div>
+
+        {/* Route Progress */}
+        <div className="flex items-center mt-2 md:mt-3 ml-4 sm:ml-[22px]">
+          <div className="bg-[#C0FFED] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0">
+            <div className="bg-[#1FC091] w-2 h-2 md:w-2.5 md:h-2.5 rounded-full"></div>
+          </div>
+          <div className="flex-grow border-b-2 border-[#D9D9D9]"></div>
+          <div className="bg-[#1FADC0] w-2 h-2 md:w-[10px] md:h-[10px] rounded-full shrink-0"></div>
+          <div className="flex-grow border-b-2 border-[#D9D9D9]"></div>
+          <div className="bg-[#FFD1D1] w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0">
+            <div className="bg-[#D21313] w-2 h-2 md:w-2.5 md:h-2.5 rounded-full"></div>
+          </div>
+        </div>
+
+        {/* Locations */}
+        <div className="flex justify-between text-sm sm:text-base mt-1 md:mt-2 font-semibold">
+          <p className="truncate max-w-[30%]">Calgary</p>
+          <p className="truncate max-w-[30%] mx-2 sm:ml-12">Red Deer</p>
+          <p className="truncate max-w-[30%] text-right">Edmonton</p>
+        </div>
+
+        {/* Times */}
+        <div className="flex justify-between text-xs sm:text-sm text-[#9C9C9C] mt-1">
+          <p className="truncate max-w-[30%]">June 19 at 01:30 AM</p>
+          <p className="truncate max-w-[30%] mx-2 sm:ml-10">June 19 at 02:00 AM</p>
+          <p className="truncate max-w-[30%] text-right">June 19 at 02:30 AM</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MapCard1;

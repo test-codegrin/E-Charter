@@ -1,0 +1,245 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+function Page5() {
+  const router = useRouter();
+
+  const [formData, setFormData] = useState({
+    name: "",
+    cardNumber: "",
+    expiration: "",
+    securityCode: "",
+    address: "",
+    adaCompliant: false,
+  });
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = event.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleReserveClick = () => {
+    const { name, cardNumber, expiration, securityCode, address } = formData;
+
+    if (!name || !cardNumber || !expiration || !securityCode || !address) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+
+    alert("Your trip has been booked successfully!");
+    router.push("/");
+  };
+
+  return (
+    <div className="bg-white text-gray-900 font-[Inter] min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <p className="text-3xl sm:text-4xl font-bold text-center lg:text-left 2xl:text-center mb-10">
+          Your trip is ready to book!
+        </p>
+
+        <div className="flex flex-col align-center justify-center lg:flex-row gap-6 lg:gap-8">
+          {/* Payment Info */}
+          <div className="lg:w-[60%] xl:w-[65%] 2xl:w-[50%] pt-6 pb-8 px-6 sm:px-8 border border-[#DBDBDB] rounded-2xl">
+            <p className="text-lg sm:text-xl font-medium">Payment Information</p>
+
+            <div className="mt-6 space-y-6">
+              <div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Enter Name"
+                  className="text-base w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                />
+                <div className="border-b border-[#DBDBDB] mt-2"></div>
+              </div>
+
+              <div className="mt-8">
+                <p className="text-lg font-medium">Card Number</p>
+                <input
+                  type="text"
+                  name="cardNumber"
+                  value={formData.cardNumber}
+                  onChange={handleChange}
+                  placeholder="Enter card number"
+                  className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                />
+                <div className="border-b border-[#DBDBDB] mt-2"></div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                <div className="flex-1">
+                  <p className="text-lg font-medium">Expiration</p>
+                  <input
+                    type="text"
+                    name="expiration"
+                    value={formData.expiration}
+                    onChange={handleChange}
+                    placeholder="MM/YY"
+                    className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                  />
+                  <div className="border-b border-[#DBDBDB] mt-2"></div>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-medium">Security Code</p>
+                  <input
+                    type="text"
+                    name="securityCode"
+                    value={formData.securityCode}
+                    onChange={handleChange}
+                    placeholder="CVV"
+                    className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                  />
+                  <div className="border-b border-[#DBDBDB] mt-2"></div>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <p className="text-lg font-medium">Address</p>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="Enter address"
+                  className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                />
+                <div className="border-b border-[#DBDBDB] mt-2"></div>
+              </div>
+
+              <div className="flex items-center gap-3 mt-6">
+                <input
+                  type="checkbox"
+                  name="adaCompliant"
+                  checked={formData.adaCompliant}
+                  onChange={handleChange}
+                  className="w-5 h-5 border border-[#D9D9D9] rounded-sm"
+                />
+                <label className="text-sm sm:text-base text-[#0D0D0D]">
+                  ADA standards Compliant
+                </label>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <Link href="/page1">
+                <button
+                  type="button"
+                  className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-sm rounded-full transition-colors duration-200"
+                >
+                  Reserve Now
+                </button>
+              </Link>
+            </div>
+
+            <p className="text-sm text-center mt-4 text-gray-600">
+              By reserving, you agree to our Terms & Conditions
+            </p>
+          </div>
+
+          {/* Booking Summary */}
+          <div className="lg:w-[40%] xl:w-[35%] border border-[#DBDBDB] rounded-2xl p-6 lg:sticky lg:top-4 lg:self-start">
+            <div className="flex justify-between items-center">
+              <p className="text-lg sm:text-xl font-medium">Booking Summary</p>
+              <p className="text-sm sm:text-base text-[#6C6C6C]">Quote #1238307</p>
+            </div>
+            <div className="border-b border-[#DBDBDB] my-4"></div>
+
+            <div className="space-y-3 text-sm sm:text-base">
+              <div className="flex justify-between">
+                <p>Base fare (1x Sprinter)</p>
+                <p>$1,528.19</p>
+              </div>
+              <div className="flex justify-between">
+                <p>Our service fee</p>
+                <p>$45.85</p>
+              </div>
+              <div className="border-b border-[#DBDBDB] my-4"></div>
+              <div className="flex justify-between font-medium text-base sm:text-lg">
+                <p>Total (USD)</p>
+                <p>$1,574.04</p>
+              </div>
+            </div>
+
+            <div className="bg-[#F6F6F6] rounded-xl text-center py-4 mt-6">
+              <p className="text-base sm:text-lg">Due now</p>
+              <p className="font-bold text-xl sm:text-2xl mt-2">$1,574.04</p>
+            </div>
+
+            <div className="flex justify-between items-center mt-6">
+              <p className="font-medium text-lg">Round trip</p>
+              <button className="text-base text-[#00A6F2] hover:underline cursor-pointer">
+                Edit trip
+              </button>
+            </div>
+
+            <div className="flex justify-between mt-4 text-sm sm:text-base text-gray-600">
+              <p>Trip to Weehawken</p>
+              <p>Passengers × 2</p>
+            </div>
+
+            <div className="mt-6">
+              <img
+                src="/images/suv2.png"
+                alt="SUV Vehicle"
+                className="w-full h-auto rounded-xl object-cover"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Why Choose Section */}
+        <div className="mt-20 text-center">
+          <p className="text-2xl sm:text-3xl font-bold">Why Choose eCharter?</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 max-w-6xl mx-auto">
+          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
+            <img
+              src="/images/Support.png"
+              alt="Support"
+              className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4"
+            />
+            <p className="text-lg font-semibold">24/7 Support</p>
+            <p className="text-base mt-2 text-gray-600">
+              Our award-winning customer support is here for you.
+            </p>
+          </div>
+
+          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
+            <img
+              src="/images/Live-Tracker.png"
+              alt="Live Tracking"
+              className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4"
+            />
+            <p className="text-lg font-semibold">Live tracking</p>
+            <p className="text-base mt-2 text-gray-600">
+              Real-time bus tracking from the first day of your trip.
+            </p>
+          </div>
+
+          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200 md:col-span-2 lg:col-span-1">
+            <img
+              src="/images/Price.png"
+              alt="Unbeatable Prices"
+              className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4"
+            />
+            <p className="text-lg font-semibold">Unbeatable prices</p>
+            <p className="text-base mt-2 text-gray-600">
+              Largest marketplace for charter buses in Canada.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Page5;
