@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";   
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function Page5() {
   const router = useRouter();
@@ -15,8 +14,7 @@ function Page5() {
     address: "",
     adaCompliant: false,
   });
-  console.log("hello");
-  
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
     setFormData((prev) => ({
@@ -130,14 +128,13 @@ function Page5() {
             </div>
 
             <div className="mt-8">
-              <Link href="/page1">
-                <button
-                  type="button"
-                  className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-sm rounded-full transition-colors duration-200"
-                >
-                  Reserve Now
-                </button>
-              </Link>
+              <button
+                type="button"
+                onClick={handleReserveClick}
+                className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-sm rounded-full transition-colors duration-200"
+              >
+                Reserve Now
+              </button>
             </div>
 
             <p className="text-sm text-center mt-4 text-gray-600">
