@@ -32,6 +32,9 @@ const PlanJourney: React.FC = () => {
     setMultiStops(updated);
   };
 
+
+  
+
   const handleUpdateStop = (index: number, data: Stop) => {
     const updated = [...multiStops];
     updated[index] = data;
