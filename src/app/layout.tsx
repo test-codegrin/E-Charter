@@ -31,10 +31,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <script
-          src="https://kit.fontawesome.com/your-kit-id.js"
-          crossOrigin="anonymous"
-        ></script>
         <link
           rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"

@@ -16,13 +16,13 @@ type Stop = {
 
 export default function NextPage() {
   const router = useRouter();
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">("single");
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [persons, setPersons] = useState<number>(1);
   const [stops, setStops] = useState<Stop[]>([
     { id: crypto.randomUUID(), location: "", date: "" },
   ]);
 
-  const addStop = () =>
+  const addStop = () => 
     setStops((prev) => [...prev, { id: crypto.randomUUID(), location: "", date: "" }]);
 
   const removeStop = (id: string | number) =>
@@ -161,7 +161,7 @@ export default function NextPage() {
 
         <div className="border border-[#DBDBDB] lg:w-[580px] my-6 sm:my-8 w-full" />
 
-          <Link href="/page3">
+        <Link href="/page3">
           <button className="w-full lg:mb-[0] mb-[20px] max-w-[573px] h-12 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
