@@ -44,7 +44,7 @@ function Page5() {
 
         <div className="flex flex-col align-center justify-center lg:flex-row gap-6 lg:gap-8">
           {/* Payment Info */}
-          <div className="lg:w-[60%] xl:w-[65%] 2xl:w-[50%] pt-6 pb-8 px-6 sm:px-8 border border-[#DBDBDB] rounded-2xl">
+          <div className="lg:w-[60%] bg-[#FCFCFC] xl:w-[65%] 2xl:w-[50%] pt-6 pb-8 px-6 sm:px-8 border border-[#DBDBDB] rounded-2xl">
             <p className="text-lg sm:text-xl font-medium">Payment Information</p>
 
             <div className="mt-6 space-y-6">
@@ -143,7 +143,7 @@ function Page5() {
           </div>
 
           {/* Booking Summary */}
-          <div className="lg:w-[40%] xl:w-[35%] border border-[#DBDBDB] rounded-2xl p-6 lg:sticky lg:top-4 lg:self-start">
+          <div className="lg:w-[40%] bg-[#FCFCFC] xl:w-[35%] border border-[#DBDBDB] rounded-2xl p-6 lg:sticky lg:top-4 lg:self-start">
             <div className="flex justify-between items-center">
               <p className="text-lg sm:text-xl font-medium">Booking Summary</p>
               <p className="text-sm sm:text-base text-[#6C6C6C]">Quote #1238307</p>
@@ -199,7 +199,7 @@ function Page5() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 max-w-6xl mx-auto">
-          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
+          <div className="border bg-[#FCFCFC] border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
             <img
               src="/images/Support.png"
               alt="Support"
@@ -211,7 +211,7 @@ function Page5() {
             </p>
           </div>
 
-          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
+          <div className="border bg-[#FCFCFC] border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200">
             <img
               src="/images/Live-Tracker.png"
               alt="Live Tracking"
@@ -223,7 +223,7 @@ function Page5() {
             </p>
           </div>
 
-          <div className="border border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200 md:col-span-2 lg:col-span-1">
+          <div className="border bg-[#FCFCFC] border-[#DBDBDB] rounded-lg p-6 text-center hover:shadow-md transition-shadow duration-200 md:col-span-2 lg:col-span-1">
             <img
               src="/images/Price.png"
               alt="Unbeatable Prices"

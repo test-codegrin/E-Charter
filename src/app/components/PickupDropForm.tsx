@@ -5,12 +5,12 @@ import React from "react";
 const inputClasses =
   "ml-3 bg-transparent focus:border-[#3DC1C4] focus:outline-none font-semibold text-sm text-[#9C9C9C]";
 
-const PickupDropForm: React.FC = () => {
+const PickupDropForm = () => {
   const fields = [
-    { icon: "Mask group1.png", placeholder: "Pickup Location", type: "text" },
-    { icon: "Clock.png", placeholder: "Pick‑Up Date & Time", type: "datetime-local" },
-    { icon: "Mask group1.png", placeholder: "Drop‑off Location", type: "text" },
-    { icon: "Clock.png", placeholder: "Drop‑off Date & Time", type: "datetime-local" },
+    { icon: "Mask group1.png", placeholder: "Pickup Location", type: "text"},
+    { icon: "Clock.png", placeholder: "Pick‑Up Date & Time", type: "datetime-local"},
+    { icon: "Mask group1.png", placeholder: "Drop‑off Location", type: "text"},
+    { icon: "Clock.png", placeholder: "Drop‑off Date & Time", type: "datetime-local"},
   ];
 
   return (

@@ -20,7 +20,7 @@ const StopCard: React.FC<StopCardProps> = ({
   onChange,
 }) => {
   return (
-    <article className="mt-6 p-4 border border-[#DBDBDB] rounded-2xl stop-card">
+    <article className="mt-6 p-4 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
       {/* Header row */}
       <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
         <div
@@ -37,7 +37,7 @@ const StopCard: React.FC<StopCardProps> = ({
 
         <h2 className="text-lg font-bold text-[#3DC1C4]">Stop</h2>
 
-        <div className="flex gap-2 max-md:w-full max-md:justify-end md:ml-auto">
+        <div className="flex gap-2 max-md:w-full md:justify-end md:ml-auto">
           <button
             type="button"
             onClick={() => onAdd(id)}

@@ -66,5 +66,4 @@ const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) =>
     </div>
   );
 };
-
 export default MapCard;

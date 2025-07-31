@@ -1,9 +1,8 @@
 "use client";
-
 import Image from "next/image";
 import React from "react";
 
-const MapCard1: React.FC = () => {
+const MapCard1 = () => {
   return (
     <div className="relative xl:ml-[30px] xl:mr-8 2xl:mr-0 lg:w-[100%] h-[100%] lg:mt-[10px] 2xl:w-[1100px]">
       {/* Map Image */}

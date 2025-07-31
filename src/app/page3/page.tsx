@@ -36,7 +36,7 @@ export default function Page3() {
 
   return (
     <section className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-11 p-3 py-6">
-      <div className="w-full xl:w-[573px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-6">
+      <div className="w-full xl:w-[573px] lg:h-[877px]  sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-6">
         <button
           onClick={() => router.back()}
           className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] transition-colors"
@@ -72,8 +72,8 @@ export default function Page3() {
           </summary>
 
           {/* Pickup Section */}
-          <div className="border border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="border bg-[#FCFCFC] border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="md:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
                   <img
@@ -86,7 +86,7 @@ export default function Page3() {
                   Pickup
                 </h3>
               </div>
-              <div className="md:flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <PersonCounter value={persons} onChange={setPersons} />
                 <button
                   onClick={addStop}
@@ -143,7 +143,7 @@ export default function Page3() {
           </div>
 
           {/* Dropoff Section */}
-          <div className="border border-gray-200 lg:w-[580px] w-full mt-6 sm:mt-8 rounded-2xl p-4 sm:p-6 space-y-4">
+          <div className="border bg-[#FCFCFC] border-gray-200 lg:w-[580px] w-full mt-6 sm:mt-8 rounded-2xl p-4 sm:p-6 space-y-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
                 <img
@@ -198,19 +198,19 @@ export default function Page3() {
         <div className="border-b border-1 mt-[20px] mb-[20px] md:w-[580px] border-gray-300" />
 
         {/* Trip Details Accordion */}
-          <details className="group md:w-[580px] w-full overflow-hidden" open>
-            <summary className="flex items-center justify-between gap-4 cursor-pointer select-none bg-white">
+          <details className="md:w-[580px] w-full overflow-hidden" open>
+            <summary className="flex items-center justify-between gap-4 cursor-pointer select-none">
               <h2 className="text-xl sm:text-2xl font-bold">Trip Details</h2>
               <i className="fas fa-chevron-down w-6 h-6 transition-transform duration-200 group-open:rotate-180"></i>
             </summary>
-            <div className="border-2 border-[#DBDBDB] mt-4 rounded-2xl p-5 bg-white space-y-6">
+            <div className="border-1 bg-[#FCFCFC] border-[#DBDBDB] mt-4 rounded-2xl p-5 space-y-6">
               {/* Trip Name */}
               <div>
                 <p className="font-medium text-lg text-[#040401]">Trip Name</p>
                 <input
                   type="text"
                   placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 bg-transparent focus:border-[#3DC1C4] focus:outline-none w-full"
+                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
                 />
                 <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
@@ -222,7 +222,7 @@ export default function Page3() {
                   <input
                     type="text"
                     placeholder="2"
-                    className="text-sm mt-2 bg-transparent focus:border-[#3DC1C4] focus:outline-none w-full"
+                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
                   />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
@@ -231,7 +231,7 @@ export default function Page3() {
                   <input
                     type="text"
                     placeholder="Personal"
-                    className="text-sm text-[#333] bg-transparent focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
+                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
                   />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
@@ -260,7 +260,7 @@ export default function Page3() {
       </div>
 
       {/* Map side */}
-      <div className="w-full lg:w-full mt-[20px] xl:h-[877px] 2xl:w-full h-[877px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-3rem)] rounded-2xl lg:top-6">
+      <div className="w-full 2xl:ml-[30px] lg:w-full mt-[20px] xl:h-[877px] 2xl:w-full h-[877px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-3rem)] overflow-hidden lg:sticky rounded-2xl lg:top-6">
         <MapCard1 />
       </div>
     </section>

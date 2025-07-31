@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 interface CarCardProps {
   title: string;
   subtitle: string;

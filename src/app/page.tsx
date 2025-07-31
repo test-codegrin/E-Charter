@@ -13,8 +13,8 @@ interface Stop {
   date: string;
 }
 
-const PlanJourney: React.FC = () => {
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">("single");
+const PlanJourney   = () => {
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("return");
   const [persons, setPersons] = useState<number>(1);
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
@@ -31,10 +31,7 @@ const PlanJourney: React.FC = () => {
     }
     setMultiStops(updated);
   };
-
-
   
-
   const handleUpdateStop = (index: number, data: Stop) => {
     const updated = [...multiStops];
     updated[index] = data;
@@ -80,7 +77,7 @@ const PlanJourney: React.FC = () => {
           </summary>
 
           {/* Pickup Section */}
-          <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4 space-y-4 sm:space-y-6">
+          <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4 bg-[#FCFCFC] space-y-4 sm:space-y-6">
             <div className="md:flex flex-wrap justify-between items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
@@ -147,7 +144,7 @@ const PlanJourney: React.FC = () => {
 
           {/* Dropoff Section */}
           {(tripType === "return" || tripType === "multi") && (
-            <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
+            <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                   <img src="/images/Dropoff.png" alt="dropoff" className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -188,7 +185,7 @@ const PlanJourney: React.FC = () => {
 
         <div className="border-t border-gray-200 my-6 md:my-8" />
         <Link href="/page2">
-          <button className="w-full max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
+          <button className="w-full lg:mb-[0] mb-[20px] max-w-[573px] h-12 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
         </Link>

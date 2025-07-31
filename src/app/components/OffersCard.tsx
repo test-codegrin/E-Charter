@@ -49,7 +49,7 @@ const OffersCard: React.FC<OffersCardProps> = ({
       <p className="text-base">{description}</p>
 
       {/* Features List */}
-      <ul className="space-y-2 text-base">
+      <ul className="space-y-2 text-base">  
         {features.map((item, i) => (
           <li key={i} className="flex items-center gap-2">
             <i className="fa-solid fa-check text-[#3DC1C4]"></i>
@@ -59,7 +59,7 @@ const OffersCard: React.FC<OffersCardProps> = ({
       </ul>
 
       {/* CTA Button */}
-      <Link href="/page1">
+      <Link href="/">
         <button className="w-full cursor-pointer bg-[#3DBEC8] text-white font-bold py-3 rounded-full hover:bg-[#35aab1] transition">
           Book Now
         </button>

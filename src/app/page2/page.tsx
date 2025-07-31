@@ -65,8 +65,8 @@ export default function NextPage() {
           </summary>
 
           {/* Pickup Section */}
-          <div className="border border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="border bg-[#FCFCFC] border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+            <div className="md:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center shrink-0">
                   <img src="/images/Mask group.png" alt="pickup" className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -74,7 +74,7 @@ export default function NextPage() {
                 <h3 className="text-base sm:text-lg text-[#3DC1C4] font-semibold">Pickup</h3>
               </div>
 
-              <div className="md:flex items-center gap-3">
+              <div className="flex items-center gap-3">
                 <PersonCounter value={persons} onChange={setPersons} />
                 <button
                   type="button"
@@ -119,7 +119,7 @@ export default function NextPage() {
           </div>
 
           {/* Dropoff Section */}
-          <div className="border border-gray-200 lg:w-[580px] w-full mt-6 sm:mt-8 rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
+          <div className="border bg-[#FCFCFC] border-gray-200 lg:w-[580px] w-full mt-6 sm:mt-8 rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center shrink-0">
                 <img src="/images/Dropoff.png" alt="dropoff" className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -162,7 +162,7 @@ export default function NextPage() {
         <div className="border border-[#DBDBDB] lg:w-[580px] my-6 sm:my-8 w-full" />
 
           <Link href="/page3">
-          <button className="w-full max-w-full cursor-pointer sm:max-w-[573px] h-10 sm:h-12 mt-4 sm:mt-6 bg-[#3DBEC8] hover:bg-[#2da8ab] text-white font-bold text-sm rounded-full transition-colors">
+          <button className="w-full lg:mb-[0] mb-[20px] max-w-[573px] h-12 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
         </Link>
