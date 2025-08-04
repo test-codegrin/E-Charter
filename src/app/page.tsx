@@ -195,5 +195,4 @@ const PlanJourney   = () => {
     </section>
   );
 };
-
 export default PlanJourney;
