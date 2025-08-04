@@ -19,6 +19,7 @@ const StopCard: React.FC<StopCardProps> = ({
   onRemove,
   onChange,
 }) => {
+  // Function to handle adding a stop
   return (
     <article className="mt-6 p-4 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
       {/* Header row */}

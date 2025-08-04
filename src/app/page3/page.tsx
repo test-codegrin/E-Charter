@@ -16,7 +16,7 @@ interface Stop {
 
 export default function Page3() {
   const router = useRouter();
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">("single");
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [persons, setPersons] = useState<number>(1);
   const [stops, setStops] = useState<Stop[]>([
     { id: crypto.randomUUID(), location: "", date: "" },
@@ -36,7 +36,7 @@ export default function Page3() {
 
   return (
     <section className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-11 p-3 py-6">
-      <div className="w-full xl:w-[573px] lg:h-[877px]  sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-6">
+      <div className="w-full 2xl:w-[580px] xl:w-[573px]  sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
         <button
           onClick={() => router.back()}
           className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] transition-colors"
@@ -201,7 +201,7 @@ export default function Page3() {
           <details className="md:w-[580px] w-full overflow-hidden" open>
             <summary className="flex items-center justify-between gap-4 cursor-pointer select-none">
               <h2 className="text-xl sm:text-2xl font-bold">Trip Details</h2>
-              <i className="fas fa-chevron-down w-6 h-6 transition-transform duration-200 group-open:rotate-180"></i>
+              <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
             </summary>
             <div className="border-1 bg-[#FCFCFC] border-[#DBDBDB] mt-4 rounded-2xl p-5 space-y-6">
               {/* Trip Name */}
@@ -246,7 +246,7 @@ export default function Page3() {
                     className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
                   />
                   <p className="text-sm lg:w-[350px]">ADA standards Compliant</p>
-                  <i className="fas fa-wheelchair w-[39px] h-[39px] text-[#3DC1C4] lg:ml-auto text-2xl"></i>
+                  <img src="/images/wheel-chair.png" alt="wheelchair" className="w-[39px] h-[39px] lg:ml-auto" />
                 </div>
               </div>
             </div>

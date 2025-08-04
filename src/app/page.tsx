@@ -5,9 +5,6 @@ import PersonCounter from "./components/PersonCounter";
 import MapCard from "./components/MapCard";
 import StopCard from "./components/StopCard";    
 import Link from "next/link";
-
-
-
 interface Stop {
   location: string;
   date: string;
