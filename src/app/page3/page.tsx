@@ -17,7 +17,7 @@ interface Stop {
 export default function Page3() {
   const router = useRouter();
   const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
-  const [persons, setPersons] = useState<number>(1);
+  const [persons, setPersons] = useState<number>(0);
   const [stops, setStops] = useState<Stop[]>([
     { id: crypto.randomUUID(), location: "", date: "" },
   ]);

@@ -8,7 +8,7 @@ interface PersonCounterProps {
 
 const PersonCounter: React.FC<PersonCounterProps> = ({ value = 1, onChange }) => {
   const inc = () => onChange(value + 1);
-  const dec = () => onChange(Math.max(1, value - 1));
+  const dec = () => onChange(Math.max(0, value - 1));
 
   return (
     <div className="flex items-center border border-[#E5E5E5] rounded-full px-3 py-1 gap-3 w-fit mt-[10px] md:mt-[0] select-none">
