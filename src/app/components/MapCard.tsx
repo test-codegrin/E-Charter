@@ -36,7 +36,7 @@ const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) =>
             alt="pin"
             width={20}
             height={20}
-            className="mr-2 md:mr-[15px]"
+            className="md:mr-[15px]"
           />
         </div>
 

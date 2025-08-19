@@ -3,7 +3,7 @@
 import React from "react";
 
 const inputClasses =
-  "ml-3 bg-transparent focus:border-[#3DC1C4] focus:outline-none font-semibold text-sm text-[#9C9C9C]";
+  "ml-3 w-[300px] bg-transparent focus:border-[#3DC1C4] focus:outline-none font-semibold text-sm text-[#9C9C9C]";
 
 const PickupDropForm = () => {
   const fields = [
@@ -31,5 +31,4 @@ const PickupDropForm = () => {
     </div>
   );
 };
-
 export default PickupDropForm;

@@ -8,7 +8,10 @@ interface StopCardProps {
   date: string;
   onAdd: (id: string | number) => void;
   onRemove: (id: string | number) => void;
-  onChange: (id: string | number, data: { location: string; date: string }) => void;
+  onChange: (
+    id: string | number,
+    data: { location: string; date: string }
+  ) => void;
 }
 
 const StopCard: React.FC<StopCardProps> = ({
@@ -23,39 +26,36 @@ const StopCard: React.FC<StopCardProps> = ({
   return (
     <article className="mt-6 p-4 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
       {/* Header row */}
-      <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div
-          aria-hidden
-          className="bg-[#3DC1C4] w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-        >
-          <img
-            className="w-5 h-5"
-            src="/images/Mask group.png"
-            alt="stop icon"
-            loading="lazy"
-          />
+      <div className="sm:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
+            <img
+              src="/images/Mask group.png"
+              alt="pickup"
+              className="w-4 h-4 sm:w-5 sm:h-5"
+            />
+          </div>
+          <h3 className="text-base sm:text-lg text-[#3DC1C4] font-semibold">
+            Stop
+          </h3>
         </div>
-
-        <h2 className="text-lg font-bold text-[#3DC1C4]">Stop</h2>
-
-        <div className="flex gap-2 max-md:w-full md:justify-end md:ml-auto">
+        <div className="sm:flex items-center">
           <button
+            className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full"
             type="button"
             onClick={() => onAdd(id)}
-            className="bg-[#3DBEC8] text-white text-sm rounded-full px-4 py-1.5 h-9 transition hover:brightness-110 focus:outline-none"
           >
             + Add Stop
           </button>
-
           <button
+            className="px-6 ml-[15px] mt-[10px] md:mt-[0] sm:px-4 py-2 bg-[#FF6363] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full transition hover:brightness-110 focus:outline-none"
             type="button"
             onClick={() => onRemove(id)}
-            className="bg-[#FF6363] text-white text-sm rounded-full px-4 py-1.5 h-9 transition hover:brightness-110 focus:outline-none"
           >
             Remove Stop
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Inputs section */}
       <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">

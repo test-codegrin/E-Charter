@@ -43,7 +43,7 @@ const PlanJourney = () => {
   return (
     <section className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6 md:py-10 lg:py-12 lg:gap-8 xl:gap-10">
       {/* Left Panel */}
-      <div className="scroll-bar md:mx-auto md:w-[580px] lg:w-[580px] xl:w-[50%] 2xl:w-[580px] h-auto lg:h-[calc(100vh-80px)] lg:overflow-y-auto xl:pr-0 lg:pr-4">
+      <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
         <button className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] font-medium transition-colors duration-200">
           <i className="fa-solid fa-arrow-left-long mr-2" />
           Back
@@ -62,7 +62,7 @@ const PlanJourney = () => {
               <select
                 value={tripType}
                 onChange={(e) => setTripType(e.target.value as "single" | "return" | "multi")}
-                className="border-2 border-gray-200 pr-2 bg-white text-sm font-medium rounded-full px-4 py-2 focus:border-[#3DC1C4] focus:outline-none transition-all duration-200"
+                className="border-2 w-[153px] border-[#E5E5E5] bg-white text-sm font-medium rounded-full px-4 py-2 focus:outline-none transition-all duration-100"
               >
                 <option value="single">Single Trip</option>
                 <option value="return">Round-Trip</option>
@@ -74,7 +74,7 @@ const PlanJourney = () => {
 
           {/* Pickup Section */}
           <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4 bg-[#FCFCFC] space-y-4 sm:space-y-6">
-            <div className="md:flex flex-wrap justify-between items-center gap-4">
+            <div className="md:flex flex flex-wrap justify-between items-center gap-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                   <img src="/images/Mask group.png" alt="pickup" className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -181,14 +181,14 @@ const PlanJourney = () => {
 
         <div className="border-t border-gray-200 my-6 md:my-8" />
         <Link href="/page2">
-          <button className="w-full lg:mb-[0] mb-[20px] max-w-[573px] h-12 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
+          <button className="w-full cursor-pointer max-w-[573px] h-12 mb-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
         </Link>
       </div>
 
       {/* Right Panel */}
-      <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[65%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+      <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[59%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
         <MapCard pickupLocation={pickupLocation} dropoffLocation={dropoffLocation} />
       </div>
     </section>

@@ -31,11 +31,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <link
-          rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-          integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27..."
-        ></link>
+        <link 
+          rel='stylesheet'
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" 
+          integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" 
+          crossOrigin='anonymous' 
+          referrerPolicy="no-referrer">
+        </link>
+        <link 
+          href='https://fonts.googleapis.com/css?family=Roboto:400,700&amp;subset=cyrillic' 
+          rel='stylesheet'>
+        </link>
       </body>
     </html>
   );

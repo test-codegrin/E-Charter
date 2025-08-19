@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { v4 as uuidv4 } from "uuid";   // ✅ import uuid
 import PersonCounter from "../components/PersonCounter";
 import StopCard from "../components/StopCard";
 import MapCard1 from "../components/MapCard1";
@@ -14,18 +15,18 @@ interface Stop {
   date: string;
 }
 
-export default function Page3() {
+export default function Page2() {
   const router = useRouter();
   const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [persons, setPersons] = useState<number>(0);
   const [stops, setStops] = useState<Stop[]>([
-    { id: crypto.randomUUID(), location: "", date: "" },
+    { id: uuidv4(), location: "", date: "" },   // ✅ replaced
   ]);
 
   const addStop = () =>
     setStops((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), location: "", date: "" },
+      { id: uuidv4(), location: "", date: "" },  // ✅ replaced
     ]);
 
   const removeStop = (id: string | number) =>
@@ -35,7 +36,7 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-11 p-3 py-6">
+    <section className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px- p-3 py-6">
       <div className="w-full 2xl:w-[580px] xl:w-[573px]  sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
         <button
           onClick={() => router.back()}
@@ -64,7 +65,7 @@ export default function Page3() {
                 className="border-2 border-[#E5E5E5] bg-transparent rounded-full text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-2"
               >
                 <option value="single">Single Trip</option>
-                <option value="return">Round‑Trip</option>
+                <option value="return">Round-Trip</option>
                 <option value="multi">Multi Stop</option>
               </select>
               <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
@@ -73,7 +74,7 @@ export default function Page3() {
 
           {/* Pickup Section */}
           <div className="border bg-[#FCFCFC] border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="md:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <div className="sm:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
                   <img
@@ -198,14 +199,14 @@ export default function Page3() {
         <div className="border-b border-1 mt-[20px] mb-[20px] md:w-[580px] border-gray-300" />
 
         <Link href="/page3">
-          <button className="w-full max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
+          <button className="w-full cursor-pointer max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
         </Link>
       </div>
 
       {/* Map side */}
-      <div className="w-full 2xl:ml-[30px] lg:w-full mt-[20px] xl:h-[877px] 2xl:w-full h-[877px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-3rem)] overflow-hidden lg:sticky rounded-2xl lg:top-6">
+      <div className="w-full 2xl:ml-[30px] xl:ml-[30px] lg:w-full mt-[20px] 2xl:w-full h-[877px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-3rem)] rounded-2xl lg:top-6">
         <MapCard1 />
       </div>
     </section>

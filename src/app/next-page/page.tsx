@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";  
 
 function Page5() {
   const router = useRouter();
@@ -36,15 +36,15 @@ function Page5() {
   };
 
   return (
-    <div className="bg-white text-gray-900 font-[Inter] min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <p className="text-3xl sm:text-4xl font-bold text-center lg:text-left 2xl:text-center mb-10">
+    <div className="bg-white text-gray-900 min-h-screen">
+      <div className="max-w-7xl sm:w-[573px] lg:w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <p className="text-3xl sm:text-4xl font-bold 2xl:ml-[90px] mb-10">
           Your trip is ready to book!
         </p>
 
         <div className="flex flex-col align-center justify-center lg:flex-row gap-6 lg:gap-8">
           {/* Payment Info */}
-          <div className="lg:w-[60%] bg-[#FCFCFC] xl:w-[65%] 2xl:w-[50%] pt-6 pb-8 px-6 sm:px-8 border border-[#DBDBDB] rounded-2xl">
+          <div className="bg-[#FCFCFC] md:w-[586px] pt-6 pb-8 px-6 sm:px-8 border border-[#DBDBDB] rounded-2xl">
             <p className="text-lg sm:text-xl font-medium">Payment Information</p>
 
             <div className="mt-6 space-y-6">
@@ -55,7 +55,7 @@ function Page5() {
                   value={formData.name}
                   onChange={handleChange}
                   placeholder="Enter Name"
-                  className="text-base w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                  className="text-sm w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
                 />
                 <div className="border-b border-[#DBDBDB] mt-2"></div>
               </div>
@@ -68,7 +68,7 @@ function Page5() {
                   value={formData.cardNumber}
                   onChange={handleChange}
                   placeholder="Enter card number"
-                  className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                  className="text-sm mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
                 />
                 <div className="border-b border-[#DBDBDB] mt-2"></div>
               </div>
@@ -82,7 +82,7 @@ function Page5() {
                     value={formData.expiration}
                     onChange={handleChange}
                     placeholder="MM/YY"
-                    className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                    className="text-sm mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
                   />
                   <div className="border-b border-[#DBDBDB] mt-2"></div>
                 </div>
@@ -94,7 +94,7 @@ function Page5() {
                     value={formData.securityCode}
                     onChange={handleChange}
                     placeholder="CVV"
-                    className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                    className="text-sm mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
                   />
                   <div className="border-b border-[#DBDBDB] mt-2"></div>
                 </div>
@@ -108,7 +108,7 @@ function Page5() {
                   value={formData.address}
                   onChange={handleChange}
                   placeholder="Enter address"
-                  className="text-base mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
+                  className="text-sm mt-2 w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none"
                 />
                 <div className="border-b border-[#DBDBDB] mt-2"></div>
               </div>
@@ -131,13 +131,13 @@ function Page5() {
               <button
                 type="button"
                 onClick={handleReserveClick}
-                className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-sm rounded-full transition-colors duration-200"
+                className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-base rounded-full transition-colors duration-200"
               >
                 Reserve Now
               </button>
             </div>
 
-            <p className="text-sm text-center mt-4 text-gray-600">
+            <p className="text-sm text-center mt-4 text-[#0D0D0D]">
               By reserving, you agree to our Terms & Conditions
             </p>
           </div>
@@ -145,40 +145,40 @@ function Page5() {
           {/* Booking Summary */}
           <div className="lg:w-[40%] bg-[#FCFCFC] xl:w-[35%] border border-[#DBDBDB] rounded-2xl p-6 lg:sticky lg:top-4 lg:self-start">
             <div className="flex justify-between items-center">
-              <p className="text-lg sm:text-xl font-medium">Booking Summary</p>
+              <p className="text-lg text-[#040401] sm:text-xl font-medium">Booking Summary</p>
               <p className="text-sm sm:text-base text-[#6C6C6C]">Quote #1238307</p>
             </div>
             <div className="border-b border-[#DBDBDB] my-4"></div>
 
             <div className="space-y-3 text-sm sm:text-base">
-              <div className="flex justify-between">
+              <div className="flex text-[#0D0D0D] justify-between">
                 <p>Base fare (1x Sprinter)</p>
                 <p>$1,528.19</p>
               </div>
-              <div className="flex justify-between">
+              <div className="flex text-[#0D0D0D] justify-between">
                 <p>Our service fee</p>
                 <p>$45.85</p>
               </div>
               <div className="border-b border-[#DBDBDB] my-4"></div>
-              <div className="flex justify-between font-medium text-base sm:text-lg">
+              <div className="flex text-[#0D0D0D] justify-between font-medium text-base sm:text-lg">
                 <p>Total (USD)</p>
                 <p>$1,574.04</p>
               </div>
             </div>
 
             <div className="bg-[#F6F6F6] rounded-xl text-center py-4 mt-6">
-              <p className="text-base sm:text-lg">Due now</p>
-              <p className="font-bold text-xl sm:text-2xl mt-2">$1,574.04</p>
+              <p className="font-medium text-[#000000] text-base">Due now</p>
+              <p className="font-bold text-xl text-[#000000] sm:text-2xl mt-2">$1,574.04</p>
             </div>
 
             <div className="flex justify-between items-center mt-6">
               <p className="font-medium text-lg">Round trip</p>
-              <button className="text-base text-[#00A6F2] hover:underline cursor-pointer">
+              <button className="text-base font-medium underline underline-offset-1 text-[#00A6F2] hover:underline cursor-pointer">
                 Edit trip
               </button>
             </div>
 
-            <div className="flex justify-between mt-4 text-sm sm:text-base text-gray-600">
+            <div className="flex justify-between mt-4 text-sm sm:text-base text-[#000000]">
               <p>Trip to Weehawken</p>
               <p>Passengers × 2</p>
             </div>
@@ -195,7 +195,7 @@ function Page5() {
 
         {/* Why Choose Section */}
         <div className="mt-20 text-center">
-          <p className="text-2xl sm:text-3xl font-bold">Why Choose eCharter?</p>
+          <p className="text-4xl font-bold">Why Choose eCharter?</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 max-w-6xl mx-auto">

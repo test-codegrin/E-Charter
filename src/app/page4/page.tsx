@@ -8,6 +8,7 @@ const Page4 = () => {
   return (
     <div className="bg-white text-black min-h-screen w-full p-4 sm:p-6 lg:p-8 xl:p-10 2xl:px-12 max-w-[1920px] mx-auto">
       {/* Form Section */}
+      
       <div className="mb-8 lg:mb-12">
         <PickupDropForm />
       </div>

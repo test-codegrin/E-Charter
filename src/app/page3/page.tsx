@@ -8,6 +8,11 @@ import StopCard from "../components/StopCard";
 import MapCard1 from "../components/MapCard1";
 import Link from "next/link"; 
 
+// ✅ Fallback ID generator (instead of crypto.randomUUID)
+function generateId() {
+  return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
+}
+
 interface Stop {
   id: string;
   location: string;
@@ -19,13 +24,13 @@ export default function Page3() {
   const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [persons, setPersons] = useState<number>(0);
   const [stops, setStops] = useState<Stop[]>([
-    { id: crypto.randomUUID(), location: "", date: "" },
+    { id: generateId(), location: "", date: "" }, // ✅ fixed
   ]);
 
   const addStop = () =>
     setStops((prev) => [
       ...prev,
-      { id: crypto.randomUUID(), location: "", date: "" },
+      { id: generateId(), location: "", date: "" }, // ✅ fixed
     ]);
 
   const removeStop = (id: string | number) =>
@@ -64,7 +69,7 @@ export default function Page3() {
                 className="border-2 border-[#E5E5E5] bg-transparent rounded-full text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-2"
               >
                 <option value="single">Single Trip</option>
-                <option value="return">Round‑Trip</option>
+                <option value="return">Round-Trip</option>
                 <option value="multi">Multi Stop</option>
               </select>
               <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
@@ -73,7 +78,7 @@ export default function Page3() {
 
           {/* Pickup Section */}
           <div className="border bg-[#FCFCFC] border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-            <div className="md:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+            <div className="sm:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
                   <img
@@ -181,7 +186,7 @@ export default function Page3() {
                   />
                   <input
                     type="datetime-local"
-                    className="w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none py-1 sm:py-2 text-sm sm:text-base"
+                    className="w-full bg-transparent text-[#9C9C9C] focus:border-[#3DC1C4] focus:outline-none py-1 sm:py-2 text-sm sm:text-base"
                   />
                 </label>
                 <div className="border-b border-gray-300" />
@@ -198,62 +203,62 @@ export default function Page3() {
         <div className="border-b border-1 mt-[20px] mb-[20px] md:w-[580px] border-gray-300" />
 
         {/* Trip Details Accordion */}
-          <details className="md:w-[580px] w-full overflow-hidden" open>
-            <summary className="flex items-center justify-between gap-4 cursor-pointer select-none">
-              <h2 className="text-xl sm:text-2xl font-bold">Trip Details</h2>
-              <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
-            </summary>
-            <div className="border-1 bg-[#FCFCFC] border-[#DBDBDB] mt-4 rounded-2xl p-5 space-y-6">
-              {/* Trip Name */}
-              <div>
-                <p className="font-medium text-lg text-[#040401]">Trip Name</p>
+        <details className="md:w-[580px] w-full overflow-hidden" open>
+          <summary className="flex items-center justify-between gap-4 cursor-pointer select-none">
+            <h2 className="text-xl sm:text-2xl font-bold">Trip Details</h2>
+            <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
+          </summary>
+          <div className="border-1 bg-[#FCFCFC] border-[#DBDBDB] mt-4 rounded-2xl p-5 space-y-6">
+            {/* Trip Name */}
+            <div>
+              <p className="font-medium text-lg text-[#040401]">Trip Name</p>
+              <input
+                type="text"
+                placeholder="Round trip"
+                className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
+              />
+              <div className="border-b border-[#DBDBDB] mt-4"></div>
+            </div>
+
+            {/* Luggage & Event Types */}
+            <div className="flex flex-col md:flex-row md:gap-4 gap-6">
+              <div className="w-full md:w-1/2">
+                <p className="font-medium text-lg text-[#040401]">Luggage</p>
                 <input
                   type="text"
-                  placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
+                  placeholder="2"
+                  className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
                 />
                 <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
-
-              {/* Luggage & Event Types */}
-              <div className="flex flex-col md:flex-row md:gap-4 gap-6">
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">Luggage</p>
-                  <input
-                    type="text"
-                    placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
-                  />
-                  <div className="border-b border-[#DBDBDB] mt-4"></div>
-                </div>
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">Event Types</p>
-                  <input
-                    type="text"
-                    placeholder="Personal"
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
-                  />
-                  <div className="border-b border-[#DBDBDB] mt-4"></div>
-                </div>
-              </div>
-
-              {/* Accessible Vehicle */}
-              <div>
-                <p className="font-medium text-lg text-[#040401] mb-3">Accessible Vehicle</p>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
-                  />
-                  <p className="text-sm lg:w-[350px]">ADA standards Compliant</p>
-                  <img src="/images/wheel-chair.png" alt="wheelchair" className="w-[39px] h-[39px] lg:ml-auto" />
-                </div>
+              <div className="w-full md:w-1/2">
+                <p className="font-medium text-lg text-[#040401]">Event Types</p>
+                <input
+                  type="text"
+                  placeholder="Personal"
+                  className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
+                />
+                <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
             </div>
-          </details>
+
+            {/* Accessible Vehicle */}
+            <div>
+              <p className="font-medium text-lg text-[#040401] mb-3">Accessible Vehicle</p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
+                />
+                <p className="text-sm lg:w-[350px]">ADA standards Compliant</p>
+                <img src="/images/wheel-chair.png" alt="wheelchair" className="w-[39px] h-[39px] lg:ml-auto" />
+              </div>
+            </div>
+          </div>
+        </details>
 
         <Link href="/page4">
-          <button className="w-full max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
+          <button className="w-full cursor-pointer max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
             Next
           </button>
         </Link>
