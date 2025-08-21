@@ -3,11 +3,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PersonCounter from "../components/PersonCounter";
-import StopCard from "../components/StopCard";
-import MapCard1 from "../components/MapCard1";
+import PersonCounter from "../components/bookservice/PersonCounter";
+import StopCard from "../components/bookservice/StopCard";
+import MapCard1 from "../components/bookservice/MapCard1";
 import Link from "next/link";
-import Nav from "../components/Nav";
+import Nav from "../components/bookservice/Nav";
 
 // ✅ Fallback ID generator (instead of crypto.randomUUID)
 function generateId() {
@@ -46,11 +46,11 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full min-h-screen bg-white">
-      {/* Navbar */}
+    <section className="w-full mt-[70px] min-h-screen bg-white">
+      {/* Navbar
       <div className="sticky top-0 z-50 bg-white">
         <Nav />
-      </div>
+      </div> */}
 
       <div className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-0 p-3 py-6">
         <div className="w-full 2xl:w-[580px] xl:w-[573px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[70px] md:mx-auto md:w-[580px] lg:py-0">

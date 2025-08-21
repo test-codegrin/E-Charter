@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Nav from "../components/Nav";
+import Nav from "../components/bookservice/Nav";
 
 function Page5() {
   const router = useRouter();
@@ -37,11 +37,11 @@ function Page5() {
   };
 
   return (
-    <div className="">
+    <div className="mt-[70px]">
       {/* Navbar */}
-      <div className="sticky top-0 z-50 bg-white">
+      {/* <div className="sticky top-0 z-50 bg-white">
         <Nav />
-      </div>
+      </div> */}
       <div className="bg-white text-gray-900 min-h-screen">
         <div className="max-w-7xl sm:w-[573px] lg:w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <p className="text-3xl sm:text-4xl xl:ml-[85px] font-bold 2xl:ml-[90px] mb-10">
