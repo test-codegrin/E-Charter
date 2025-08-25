@@ -41,7 +41,7 @@ export default function MyJourneyPage() {
                   <p className="font-bold text-lg">Singal Trip</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC]">
+                    <div className="w-[206.39px] h-[62.19px] border-r-2 sm:ml-[0] border-[#ECECEC]">
                       <label className="text-lg font-semibold text-[#000000]">
                         Pickup Location
                       </label>
@@ -52,7 +52,7 @@ export default function MyJourneyPage() {
                       />
                     </div>
 
-                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] ml-[20px]">
+                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] sm:ml-[20px]">
                       <label className="text-lg font-semibold text-[#000000]">
                         Drop Off Location
                       </label>
@@ -63,7 +63,7 @@ export default function MyJourneyPage() {
                       />
                     </div>
 
-                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] ml-[20px]">
+                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] sm:ml-[20px]">
                       <label className="text-lg font-semibold text-[#000000]">
                         Departure Date
                       </label>
@@ -73,7 +73,7 @@ export default function MyJourneyPage() {
                       />
                     </div>
 
-                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] ml-[20px]">
+                    <div className="w-[206.39px] h-[62.19px] border-r-2 border-[#ECECEC] sm:ml-[20px]">
                       <label className="text-lg font-semibold text-[#000000]">
                         Return Date
                       </label>

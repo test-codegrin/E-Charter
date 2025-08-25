@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
         {/* Logo */}
         <div className="flex-shrink-0 w-[70px] sm:w-[80px] md:w-[90px]">
           <a href="/">
-            <img src="/header/logo.png" alt="Logo" className="w-full" />
+            <img src="/images/Logo.png" alt="Logo" className="w-full" />  
           </a>
         </div>
 

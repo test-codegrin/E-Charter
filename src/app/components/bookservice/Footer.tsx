@@ -1,29 +1,25 @@
 "use client";
 import React, { JSX } from "react";
-// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-// import {
-//   faFacebookF,
-//   faInstagram,
-//   faTwitter, // ✅ use faTwitter instead of faXTwitter for compatibility
-//   faYoutube,
-// } from "@fortawesome/free-brands-svg-icons";
-// import {
-//   faEnvelope,
-//   faLocationDot,
-//   faPhone,
-// } from "@fortawesome/free-solid-svg-icons";
-// import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
+} from "lucide-react";
 
 interface LinkSection {
   title: string;
   items: string[];
 }
 
-// interface InfoBlock {
-//   icon: IconDefinition;
-//   label: string;
-//   value: string;
-// }
+interface InfoBlock {
+  icon: JSX.Element;
+  label: string;
+  value: string;
+}
 
 export default function Footer(): JSX.Element {
   const linkSections: LinkSection[] = [
@@ -41,96 +37,143 @@ export default function Footer(): JSX.Element {
     },
   ];
 
-  // const socialIcons: IconDefinition[] = [
-  //   faFacebookF,
-  //   faInstagram,
-  //   faTwitter, // ✅ replaced faXTwitter
-  //   faYoutube,
-  // ];
+  const socialIcons: { icon: JSX.Element; label: string }[] = [
+    { icon: <Facebook size={18} />, label: "Facebook" },
+    { icon: <Instagram size={18} />, label: "Instagram" },
+    { icon: <Twitter size={18} />, label: "Twitter" },
+    { icon: <Youtube size={18} />, label: "YouTube" },
+  ];
 
-  // const infoBlocks: InfoBlock[] = [
-  //   {
-  //     icon: faLocationDot,
-  //     label: "Address",
-  //     value: "Oxford Ave. Cary, NC 27511",
-  //   },
-  //   {
-  //     icon: faEnvelope,
-  //     label: "Email",
-  //     value: "nwiger@yahoo.com",
-  //   },
-  //   {
-  //     icon: faPhone,
-  //     label: "Phone",
-  //     value: "+537 547-6401",
-  //   },
-  // ];
+  const infoBlocks: InfoBlock[] = [
+    {
+      icon: <MapPin size={20} />,
+      label: "Address",
+      value: "Oxford Ave. Cary, NC 27511",
+    },
+    {
+      icon: <Mail size={20} />,
+      label: "Email",
+      value: "nwiger@yahoo.com",
+    },
+    {
+      icon: <Phone size={20} />,
+      label: "Phone",
+      value: "+537 547-6401",
+    },
+  ];
 
   return (
-    <div className="flex justify-center px-4 sm:px-6 lg:px-8 bg-[#F1F1F1]">
-      <footer className="w-full max-w-[1780px] rounded-[40px] border border-[#CCCCCC] bg-[#F1F1F1]">
+    <div className="flex justify-center px-4 sm:px-6 lg:px-8 mb-[80px]">
+      <footer className="w-full max-w-[1780px] rounded-[30px] border border-[#CCCCCC] bg-[#F1F1F1]">
         {/* Top Section */}
-        <div className="px-6 sm:px-10 lg:px-16 pt-14 pb-10 border-b border-[#CCCCCC]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="px-4 sm:px-8 lg:px-[40px] pt-[30px] pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
             {/* Logo & Description */}
-            <div>
-              <img src="/header/logo.png" alt="Logo" className="w-[160px]" />
-              <p className="text-sm sm:text-base mt-4 leading-[26px] text-[#4A4A4A] max-w-md">
+            <div className="text-center sm:text-left">
+              <img
+                src="/images/Logo.png"
+                alt="Logo"
+                className="mx-auto sm:mx-0 w-[80px] h-[55px] sm:w-[90px] sm:h-[60px]"
+              />
+              <p className="text-base mt-4 leading-relaxed text-[#000000] max-w-md mx-auto sm:mx-0">
                 Faucibus faucibus pellentesque dictum turpis. Id pellentesque
-                turpis massa a id iaculis lorem turpis euismod. Purus at
-                quisque integer sit. Libero quis sapien tempus.
+                turpis massa a id iaculis lorem turpis euismod. Purus at quisque
+                integer sit. Libero quis sapien tempus.
               </p>
             </div>
 
-            {/* Dynamic Link Sections */}
-            {linkSections.map((section) => (
-              <div key={section.title} className="px-15 w-[250px]">
+            <div className="sm:flex w-full justify-between">
+              {/* Each LinkSection in its own div */}
+              <div className="flex justify-between">
+                <div className="text-left sm:w-[400px] sm:text-left w-full xl:ml-[60px] ml-[20px]">
+                  <h3 className="text-lg font-bold text-[#1E1E1E] mb-4">
+                    {linkSections[0].title}
+                  </h3>
+                  <ul className="space-y-2">
+                    {linkSections[0].items.map((item) => (
+                      <li
+                        key={item}
+                        className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="text-left sm:w-[400px] w-full">
+                  <h3 className="text-lg font-bold text-[#1E1E1E] mb-4">
+                    {linkSections[1].title}
+                  </h3>
+                  <ul className="space-y-2">
+                    {linkSections[1].items.map((item) => (
+                      <li
+                        key={item}
+                        className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="text-left sm:w-[400px] sm:mt-[0] ml-[20px] mt-[30px] w-full">
                 <h3 className="text-lg font-bold text-[#1E1E1E] mb-4">
-                  {section.title}
+                  {linkSections[2].title}
                 </h3>
                 <ul className="space-y-2">
-                  {section.items.map((item) => (
+                  {linkSections[2].items.map((item) => (
                     <li
                       key={item}
-                      className="text-sm text-[#4A4A4A] hover:text-[#1E1E1E] transition cursor-pointer"
+                      className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
                     >
                       {item}
                     </li>
                   ))}
                 </ul>
               </div>
-            ))}
+            </div>
           </div>
         </div>
 
+        {/* Divider */}
+        <div className="border-b border-[#1FC091] mx-4 sm:mx-8 lg:mx-[40px]"></div>
+
         {/* Bottom Section */}
-        <div className="px-6 sm:px-10 lg:px-16 py-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="px-4 sm:px-8 lg:px-16 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Social Icons */}
           <div className="flex justify-center sm:justify-start gap-4">
-            {/* {socialIcons.map((icon, idx) => (
+            {socialIcons.map((social, idx) => (
               <div
                 key={idx}
-                className="h-[40px] w-[40px] bg-[#8D8D8D] transition duration-200 rounded-full text-white flex items-center justify-center hover:bg-[#3DBEC8] cursor-pointer"
+                title={social.label}
+                className="h-[40px] w-[40px] bg-[#3DBEC8] transition duration-200 rounded-full text-white flex items-center justify-center hover:scale-105 cursor-pointer"
               >
-                {/* <FontAwesomeIcon icon={icon} className="text-[18px]" />
+                {social.icon}
               </div>
-            ))} */}
+            ))}
           </div>
 
           {/* Info Blocks */}
-          {/* {infoBlocks.map((info, idx) => (
-            <div key={idx} className="flex items-center justify-start gap-4">
-              <div className="h-[50px] w-[50px] bg-[#8D8D8D] text-white rounded-full flex items-center justify-center">
-                <FontAwesomeIcon icon={info.icon} className="text-[20px]" />
+          {infoBlocks.map((info, idx) => (
+            <div
+              key={idx}
+              className="flex flex-row sm:flex-row items-center sm:items-start justify-start gap-2 sm:gap-4text-left"
+            >
+              <div className="h-[40px] w-[40px] bg-[#3DBEC8] text-white rounded-full flex items-center justify-center">
+                {info.icon}
               </div>
               <div>
-                <p className="text-sm text-[#4A4A4A]">{info.label}</p>
-                <p className="text-sm font-semibold text-[#1E1E1E]">
+                <p className="text-sm sm:text-base text-[#000000]">
+                  {info.label}
+                </p>
+                <p className="text-base font-semibold text-[#000000]">
                   {info.value}
                 </p>
               </div>
             </div>
-          ))} */}
+          ))}
         </div>
       </footer>
     </div>

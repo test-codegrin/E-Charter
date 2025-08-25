@@ -4,7 +4,7 @@ import React, { FC } from "react";
 const BookCar: FC = () => {
   return (
     <>
-      <div className="mt-11 flex justify-center">
+      <div className="mt-11 mb-[50px] flex justify-center">
         <div className="h-auto lg:h-[569px] w-full max-w-[1480px] flex items-center">
           <div className="lg:h-[365px] w-full lg:w-[1480px] rounded-4xl bg-[#21211D] flex flex-col md:flex-col lg:flex-row items-center p-6 lg:p-0">
             {/* Image - shown first on md/sm, hidden on lg */}

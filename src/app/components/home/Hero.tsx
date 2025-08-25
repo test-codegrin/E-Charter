@@ -202,7 +202,7 @@ export default function Hero(): JSX.Element {
                   />
                 </div>
               )}
-            </div>
+            </div>  
 
             {/* Checkbox */}
             <div className="mt-4 flex items-center gap-2">
@@ -211,7 +211,7 @@ export default function Hero(): JSX.Element {
                 id="agree"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="w-4 h-4 accent-[#3DBEC8] border-2 border-[#3DBEC8] cursor-pointer"
+                className="w-4 h-4 border-2 border-[#3DBEC8] cursor-pointer"
               />
               <label
                 htmlFor="agree"
