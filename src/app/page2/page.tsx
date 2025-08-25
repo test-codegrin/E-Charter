@@ -3,12 +3,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { v4 as uuidv4 } from "uuid"; // ✅ import uuid
+import { v4 as uuidv4 } from "uuid";
 import PersonCounter from "../components/bookservice/PersonCounter";
 import StopCard from "../components/bookservice/StopCard";
 import MapCard1 from "../components/bookservice/MapCard1";
 import Link from "next/link";
-import Nav from "../components/bookservice/Nav";
 
 interface Stop {
   id: string;
@@ -43,11 +42,6 @@ export default function Page2() {
 
   return (
     <section className="w-full mt-[80px] min-h-screen bg-white">
-      {/* Navbar
-      <div className="sticky top-0 z-50 bg-white">
-        <Nav />
-      </div> */}
-
       <div className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-0 p-3 py-6">
         <div className="w-full 2xl:w-[580px] xl:w-[573px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[70px] md:mx-auto md:w-[580px] lg:py-0">
           <button

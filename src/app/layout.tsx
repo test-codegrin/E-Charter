@@ -3,7 +3,6 @@ import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import Nav from "./components/bookservice/Nav";
 import Footer from "./components/bookservice/Footer";
-import ProfileCard from "./components/profile/ProfileCard";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,23 +30,24 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} antialiased`}
       >
-        <link 
-        rel="stylesheet" 
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" 
-        integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" 
-        crossOrigin="anonymous" 
-        referrerPolicy="no-referrer" 
-        ></link>        
+        {/* ✅ Move <link> into <head> for correctness */}
+          <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+            integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+            crossOrigin="anonymous"
+            referrerPolicy="no-referrer"
+          />
 
-        <Nav /> 
+        <Nav />
         {children}
         <Footer />
       </body>

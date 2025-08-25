@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8">
+    <header className="fixed mt-2 top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8">
       <nav className="max-w-[1760px] mx-auto flex items-center justify-between h-[60px] my-2">
         {/* Logo */}
         <div className="flex-shrink-0 w-[70px] sm:w-[80px] md:w-[90px]">
@@ -116,7 +116,7 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Slide Menu */}
       <div
-        className={`lg:hidden fixed top-[84px] right-0 bottom-0 w-[80vw] sm:w-[60vw] bg-white shadow-xl z-50 transition-transform duration-300 ${
+        className={`lg:hidden  fixed top-[84px] right-0 bottom-0 w-[80vw] sm:w-[60vw] bg-white shadow-xl z-50 transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >

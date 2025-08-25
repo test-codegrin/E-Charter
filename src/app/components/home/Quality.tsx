@@ -5,7 +5,7 @@ import React, { FC } from "react";
 
 const Quality: FC = () => {
   return (
-    <div className="px-4">
+    <div className="px-4 mt-[40px]">
       <div className="max-w-[1482px] mx-auto">
         {/* Section Title */}
         <p className="text-[#3DBEC8] text-base font-bold text-center">
@@ -23,13 +23,13 @@ const Quality: FC = () => {
               <img src="/homepage/extensive.svg" alt="Extensive Fleet" className="h-[50px]" />
               <div className="ms-6">
                 <p className="text-[20px] font-semibold">Extensive Fleet Options</p>
-                <p className="text-base font-semibold pt-2 text-[#616161] text-left">
+                <p className="text-base pb-[20px] font-semibold pt-2 text-[#616161] text-left">
                   Choose from a wide range of luxury vehicles tailored to suit your style, comfort, and travel needs.
                 </p>
               </div>
             </div>
 
-            <div className="w-full max-w-[422px] flex my-6">
+            <div className="w-full max-w-[422px] flex">
               <img src="/homepage/customer.svg" alt="Customer Focused" className="h-[50px]" />
               <div className="ms-6">
                 <p className="text-[20px] font-semibold">Customer-Focused Experience</p>
@@ -41,7 +41,7 @@ const Quality: FC = () => {
           </div>
 
           {/* Middle Image (only on large screens) */}
-          <div className="hidden lg:block">
+          <div className="lg:block">
             <img src="/homePage/quality.png" alt="Quality" className="max-w-full" />
           </div>
 
@@ -51,13 +51,13 @@ const Quality: FC = () => {
               <img src="/homepage/convenient.svg" alt="Convenient Locations" className="h-[50px]" />
               <div className="ms-6">
                 <p className="text-[20px] font-semibold">Convenient Locations</p>
-                <p className="text-base font-semibold pt-2 text-[#616161] text-left">
+                <p className="text-base pb-[20px] font-semibold pt-2 text-[#616161] text-left">
                   With multiple hubs across the city, we’re always just around the corner—ready when you need us.
                 </p>
               </div>
             </div>
 
-            <div className="w-full max-w-[422px] flex my-6">
+            <div className="w-full max-w-[422px] flex">
               <img src="/homepage/reliability.svg" alt="Reliability & Safety" className="h-[50px]" />
               <div className="ms-6">
                 <p className="text-[20px] font-semibold">Reliability and Safety</p>

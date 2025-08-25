@@ -101,7 +101,7 @@ const Fleet: FC = () => {
             {slides.map((slide) => (
               <SwiperSlide key={slide.id}>
                 <div
-                  className={`h-[424px] w-full mx-auto rounded-3xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 ${slidePadding}`}
+                  className={`h-[400px] w-full mx-auto rounded-3xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 ${slidePadding}`}
                 >
                   {/* Car Image */}
                   <div className="h-[140px] flex items-center justify-center mt-6">
@@ -139,7 +139,7 @@ const Fleet: FC = () => {
 
                   {/* Price & Button */}
                   <div className="px-4">
-                    <div className="flex justify-between items-center border-t border-gray-100 pt-4">
+                    <div className="flex justify-between items-center border-t border-gray-100 pt-5 ">
                       <div>
                         <span className="text-xl font-bold">${slide.price}</span>
                         <span className="text-sm text-gray-500 ml-1">/day</span>

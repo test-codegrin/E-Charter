@@ -24,7 +24,7 @@ export default function Hero(): JSX.Element {
   };
 
   return (
-    <div className="flex justify-center px-4 py-8 md:py-[80px] relative mt-5">
+    <div className="flex justify-center px-4 py-8 md:py-[80px] relative sm:mt-3 mt-13">
       <div className="w-full max-w-[1780px] rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
         {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4">
@@ -55,7 +55,7 @@ export default function Hero(): JSX.Element {
                   Single Trip
                   <p className={`2xl:w-[221px] ${
                     activeTab === "single"
-                        ? "text-[#3DBEC8] border-b-2 pt-[22px] border-[#3DBEC8]"
+                        ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
                       : "text-gray-600"
                   }`}></p>
                 </button>
@@ -66,18 +66,21 @@ export default function Hero(): JSX.Element {
                   Round-Trip
                   <p className={`2xl:w-[221px] ${
                     activeTab === "round"
-                        ? "text-[#3DBEC8] border-b-2 pt-[22px] border-[#3DBEC8]"
+                      ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
                       : "text-gray-600"
                   }`}></p>
                 </button>
                 <button
-                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold text-gray-600 hover:text-[#3DBEC8]"
-                  onClick={() => router.push("/page1")}
+                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold hover:text-[#3DBEC8]"
+                  onClick={() => {
+                    setActiveTab("multi")
+                    router.push("/page1")
+                  }}
                 >
                   Multi Stop
                    <p className={` ${
                     activeTab === "multi"
-                        ? "text-[#3DBEC8] border-b-2 pt-[22px] border-[#3DBEC8]"
+                      ? "text-[#3DBEC8] border-b-2 border-[#3DBEC8]"
                       : "text-gray-600"
                   }`}></p>
                 </button>

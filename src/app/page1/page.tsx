@@ -6,7 +6,7 @@ import PersonCounter from "../components/bookservice/PersonCounter";
 import MapCard from "../components/bookservice/MapCard";
 import StopCard from "../components/bookservice/StopCard";
 import Link from "next/link";
-// import Nav from "../components/bookservice/Nav"; // Uncomment if you need Navbar
+import Nav from "../components/bookservice/Nav"; // Uncomment if you need Navbar
 
 interface Stop {
   location: string;

@@ -13,9 +13,9 @@ const ServiceCard: FC<ServiceCardProps> = ({ image, title, description }) => (
     <img
       src={image}
       alt={title}
-      className="w-full sm:w-[40%] rounded-3xl object-cover p-2"
+      className="w-full sm:w-[40%] 2xl:w-[403px] rounded-3xl object-cover p-2"
     />
-    <div className="sm:ml-5 mt-4 sm:mt-0 flex-1">
+    <div className="sm:ml-5 mt-4 2xl:w-[382px] sm:mt-0">
       <p className="text-[24px] md:text-[28px] lg:text-[32px] font-bold">
         {title}
       </p>
@@ -41,7 +41,7 @@ const Service: FC = () => {
       image: "/homePage/service2.png",
       title: "Car Rental With Driver",
       description:
-        "Enjoy flexible car rentals with professional drivers for stress-free travel. Perfect for city tours, day trips, or long-distance journeys.",
+      "Reliable airport transfers with real-time flight tracking and timely pickups. Travel to or from the airport smoothly, with luggage assistance and a comfortable, hassle-free ride."    
     },
     {
       image: "/homePage/service3.png",
