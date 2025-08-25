@@ -21,11 +21,11 @@ interface Slide {
 
 const slides: Slide[] = [
   { id: 1, title: "XUV 3XO", image: "/homePage/XUV-3XO.png", price: 219, doors: 4, passengers: 4 },
-  { id: 2, title: "SCORPIO-N", image: "/homePage/SCoRPIO-N.png", price: 249, doors: 4, passengers: 4 },
+  { id: 2, title: "SCORPIO-N", image: "/homePage/SCORPIO-N.png", price: 249, doors: 4, passengers: 4 },
   { id: 3, title: "XUV700", image: "/homePage/XUV700.png", price: 279, doors: 4, passengers: 4 },
   { id: 4, title: "THAR", image: "/homePage/Thar.png", price: 299, doors: 4, passengers: 4 },
   { id: 5, title: "XUV 3XO", image: "/homePage/XUV-3XO.png", price: 219, doors: 4, passengers: 4 },
-  { id: 6, title: "SCORPIO-N", image: "/homePage/SCoRPIO-N.png", price: 249, doors: 4, passengers: 7, luggage: 3, ac: true },
+  { id: 6, title: "SCORPIO-N", image: "/homePage/SCORPIO-N.png", price: 249, doors: 4, passengers: 7, luggage: 3, ac: true },
   { id: 7, title: "XUV700", image: "/homePage/XUV700.png", price: 279, doors: 4, passengers: 4 },
   { id: 8, title: "THAR", image: "/homePage/Thar.png", price: 299, doors: 4, passengers: 4 },
 ];
