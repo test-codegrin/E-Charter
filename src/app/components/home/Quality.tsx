@@ -30,6 +30,7 @@ const Quality: FC = () => {
               </div>
             </div>
 
+            
             <div className="w-full max-w-[422px] flex">
               <img src="/images/Customer.png" alt="Customer Focused" className="h-[50px]" />
               <div className="ms-6">
