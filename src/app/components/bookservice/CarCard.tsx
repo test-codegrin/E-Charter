@@ -28,8 +28,8 @@ const CarCard: React.FC<CarCardProps> = ({
   const router = useRouter();
 
   return (
-    <div className="">
-      <div className="bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl px-4 sm:px-6 pt-6 sm:pt-[37px] pb-6 flex flex-col lg:flex-col xl:flex-row gap-6 w-full max-w-7xl mx-auto">
+    <div className="w-full">
+      <div className="bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl px-4 sm:px-6 pt-6 sm:pt-[37px] pb-6 flex flex-col lg:flex-col xl:flex-row gap-6 w-full mx-auto">
         {/* Image Section */}
         <div className="lg:w-[100%] xl:w-[525px] flex justify-center items-center">
           <img
@@ -104,7 +104,7 @@ const CarCard: React.FC<CarCardProps> = ({
               <p className="text-xl sm:text-2xl font-bold">Total {price}</p>
             </div>  
 
-            <Link href="/page5">
+            <Link href="/services/page5">
               <button className="bg-[#3DBEC8] cursor-pointer hover:bg-[#35aab1] transition text-white py-3 font-semibold rounded-full w-full">
                 Reserve
               </button>

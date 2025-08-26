@@ -58,8 +58,8 @@ const Service: FC = () => {
   ];
 
   return (
-    <div className="flex justify-center px-4 sm:px-6 lg:px-0">
-      <div className="max-w-[1780px] w-full py-16">
+    <div className="flex justify-center px-4">
+      <div className="max-w-[1780px] mt-[80px] w-full py-0">
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Our Services
         </p>
@@ -71,7 +71,7 @@ const Service: FC = () => {
           personal to professional travel. Choose the service that best suits
           your journey.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-7 mt-12">
           {services.map((service, index) => (
             <ServiceCard key={index} {...service} />
           ))}

@@ -24,7 +24,7 @@ export default function Hero(): JSX.Element {
   };
 
   return (
-    <div className="flex justify-center px-4 py-8 md:py-[80px] relative sm:mt-3 mt-13">
+    <div className="flex mt-[80px] sm:px-0 px-3 max-w-[1780px] relative 2xl:ml-[16px] sm:mt-[80px]">
       <div className="w-full max-w-[1780px] rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
         {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4">
@@ -44,7 +44,7 @@ export default function Hero(): JSX.Element {
         {/* Booking Box */}
         <div className="w-full max-w-[1310px] mx-auto px-4 lg:px-6 xl:px-0 lg:absolute lg:bottom-32 lg:left-1/2 lg:-translate-x-1/2">
           <div className="bg-white w-full h-auto rounded-2xl md:rounded-[30px] mt-12 md:mt-[160px] lg:mt-0 shadow-lg px-4 md:px-8 py-6">
-            {/* Tabs + Counters + Button */}
+              {/* Tabs + Counters + Button */}
             <div className="flex flex-wrap items-center gap-3 border-b-2 border-gray-200 pb-4">
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 sm:gap-6">
@@ -74,13 +74,13 @@ export default function Hero(): JSX.Element {
                   className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold hover:text-[#3DBEC8]"
                   onClick={() => {
                     setActiveTab("multi")
-                    router.push("/page1")
+                    router.push("/services/page1");
                   }}
                 >
                   Multi Stop
                    <p className={` ${
                     activeTab === "multi"
-                      ? "text-[#3DBEC8] border-b-2 border-[#3DBEC8]"
+                      ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
                       : "text-gray-600"
                   }`}></p>
                 </button>

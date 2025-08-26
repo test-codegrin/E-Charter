@@ -63,7 +63,7 @@ export default function Footer(): JSX.Element {
   ];
 
   return (
-    <div className="lg:flex justify-center px-4 sm:px-6 lg:px-8 mb-[80px]">
+    <div className="lg:flex w-full justify-center px-4 2xl:mt-[80px] sm:px-6 mb-[20px]">
       <footer className="w-full max-w-[1780px] rounded-[30px] border border-[#CCCCCC] bg-[#F1F1F1]">
         {/* Top Section */}
         <div className="px-4 sm:px-8 lg:px-[40px] pt-[30px] pb-8">

@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   return (
-    <header className="fixed mt-2 top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8">
       <nav className="max-w-[1760px] mx-auto flex items-center justify-between h-[60px] my-2">
         {/* Logo */}
         <div className="flex-shrink-0 w-[70px] sm:w-[80px] md:w-[90px]">
@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
           {/* Nav Links */}
           <div className="flex gap-4 xl:gap-12 2xl:gap-24 text-[16px] xl:text-[18px]">
             <a href="/" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Home</a>
-            <a href="/service" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Service</a>
+            <a href="/services/page1" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Service</a>
             <a href="/about" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">About Us</a>
             <a href="/contact" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Contact Us</a>
           </div>

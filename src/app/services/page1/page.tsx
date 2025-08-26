@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PersonCounter from "../components/bookservice/PersonCounter";
-import MapCard from "../components/bookservice/MapCard";
-import StopCard from "../components/bookservice/StopCard";
-import Link from "next/link";
-import Nav from "../components/bookservice/Nav"; // Uncomment if you need Navbar
+import PersonCounter from "../../components/bookservice/PersonCounter";
+import MapCard from "../../components/bookservice/MapCard";
+import StopCard from "../../components/bookservice/StopCard";
+import Link from "next/link"; 
 
 interface Stop {
   location: string;
@@ -16,9 +15,7 @@ interface Stop {
 const PlanJourney = () => {
   const router = useRouter();
 
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
-    "return"
-  );
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("return");
   const [persons, setPersons] = useState<number>(0);
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
@@ -50,13 +47,8 @@ const PlanJourney = () => {
 
   return (
     <section className="w-full mt-[75px] min-h-screen bg-white">
-      {/* Navbar 
-      <div className="sticky top-0 z-50 bg-white">
-        <Nav />
-      </div> */}
-
       {/* Main Content */}
-      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 2xl:px-16 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-6 md:px-9 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
           {/* Back Button */}
@@ -234,7 +226,7 @@ const PlanJourney = () => {
           </details>
 
           <div className="border-t border-gray-200 my-6 md:my-8" />
-          <Link href="/page2">
+          <Link href="/services/page2">
             <button className="w-full cursor-pointer max-w-[573px] h-12 mb-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
               Next
             </button>

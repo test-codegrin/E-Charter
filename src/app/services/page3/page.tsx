@@ -3,11 +3,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import PersonCounter from "../components/bookservice/PersonCounter";
-import StopCard from "../components/bookservice/StopCard";
-import MapCard1 from "../components/bookservice/MapCard1";
+import PersonCounter from "../../components/bookservice/PersonCounter";
+import StopCard from "../../components/bookservice/StopCard";
+import MapCard1 from "../../components/bookservice/MapCard1";
 import Link from "next/link";
-import Nav from "../components/bookservice/Nav";
 
 // ✅ Fallback ID generator (instead of crypto.randomUUID)
 function generateId() {
@@ -46,23 +45,21 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[70px] min-h-screen bg-white">
-      {/* Navbar
-      <div className="sticky top-0 z-50 bg-white">
-        <Nav />
-      </div> */}
-
-      <div className="flex flex-col xl:flex-row min-h-screen lg:flex-col w-full sm:px-6 lg:px-8 xl:px-0 p-3 py-6">
-        <div className="w-full 2xl:w-[580px] xl:w-[573px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[70px] md:mx-auto md:w-[580px] lg:py-0">
+    <section className="w-full mt-[75px] min-h-screen bg-white">
+      {/* Main Content */}
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-6 md:px-9 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
+        {/* Left Panel */}
+        <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
+          {/* Back Button */}
           <button
             onClick={() => router.back()}
-            className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] transition-colors"
+            className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] font-medium transition-colors duration-200"
           >
-            <i className="fa-solid fa-arrow-left-long ml-2 mr-2" />
-            <span className="text-sm sm:text-base">Back</span>
+            <i className="fa-solid fa-arrow-left-long mr-2" />
+            Back
           </button>
 
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">
             Plan Your Journey
           </h1>
           <p className="mt-2 text-base sm:text-lg text-gray-600">
@@ -70,9 +67,10 @@ export default function Page3() {
             service
           </p>
 
-          <details className="group w-full lg:w-[580px] mt-6 lg:mt-8" open>
-            <summary className="flex flex-wrap items-center justify-between gap-3 py-4 select-none cursor-pointer">
-              <h2 className="text-lg sm:text-xl md:text-2xl font-bold">
+          {/* Accordion */}
+          <details className="group mt-6 md:mt-8" open>
+            <summary className="flex justify-between items-center py-4 cursor-pointer select-none list-none">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Itinerary
               </h2>
               <div className="flex items-center gap-2 sm:gap-4">
@@ -81,21 +79,21 @@ export default function Page3() {
                   onChange={(e) =>
                     setTripType(e.target.value as "single" | "return" | "multi")
                   }
-                  className="border-2 border-[#E5E5E5] bg-transparent rounded-full text-xs sm:text-sm font-medium px-3 sm:px-4 py-1 sm:py-2"
+                  className="border-2 w-[153px] border-[#E5E5E5] bg-white text-sm font-medium rounded-full px-4 py-2 focus:outline-none transition-all duration-100"
                 >
                   <option value="single">Single Trip</option>
                   <option value="return">Round-Trip</option>
                   <option value="multi">Multi Stop</option>
                 </select>
-                <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
+                <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
               </div>
             </summary>
 
             {/* Pickup Section */}
-            <div className="border bg-[#FCFCFC] border-gray-200 2xl:w-[580px] w-full rounded-2xl p-4 sm:p-6 space-y-4 sm:space-y-6">
-              <div className="sm:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
+            <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4 bg-[#FCFCFC] space-y-4 sm:space-y-6">
+              <div className="md:flex flex flex-wrap justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                     <img
                       src="/images/Mask group.png"
                       alt="pickup"
@@ -108,40 +106,44 @@ export default function Page3() {
                 </div>
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
-                  <button
-                    onClick={addStop}
-                    className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full"
-                  >
-                    + Add Stop
-                  </button>
+                  {tripType === "multi" && (
+                    <button
+                      type="button"
+                      onClick={addStop}
+                      className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-[10px] sm:py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full transition-colors duration-200"
+                    >
+                      + Add Stop
+                    </button>
+                  )}
                 </div>
               </div>
-              <div className="grid gap-4 sm:gap-6 mt-3 sm:mt-5 sm:grid-cols-2">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
-                  <label className="flex items-center gap-2 sm:gap-3 w-full">
+                  <label className="flex items-center gap-2 sm:gap-3">
                     <img
                       src="/images/Mask group1.png"
-                      alt="loc"
-                      className="w-5 h-5 sm:w-6 sm:h-6"
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        alt="location"
                     />
                     <input
                       type="text"
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none py-1 sm:py-2 text-sm sm:text-base"
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
                     />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-2 sm:gap-3 w-full">
+                  <label className="flex items-center gap-2 sm:gap-3">
                     <img
                       src="/images/Clock.png"
-                      alt="time"
                       className="w-5 h-5 sm:w-6 sm:h-6"
+                      alt="time"
                     />
                     <input
                       type="datetime-local"
-                      className="w-full bg-transparent focus:border-[#3DC1C4] text-[#9C9C9C] py-1 sm:py-2 text-sm sm:text-base"
+                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
                     />
                   </label>
                   <div className="border-b border-gray-300" />
@@ -149,9 +151,8 @@ export default function Page3() {
               </div>
             </div>
 
-            {/* Stop Cards */}
-            <div className="space-y-4 lg:w-[580px] sm:space-y-6 mt-6 sm:mt-8">
-              {stops.map((s) => (
+            {/* Multi Stops */}
+            {stops.map((s) => (
                 <StopCard
                   key={s.id}
                   {...s}
@@ -160,62 +161,59 @@ export default function Page3() {
                   onAdd={addStop}
                 />
               ))}
-            </div>
 
             {/* Dropoff Section */}
-            <div className="border bg-[#FCFCFC] border-gray-200 lg:w-[580px] w-full mt-6 sm:mt-8 rounded-2xl p-4 sm:p-6 space-y-4">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
-                  <img
-                    src="/images/Dropoff.png"
-                    alt="dropoff"
-                    className="w-4 h-4 sm:w-5 sm:h-5"
-                  />
-                </div>
-                <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
-                  Dropoff
-                </h3>
-              </div>
-              <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
-                <div>
-                  <label className="flex items-center gap-2 sm:gap-3 w-full">
+            {(tripType === "return" || tripType === "multi") && (
+              <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                     <img
-                      src="/images/Mask group1.png"
-                      alt="loc"
-                      className="w-5 h-5 sm:w-6 sm:h-6"
+                      src="/images/Dropoff.png"
+                      alt="dropoff"
+                      className="w-4 h-4 sm:w-5 sm:h-5"
                     />
-                    <input
-                      type="text"
-                      placeholder="Dropoff Location"
-                      className="w-full bg-transparent focus:border-[#3DC1C4] focus:outline-none py-1 sm:py-2 text-sm sm:text-base"
-                    />
-                  </label>
-                  <div className="border-b border-gray-300" />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
+                    Dropoff
+                  </h3>
                 </div>
-                <div>
-                  <label className="flex items-center gap-2 sm:gap-3 w-full">
-                    <img
-                      src="/images/Clock.png"
-                      alt="time"
-                      className="w-5 h-5 sm:w-6 sm:h-6"
-                    />
-                    <input
-                      type="datetime-local"
-                      className="w-full bg-transparent text-[#9C9C9C] focus:border-[#3DC1C4] focus:outline-none py-1 sm:py-2 text-sm sm:text-base"
-                    />
-                  </label>
-                  <div className="border-b border-gray-300" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                  <div>
+                    <label className="flex items-center gap-2 sm:gap-3">
+                      <img
+                        src="/images/Mask group1.png"
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        alt="location"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Dropoff Location"
+                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
+                      />
+                    </label>
+                    <div className="border-b border-gray-300" />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-2 sm:gap-3">
+                      <img
+                        src="/images/Clock.png"
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        alt="time"
+                      />
+                      <input
+                        type="datetime-local"
+                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
+                      />
+                    </label>
+                    <div className="border-b border-gray-300" />
+                  </div>
                 </div>
               </div>
-              <div className="bg-[#E5E5E5] text-center rounded-full py-2 sm:py-3 mt-4">
-                <p className="text-xs sm:text-sm font-semibold">
-                  Arrives on Thursday, June 19 at 02:30 AM
-                </p>
-              </div>
-            </div>
+            )}
           </details>
 
-          <div className="border-b border-1 mt-[20px] mb-[20px] md:w-[580px] border-gray-300" />
+          <div className="border-t border-gray-200 my-6 md:my-8" />
 
           {/* Trip Details Accordion */}
           <details className="md:w-[580px] w-full overflow-hidden" open>
@@ -282,16 +280,17 @@ export default function Page3() {
             </div>
           </details>
 
-          <Link href="/page4">
+          <Link href="/services/page4">
             <button className="w-full cursor-pointer max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
               Next
             </button>
           </Link>
         </div>
 
-        {/* Map side */}
-        <div className="w-full 2xl:ml-[30px] lg:w-full mt-[20px] xl:h-[877px] 2xl:w-full h-[877px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-3rem)] overflow-hidden lg:sticky rounded-2xl lg:top-6">
-          <MapCard1 />
+        {/* Right Panel */}
+        <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[70%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+          <MapCard1
+          />
         </div>
       </div>
     </section>

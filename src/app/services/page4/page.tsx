@@ -1,27 +1,27 @@
 // pages/page4.tsx
 import React from "react";
-import PickupDropForm from "../components/bookservice/PickupDropForm";
-import OffersCard from "../components/bookservice/OffersCard";
-import CarCard from "../components/bookservice/CarCard";
-import Nav from "../components/bookservice/Nav";
+import PickupDropForm from "../../components/bookservice/PickupDropForm";
+import OffersCard from "../../components/bookservice/OffersCard";
+import CarCard from "../../components/bookservice/CarCard";
+import Nav from "../../components/bookservice/Nav";
 
 const Page4 = () => {
   return (
-    <div className="w-full mt-[70px] min-h-screen bg-white">
+    <div className="w-full px-8 mt-[70px] min-h-screen bg-white">
       {/* Navbar */}
       {/* <div className="sticky top-0 z-50 bg-white">
         <Nav />
       </div> */}
       <div className="bg-white sm:w-[500px] md:w-[600px] lg:w-full text-black min-h-screen w-full p-4 sm:p-6 lg:p-8 xl:p-12.5 2xl:px-0 mx-auto">
         {/* Form Section */}
-        <div className="mb-8 lg:mb-12 2xl:ml-[70px]">
+        <div className="mb-8 lg:mb-12">
           <PickupDropForm />
         </div>
 
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-6 xl:gap-8 2xl:gap-0">
           {/* Offers Column */}
-          <div className="flex flex-col 2xl:ml-[70px] gap-6 w-full lg:max-w-sm lg:top-4">
+          <div className="flex flex-col gap-6 w-full lg:max-w-sm lg:top-4">
             <OffersCard
               title="Weekend Special"
               date="19‑05‑2025 to 25‑05‑2025"

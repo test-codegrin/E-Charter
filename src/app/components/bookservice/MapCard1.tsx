@@ -4,7 +4,7 @@ import React from "react";
 
 const MapCard1 = () => {
   return (
-    <div className="relative w-full h-[877px] md:h-[590px] xl:w-[700px] sm:h-[450px] lg:h-[460px] xl:h-[877px] 2xl:h-[750px] xl:ml-[30px] xl:mr-8 2xl:mr-0 lg:mt-[10px] 2xl:w-[1040px]">
+    <div className="relative w-full h-full ">
       {/* Map Image */}
       <div className="relative w-full h-full rounded-lg md:rounded-xl overflow-hidden">
         <Image

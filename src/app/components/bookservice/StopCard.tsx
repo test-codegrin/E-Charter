@@ -48,7 +48,7 @@ const StopCard: React.FC<StopCardProps> = ({
             + Add Stop
           </button>
           <button
-            className="px-6 ml-[15px] mt-[10px] md:mt-[0] sm:px-4 py-2 bg-[#FF6363] t   ext-white text-xs sm:text-sm font-medium rounded-full transition hover:brightness-110 focus:outline-none"
+            className="px-6 ml-[15px] mt-[10px] md:mt-[0] sm:px-4 py-2 text-white bg-[#FF6363] t   ext-white text-xs sm:text-sm font-medium rounded-full transition hover:brightness-110 focus:outline-none"
             type="button"
             onClick={() => onRemove(id)}
           >

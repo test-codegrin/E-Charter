@@ -65,8 +65,8 @@ const Fleet: FC = () => {
   }, []);
 
   return (
-    <div className="flex justify-center px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-[1780px] py-10 relative">
+    <div className="flex max-w-[1780px] 2xl:ml-[16px] 2xl:mt-[80px] justify-center px-3">
+      <div className="w-full max-w-[1920px] relative">
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Our Fleets
         </p>
@@ -79,7 +79,7 @@ const Fleet: FC = () => {
           your journey.
         </p>
 
-        <div className="relative mt-12">
+        <div className="relative mt-12 2xl:px-0 lg:px-0">
           {/* Swiper */}
           <Swiper
             modules={[Autoplay, Navigation]}
@@ -90,12 +90,12 @@ const Fleet: FC = () => {
             }}
             breakpoints={{
               320: { slidesPerView: 1, spaceBetween: 12, centeredSlides: true },
-              640: { slidesPerView: 1.2, spaceBetween: 16 },
-              768: { slidesPerView: 1.5, spaceBetween: 20 },
-              1024: { slidesPerView: 2, spaceBetween: 24 },
+              640: { slidesPerView: 1, spaceBetween: 16 },
+              768: { slidesPerView: 2, spaceBetween: 20 },
+              1024: { slidesPerView: 2, spaceBetween: 20, },
               1280: { slidesPerView: 3, spaceBetween: 24 },
-              1536: { slidesPerView: 3.5, spaceBetween: 28 },
-              1780: { slidesPerView: 4, spaceBetween: 32 },
+              1536: { slidesPerView: 4, spaceBetween: 28 },
+              1780: { slidesPerView: 4, spaceBetween: 28 },
             }}
           >
             {slides.map((slide) => (

@@ -5,8 +5,8 @@ import React, { FC } from "react";
 
 const Quality: FC = () => {
   return (
-    <div className="px-4 mt-[40px]">
-      <div className="max-w-[1482px] mx-auto">
+    <div className="px-4 max-w-[1780px] mt-[80px]">
+      <div className="max-w-[1500px] mx-auto">
         {/* Section Title */}
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Why Choose Us
@@ -16,7 +16,7 @@ const Quality: FC = () => {
         </h2>
 
         {/* Content Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-center mt-10 gap-10">
+        <div className="flex lg:flex-row justify-between items-center mt-10 gap-10">
           {/* Left Services */}
           <div className="flex flex-col items-start">
             <div className="w-full max-w-[422px] border-b border-gray-200 flex my-6">
