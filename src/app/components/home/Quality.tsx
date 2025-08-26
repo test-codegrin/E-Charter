@@ -43,7 +43,7 @@ const Quality: FC = () => {
 
           {/* Middle Image (only on large screens) */}
           <div className="lg:block">
-            <img src="/homepage/quality.png" alt="Quality" className="max-w-full" />
+            <img src="/images/Quality.png" alt="Quality" className="max-w-full" />
           </div>
 
           {/* Right Services */}
