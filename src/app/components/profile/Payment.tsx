@@ -1,6 +1,6 @@
 export default function PaymentPage() {
   return (
-    <div className="mt-6 max-w-[1176px] w-full">
+    <div className="mt-6 max-w-[1176px] min-h-[450px] w-full">
       <div className="flex items-center justify-between">
         <div className="">
           <h3 className="text-[22px] font-semibold text-[#3DBEC8] mb-4">
@@ -8,7 +8,7 @@ export default function PaymentPage() {
           </h3>
         </div>
         <div className="bg-[#3DBEC8] w-[261px] h-[52px] rounded-full">
-          <p className="text-center mt-[13px] text-base font-bold text-[#FFFFFF]">Add payment Method</p>
+          <button className="mt-[13px] ml-[45px] text-base font-bold text-[#FFFFFF]">Add payment Method</button>
         </div>
       </div>
       <form className="gap-4 text-sm text-gray-700">

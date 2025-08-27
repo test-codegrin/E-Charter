@@ -45,9 +45,9 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[75px] min-h-screen bg-white">
+    <section className="w-full mt-[75px] max-w-[1760px] mx-auto min-h-screen bg-white">
       {/* Main Content */}
-      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-6 md:px-9 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
           {/* Back Button */}

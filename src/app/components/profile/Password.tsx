@@ -12,7 +12,7 @@ export default function PasswordPage() {
   const [showConfirm, setShowConfirm] = useState(false);
 
   return (
-    <div className="sm:px-6 lg:px-8">
+    <div className="max-w-[1176px] w-full">
       {/* Page Title */}
       <h3 className="text-[22px] font-semibold text-[#3DBEC8] mb-6">
         Security Settings

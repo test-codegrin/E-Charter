@@ -65,7 +65,7 @@ const Fleet: FC = () => {
   }, []);
 
   return (
-    <div className="flex max-w-[1780px] 2xl:ml-[16px] 2xl:mt-[80px] justify-center px-3">
+    <div className="flex max-w-[1760px] w-full border-2 mx-auto 2xl:mt-[80px] justify-center px-3">
       <div className="w-full max-w-[1920px] relative">
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Our Fleets

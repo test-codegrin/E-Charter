@@ -24,8 +24,8 @@ export default function Hero(): JSX.Element {
   };
 
   return (
-    <div className="flex mt-[80px] sm:px-0 px-3 max-w-[1780px] relative 2xl:ml-[16px] sm:mt-[80px]">
-      <div className="w-full max-w-[1780px] rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
+    <div className="flex w-full mt-[80px] border-2 sm:px-0 px-3 max-w-[1760px] mx-auto relative">
+      <div className="w-full max-w-[1760px] mx-auto rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
         {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4">
           <p className="text-[#3DBEC8] text-sm md:text-base">

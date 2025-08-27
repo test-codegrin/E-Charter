@@ -3,11 +3,10 @@ import React from "react";
 import PickupDropForm from "../../components/bookservice/PickupDropForm";
 import OffersCard from "../../components/bookservice/OffersCard";
 import CarCard from "../../components/bookservice/CarCard";
-import Nav from "../../components/bookservice/Nav";
 
 const Page4 = () => {
   return (
-    <div className="w-full px-8 mt-[70px] min-h-screen bg-white">
+    <div className="w-full px-8 sm:px-0 max-w-[1760px] mx-auto mt-[70px] min-h-screen bg-white">
       {/* Navbar */}
       {/* <div className="sticky top-0 z-50 bg-white">
         <Nav />

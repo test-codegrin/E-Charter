@@ -7,7 +7,7 @@ import Tabs from "../components/profile/Tabs";
 
 export default function Page() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-[533px] max-w-[1760px] mx-auto w-full flex flex-col">
       {/* ✅ Navbar at the top */}
       <Nav />
 

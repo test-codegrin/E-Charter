@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Nav from "../../components/bookservice/Nav";
 
 function Page5() {
   const router = useRouter();
@@ -37,7 +36,7 @@ function Page5() {
   };
 
   return (
-    <div className="mt-[70px]">
+    <div className="mt-[70px] max-w-[1760px] mx-auto">
       <div className="bg-white text-gray-900 min-h-screen">
         <div className="max-w-7xl sm:w-[573px] lg:w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <p className="text-3xl sm:text-4xl xl:ml-[85px] font-bold 2xl:ml-[90px] mb-10">

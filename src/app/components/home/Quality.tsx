@@ -6,8 +6,8 @@ import React from "react";
 function Quality() {
 
   return (
-    <div className="px-4 max-w-[1780px] mt-[80px]">
-      <div className="max-w-[1500px] mx-auto">
+    <div className="px-4 max-w-[1760px] w-full border-2 mx-auto mt-[80px]">
+      <div className="max-w-[1500px] w-full mx-auto">
         {/* Section Title */}
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Why Choose Us

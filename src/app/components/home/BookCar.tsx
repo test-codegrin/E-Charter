@@ -3,7 +3,7 @@ import React, { FC } from "react";
 
 const BookCar: FC = () => {
   return (
-    <section className="w-full py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 flex justify-center">
+    <section className="w-full border-2 mt-[80px] max-w-[1760px] mx-auto flex justify-center">
       <div className="w-full max-w-[1480px]">
         <div className="w-full rounded-2xl md:rounded-3xl lg:rounded-4xl bg-[#21211D] flex flex-col lg:flex-row items-center p-6 md:p-8 lg:p-12 xl:p-16">
           {/* Text content - order changes based on screen size */}

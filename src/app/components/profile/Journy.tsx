@@ -21,7 +21,7 @@ export default function MyJourneyPage() {
   ];
 
   return (
-    <div className="w-full max-w-6xl">
+    <div className="w-full max-w-[1760px] mx-auto">
 
       {/* My Journey */}
       {activeTab === "journey" && (
