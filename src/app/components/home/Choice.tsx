@@ -4,7 +4,7 @@ import React, { FC } from "react";
 
 const Choice: FC = () => {
   return (
-    <section className="w-full border-2 max-w-[1760px] mx-auto mt-[80px] px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
+    <section className="w-full max-w-[1760px] mx-auto mt-[80px] px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
       <div className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center gap-8 md:gap-10 lg:gap-12 xl:gap-16">
         {/* Image Section */}
         <div className="w-full lg:w-1/2 flex justify-center">

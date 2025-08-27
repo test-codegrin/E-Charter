@@ -58,7 +58,7 @@ const Service: FC = () => {
   ];
 
   return (
-    <div className="flex max-w-[1760px] w-full mt-[80px] mx-auto border-2 justify-center px-4">
+    <div className="flex max-w-[1760px] w-full mt-[80px] mx-auto justify-center px-4">
       <div className="max-w-[1760px] w-full py-0">
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Our Services
