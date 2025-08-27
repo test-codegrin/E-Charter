@@ -2,8 +2,8 @@ import React from 'react'
 
 export default function contactus() {
   return (
-    <div>
-      <p>This is Contact Us page.</p>
+    <div className='bg-green-200 h-[410px] flex justify-center items-center'>
+        <h1 className='mt-[60px] text-4xl font-bold text-green-400'>This is Contact Us page.</h1>
     </div>
   )
 }

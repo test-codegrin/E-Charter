@@ -23,8 +23,8 @@ const Navbar: React.FC = () => {
           <div className="flex gap-4 xl:gap-12 2xl:gap-24 text-[16px] xl:text-[18px]">
             <a href="/" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Home</a>
             <a href="/services/page1" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Service</a>
-            <a href="/about" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">About Us</a>
-            <a href="/contact" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Contact Us</a>
+            <a href="/aboutus" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">About Us</a>
+            <a href="/contactus" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Contact Us</a>
           </div>
 
           {/* Search & Book Now */}
