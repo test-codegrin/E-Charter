@@ -1,10 +1,10 @@
 // app/quality/page.tsx
 "use client";
 
-import React, { FC } from "react";
-import Image from "next/image";
+import React from "react";
 
-const Quality: FC = () => {
+function Quality() {
+
   return (
     <div className="px-4 max-w-[1780px] mt-[80px]">
       <div className="max-w-[1500px] mx-auto">
@@ -29,7 +29,6 @@ const Quality: FC = () => {
                 </p>
               </div>
             </div>
-
             
             <div className="w-full max-w-[422px] flex">
               <img src="/images/Customer.png" alt="Customer Focused" className="h-[50px]" />
@@ -73,6 +72,6 @@ const Quality: FC = () => {
       </div>
     </div>
   );
-};
 
+};
 export default Quality;

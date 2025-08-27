@@ -17,7 +17,7 @@ export default function PaymentPage() {
           <input
             type="text"
             placeholder="**** **** **** 9988"
-            className="w-full pb-[16px] border-b mt-[15px] outline-none"
+            className="w-full pb-[16px] border-b border-[#DBDBDB] mt-[15px] outline-none"
           />
         </div>
         <div className="mt-[30px]">
@@ -25,22 +25,15 @@ export default function PaymentPage() {
           <input
             type="text"
             placeholder="Chase Bank ****1234"
-            className="w-full pb-[16px] border-b mt-[15px] outline-none"
+            className="w-full pb-[16px] border-b border-[#DBDBDB] mt-[15px] outline-none"
           />
         </div>
-        {/* <div>
-          <label className="text-lg font-medium">Digital Wallet</label>
-          <input
-            type="month"
-            className="w-full border-b mt-[15px] outline-none"
-          />
-        </div> */}
         <div className="mt-[30px]">
-          <label className="text-lg font-medium">Digital Wallet</label>
+          <label className="text-lg font-medium">Digital Wallet</label>   
           <input
             type="password"
             placeholder="PayPal, Apple Pay"
-            className="w-full pb-[16px] border-b mt-[15px] outline-none"
+            className="w-full pb-[16px] border-b border-[#DBDBDB] mt-[15px] outline-none"
           />
         </div>
       </form>

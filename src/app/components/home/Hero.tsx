@@ -74,7 +74,7 @@ export default function Hero(): JSX.Element {
                   className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold hover:text-[#3DBEC8]"
                   onClick={() => {
                     setActiveTab("multi")
-                    router.push("/services/page1");
+                    router.push("/services/page2");
                   }}
                 >
                   Multi Stop

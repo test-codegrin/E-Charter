@@ -24,7 +24,7 @@ export default function Page3() {
   const [tripType, setTripType] = useState<"single" | "return" | "multi">(
     "multi"
   );
-  const [persons, setPersons] = useState<number>(0);
+  const [persons, setPersons] = useState<number>(1);
   const [stops, setStops] = useState<Stop[]>([
     { id: generateId(), location: "", date: "" }, // ✅ fixed
   ]);

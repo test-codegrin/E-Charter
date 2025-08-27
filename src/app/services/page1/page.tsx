@@ -16,7 +16,7 @@ const PlanJourney = () => {
   const router = useRouter();
 
   const [tripType, setTripType] = useState<"single" | "return" | "multi">("return");
-  const [persons, setPersons] = useState<number>(0);
+  const [persons, setPersons] = useState<number>(1);
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
   const [pickupDateTime, setPickupDateTime] = useState<string>("");
