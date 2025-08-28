@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import PersonCounter from "../../components/bookservice/PersonCounter";
 import MapCard from "../../components/bookservice/MapCard";
 import StopCard from "../../components/bookservice/StopCard";
-import Link from "next/link"; 
+import Button from "../../components/ui/Button";
+import Inputs from "../../components/ui/Inputs";
 
 interface Stop {
   location: string;
@@ -15,7 +16,9 @@ interface Stop {
 const PlanJourney = () => {
   const router = useRouter();
 
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">("return");
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
+    "return"
+  );
   const [persons, setPersons] = useState<number>(1);
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
@@ -46,7 +49,7 @@ const PlanJourney = () => {
   };
 
   return (
-    <section className="w-full max-w-[1760px] mx-auto mt-[75px] min-h-screen bg-white">
+    <section className="w-full max-w-[1760px] mx-auto mt-[75px] max-h-[877px] bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
@@ -108,13 +111,12 @@ const PlanJourney = () => {
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && multiStops.length === 0 && (
-                    <button
-                      type="button"
+                    <Button
+                      label="+ Add Stop"
                       onClick={() => handleAddStop()}
-                      className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-[10px] sm:py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full transition-colors duration-200"
-                    >
-                      + Add Stop
-                    </button>
+                      variant="secondary"
+                      size="sm"
+                    />
                   )}
                 </div>
               </div>
@@ -124,15 +126,16 @@ const PlanJourney = () => {
                   <label className="flex items-center gap-2 sm:gap-3">
                     <img
                       src="/images/Mask group1.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="location"
+                      className="w-5 h-5 sm:w-6 sm:h-6"
+                      alt="location"
                     />
-                    <input
+                    <Inputs
                       type="text"
                       value={pickupLocation}
                       onChange={(e) => setPickupLocation(e.target.value)}
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
+                      className="w-full bg-transparent focus:outline-none text-sm sm:text-base placeholder-gray-400" 
+                      name="Pickup Location"                    
                     />
                   </label>
                   <div className="border-b border-gray-300" />
@@ -144,7 +147,8 @@ const PlanJourney = () => {
                       className="w-5 h-5 sm:w-6 sm:h-6"
                       alt="time"
                     />
-                    <input
+                    <Inputs
+                      name="Pickup Date & Time"
                       type="datetime-local"
                       value={pickupDateTime}
                       onChange={(e) => setPickupDateTime(e.target.value)}
@@ -194,7 +198,8 @@ const PlanJourney = () => {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Location"
                         type="text"
                         value={dropoffLocation}
                         onChange={(e) => setDropoffLocation(e.target.value)}
@@ -211,7 +216,8 @@ const PlanJourney = () => {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="time"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Date & Time"
                         type="datetime-local"
                         value={dropoffDateTime}
                         onChange={(e) => setDropoffDateTime(e.target.value)}
@@ -226,11 +232,8 @@ const PlanJourney = () => {
           </details>
 
           <div className="border-t border-gray-200 my-6 md:my-8" />
-          <Link href="/services/page2">
-            <button className="w-full cursor-pointer max-w-[573px] h-12 mb-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
-              Next
-            </button>
-          </Link>
+          {/* Next Buttons */}
+          <Button label="Next" href="/services/page2" size="full" />
         </div>
 
         {/* Right Panel */}

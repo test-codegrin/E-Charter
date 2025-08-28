@@ -1,15 +1,45 @@
+// File: src/app/security/page.tsx
 "use client";
 
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import Button from "../ui/Button";
+import Inputs from "../ui/Inputs";
 
 export default function PasswordPage() {
+  // Modal state
   const [showModal, setShowModal] = useState(false);
 
-  // State for password visibility
+  // Password input state
+  const [formData, setFormData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+
+  // Password visibility toggles
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  // Handle form input changes
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle update action
+  const handleUpdate = () => {
+    console.log("Password Update Attempt ✅", formData);
+
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert("New password and confirmation do not match!");
+      return;
+    }
+
+    // TODO: Add API call here to update password securely
+    setShowModal(false);
+  };
 
   return (
     <div className="max-w-[1176px] w-full">
@@ -27,7 +57,8 @@ export default function PasswordPage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="mt-4 sm:mt-0 w-full sm:w-auto px-6 py-2 rounded-full text-white font-semibold text-lg bg-[#3DBEC8] hover:bg-[#34a7af] transition">
+            className="mt-4 sm:mt-0 w-full sm:w-auto px-6 py-2 rounded-full text-white font-semibold text-lg bg-[#3DBEC8] hover:bg-[#34a7af] transition"
+          >
             Change Password
           </button>
         </div>
@@ -36,11 +67,17 @@ export default function PasswordPage() {
       {/* Modal Popup */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+          <div className="relative bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black text-lg"
+            >
+              ✕
+            </button>
+
             {/* Title */}
-            <h2 className="text-xl font-semibold text-[#3DBEC8] mb-6">
-              Change Password
-            </h2>
+            <h4 className="text-xl font-semibold mb-6">Change Password</h4>
 
             {/* Form */}
             <form className="space-y-5">
@@ -50,15 +87,19 @@ export default function PasswordPage() {
                   Current Password
                 </label>
                 <div className="relative mt-1">
-                  <input
+                  <Inputs
+                    name="currentPassword"
                     type={showCurrent ? "text" : "password"}
                     placeholder="Enter current password"
+                    value={formData.currentPassword}
+                    onChange={handleChange}
                     className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]">
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                  >
                     {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -70,15 +111,19 @@ export default function PasswordPage() {
                   New Password
                 </label>
                 <div className="relative mt-1">
-                  <input
+                  <Inputs
+                    name="newPassword"
                     type={showNew ? "text" : "password"}
                     placeholder="Enter new password"
+                    value={formData.newPassword}
+                    onChange={handleChange}
                     className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNew(!showNew)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]">
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                  >
                     {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -90,15 +135,19 @@ export default function PasswordPage() {
                   Confirm Password
                 </label>
                 <div className="relative mt-1">
-                  <input
+                  <Inputs
+                    name="confirmPassword"
                     type={showConfirm ? "text" : "password"}
                     placeholder="Confirm new password"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
                     className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]">
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                  >
                     {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
@@ -107,16 +156,17 @@ export default function PasswordPage() {
 
             {/* Action Buttons */}
             <div className="mt-8 flex flex-col sm:flex-row justify-end gap-4">
-              <button
+              <Button
+                label="Cancel"
                 onClick={() => setShowModal(false)}
-                className="px-6 py-2 rounded-full border border-gray-300 text-gray-600 hover:bg-gray-100 transition w-full sm:w-auto">
-                Cancel
-              </button>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-6 py-2 rounded-full bg-[#3DBEC8] text-white font-semibold hover:bg-[#34a7af] transition w-full sm:w-auto">
-                Update
-              </button>
+                variant="outline"
+                size="md"
+              />
+              <Button
+                label="Update"
+                onClick={handleUpdate}
+                size="md"
+              />
             </div>
           </div>
         </div>

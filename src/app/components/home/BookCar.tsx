@@ -1,5 +1,6 @@
 "use client";
 import React, { FC } from "react";
+import Button from "../ui/Button";
 
 const BookCar: FC = () => {
   return (
@@ -15,9 +16,7 @@ const BookCar: FC = () => {
               Our friendly customer service team is here to help. Contact us
               anytime for support and inquiries.
             </p>
-            <button className="h-12 md:h-14 w-36 md:w-40 bg-[#3DBEC8] hover:bg-[#35a7b0] text-white font-semibold text-sm md:text-base rounded-full mt-6 md:mt-8 transition-colors duration-300">
-              Contact Us
-            </button>
+            <Button label="Contact Us" href="/contactus" size="md" variant="primary" className="mt-6 md:mt-8" />
           </div>
 
           {/* Image container */}

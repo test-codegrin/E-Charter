@@ -5,7 +5,7 @@ export default function ProfileCard() {
     <div className="bg-[#FCFCFC] max-w-[1176px] border border-[#DBDBDB] rounded-[14px] p-6 w-full">
       <div className="flex sm:flex-row flex-col md:w-[458px] sm:mx-auto items-center">
         <Image
-          src="/images/Profile1.png"
+          src="/images/Profile12.png"
           alt="profile"
           width={130}
           height={130}

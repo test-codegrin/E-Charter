@@ -1,6 +1,7 @@
 // app/components/Service.tsx
 "use client";
 import React, { FC } from "react";
+import Button from "../ui/Button";
 
 interface ServiceCardProps {
   image: string;
@@ -22,9 +23,7 @@ const ServiceCard: FC<ServiceCardProps> = ({ image, title, description }) => (
       <p className="text-base text-[#616161] leading-[27.2px] font-semibold mt-2">
         {description}
       </p>
-      <button className="rounded-full border-2 h-[48px] w-[140px] font-bold text-sm text-white bg-[#3DBEC8] mt-6">
-        Read More
-      </button>
+      <Button label="Read More" href="/services" size="md" className="mt-6" />
     </div>
   </div>
 );

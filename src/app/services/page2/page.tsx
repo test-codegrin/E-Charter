@@ -7,7 +7,8 @@ import { v4 as uuidv4 } from "uuid";
 import PersonCounter from "../../components/bookservice/PersonCounter";
 import StopCard from "../../components/bookservice/StopCard";
 import MapCard1 from "../../components/bookservice/MapCard1";
-import Link from "next/link";
+import Button from "../../components/ui/Button";
+import Inputs from "../../components/ui/Inputs";
 
 interface Stop {
   id: string;
@@ -42,7 +43,7 @@ export default function Page2() {
 
 
   return (
-    <section className="w-full mt-[75px] max-w-[1760px] mx-auto min-h-screen bg-white">
+    <section className="w-full mt-[75px] max-w-[1760px] mx-auto bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
@@ -104,13 +105,12 @@ export default function Page2() {
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
-                    <button
-                      type="button"
+                    <Button
+                      label="+ Add Stop"
                       onClick={addStop}
-                      className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-[10px] sm:py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full transition-colors duration-200"
-                    >
-                      + Add Stop
-                    </button>
+                      size="sm"
+                      className="mt-[10px] md:mt-[0]" 
+                    />
                   )}
                 </div>
               </div>
@@ -123,11 +123,13 @@ export default function Page2() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
                     />
-                    <input
+                    <Inputs
+                      name="Pickup Location"
                       type="text"
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
-                    />
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                        throw new Error("Function not implemented.");
+                      } }                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -138,10 +140,12 @@ export default function Page2() {
                       className="w-5 h-5 sm:w-6 sm:h-6"
                       alt="time"
                     />
-                    <input
+                    <Inputs
+                      name="Pickup Date & Time"
                       type="datetime-local"
-                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
-                    />
+                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                        throw new Error("Function not implemented.");
+                      } }                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -183,11 +187,13 @@ export default function Page2() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Location"
                         type="text"
                         placeholder="Dropoff Location"
-                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
-                      />
+                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                          throw new Error("Function not implemented.");
+                        } }                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -198,10 +204,12 @@ export default function Page2() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="time"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Date & Time"
                         type="datetime-local"
-                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
-                      />
+                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                          throw new Error("Function not implemented.");
+                        } }                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -211,15 +219,12 @@ export default function Page2() {
           </details>
 
           <div className="border-t border-gray-200 my-6 md:my-8" />
-          <Link href="/services/page3">
-            <button className="w-full cursor-pointer max-w-[573px] h-12 mb-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
-              Next
-            </button>
-          </Link>
+          {/* Next Buttons */}
+          <Button label="Next" href="/services/page3" size="full" />
         </div>
 
         {/* Right Panel */}
-        <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[70%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+        <div className="w-full max-h-[877px] lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[70%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
           <MapCard1
           />
         </div>

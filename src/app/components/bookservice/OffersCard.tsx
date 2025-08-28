@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Button from "../ui/Button";
 import React from "react";
 
 interface OffersCardProps {
@@ -59,11 +59,7 @@ const OffersCard: React.FC<OffersCardProps> = ({
       </ul>
 
       {/* CTA Button */}
-      <Link href="/">
-        <button className="w-full cursor-pointer bg-[#3DBEC8] text-white font-bold py-3 rounded-full hover:bg-[#35aab1] transition">
-          Book Now
-        </button>
-      </Link>
+      <Button label="Book Weekend Deal" href="/" size="full" className="mt-auto" />
     </div>
   );
 };

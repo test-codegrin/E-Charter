@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import Button from "../ui/Button";
+import Inputs from "../ui/Inputs";
 
 interface StopCardProps {
   id: string | number;
@@ -40,34 +42,33 @@ const StopCard: React.FC<StopCardProps> = ({
           </h3>
         </div>
         <div className="sm:flex items-center">
-          <button
-            className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full"
-            type="button"
+          <Button
+            label="+ Add Stop"
             onClick={() => onAdd(id)}
-          >
-            + Add Stop
-          </button>
-          <button
-            className="px-6 ml-[15px] mt-[10px] md:mt-[0] sm:px-4 py-2 text-white bg-[#FF6363] t   ext-white text-xs sm:text-sm font-medium rounded-full transition hover:brightness-110 focus:outline-none"
-            type="button"
+            size="sm"
+            className="mr-3 mb-3 sm:mb-0"
+          />
+          <Button
+            label="Remove Stop"
             onClick={() => onRemove(id)}
-          >
-            Remove Stop
-          </button>
+            variant="danger"
+            size="sm"
+          />
         </div>
       </div>
 
       {/* Inputs section */}
       <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
         {/* Stop location */}
-        <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB] py-3">
+        <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB]">
           <img
             src="/images/Mask group1.png"
             alt="location"
             className="w-6 h-6 shrink-0"
             loading="lazy"
           />
-          <input
+          <Inputs
+            name="Stop Location"
             type="text"
             value={location}
             onChange={(e) => onChange(id, { location: e.target.value, date })}
@@ -77,14 +78,15 @@ const StopCard: React.FC<StopCardProps> = ({
         </label>
 
         {/* Date & Time */}
-        <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB] py-3">
+        <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB]">
           <img
             src="/images/Clock.png"
             alt="date-time"
             className="w-6 h-6 shrink-0"
             loading="lazy"
           />
-          <input
+          <Inputs
+            name="Stop Date & Time"
             type="datetime-local"
             value={date}
             onChange={(e) => onChange(id, { location, date: e.target.value })}

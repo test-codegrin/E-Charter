@@ -6,11 +6,7 @@ import CarCard from "../../components/bookservice/CarCard";
 
 const Page4 = () => {
   return (
-    <div className="w-full px-8 sm:px-0 max-w-[1760px] mx-auto mt-[70px] min-h-screen bg-white">
-      {/* Navbar */}
-      {/* <div className="sticky top-0 z-50 bg-white">
-        <Nav />
-      </div> */}
+    <div className="w-full px-8 sm:px-0 max-w-[1760px] mx-auto mt-[70px] max-h-[1150px] bg-white">
       <div className="bg-white sm:w-[500px] md:w-[600px] lg:w-full text-black min-h-screen w-full p-4 sm:p-6 lg:p-8 xl:p-12.5 2xl:px-0 mx-auto">
         {/* Form Section */}
         <div className="mb-8 lg:mb-12">

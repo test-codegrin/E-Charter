@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Menu, X, Search } from "lucide-react";
+import Button from "../ui/Button";
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -40,9 +41,8 @@ const Navbar: React.FC = () => {
                 className="border border-[#3DBEC8] bg-white rounded-full h-[42px] md:h-[47px] w-full pl-12 pr-4 text-sm md:text-base focus:outline-none"
               />
             </div>
-            <button className="h-[42px] md:h-[47px] w-[120px] md:w-[150px] xl:w-[198px] bg-[#3DBEC8] text-white rounded-full font-semibold text-sm md:text-base mr-6 xl:mr-8">
-              Book Now
-            </button>
+            {/* Book Now */}
+              <Button label="Book Now" href="/services/page1" size="xl" />
           </div>
         </div>
 
@@ -122,7 +122,7 @@ const Navbar: React.FC = () => {
       >
         <div className="flex flex-col gap-4 px-6 pt-6">
           <a href="/" className="text-[18px] font-medium py-2">Home</a>
-          <a href="/service" className="text-[18px] font-medium py-2">Service</a>
+          <a href="/services/page1" className="text-[18px] font-medium py-2">Service</a>
           <a href="/about" className="text-[18px] font-medium py-2">About Us</a>
           <a href="/contact" className="text-[18px] font-medium py-2">Contact Us</a>
 
@@ -138,9 +138,8 @@ const Navbar: React.FC = () => {
             />
           </div>
 
-          <button className="mt-4 h-[42px] w-full bg-[#3DBEC8] text-white rounded-full font-semibold text-sm">
-            Book Now
-          </button>
+          {/* Book Now */}
+          <Button label="Book Now" size="full" href="/services/page1" />
         </div>
       </div>
     </header>

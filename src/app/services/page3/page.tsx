@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import PersonCounter from "../../components/bookservice/PersonCounter";
 import StopCard from "../../components/bookservice/StopCard";
 import MapCard1 from "../../components/bookservice/MapCard1";
-import Link from "next/link";
+import Button from "../../components/ui/Button";
+import Inputs from "../../components/ui/Inputs";
+import Input from "../../components/ui/Inputs";
 
 // ✅ Fallback ID generator (instead of crypto.randomUUID)
 function generateId() {
@@ -45,11 +47,11 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[75px] max-w-[1760px] mx-auto min-h-screen bg-white">
+    <section className="w-full mt-[75px] max-h-[977px] max-w-[1760px] mx-auto bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
-        <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
+        <div className="w-full max-h-[877px] overflow-scroll 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
           {/* Back Button */}
           <button
             onClick={() => router.back()}
@@ -85,7 +87,7 @@ export default function Page3() {
                   <option value="return">Round-Trip</option>
                   <option value="multi">Multi Stop</option>
                 </select>
-                <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
+                <i className="fa-solid fa-chevron-up transition-transform duration-200 group-open:rotate-180" />
               </div>
             </summary>
 
@@ -107,13 +109,12 @@ export default function Page3() {
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
-                    <button
-                      type="button"
+                    <Button
+                      label="+ Add Stop"
                       onClick={addStop}
-                      className="px-6 mt-[10px] md:mt-[0] sm:px-4 py-[10px] sm:py-2 bg-[#3DC1C4] hover:bg-[#2da8ab] text-white text-xs sm:text-sm font-medium rounded-full transition-colors duration-200"
-                    >
-                      + Add Stop
-                    </button>
+                      size="sm"
+                      className="mt-[10px] md:mt-[0]"
+                    />
                   )}
                 </div>
               </div>
@@ -126,11 +127,13 @@ export default function Page3() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
                     />
-                    <input
+                    <Inputs
+                      name="Pickup Location"
                       type="text"
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
-                    />
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                        throw new Error("Function not implemented.");
+                      } }                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -141,10 +144,12 @@ export default function Page3() {
                       className="w-5 h-5 sm:w-6 sm:h-6"
                       alt="time"
                     />
-                    <input
+                    <Inputs
+                      name="Pickup Date & Time"
                       type="datetime-local"
-                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
-                    />
+                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                        throw new Error("Function not implemented.");
+                      } }                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -186,11 +191,13 @@ export default function Page3() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Location"
                         type="text"
                         placeholder="Dropoff Location"
-                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
-                      />
+                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                          throw new Error("Function not implemented.");
+                        } }                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -201,10 +208,12 @@ export default function Page3() {
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="time"
                       />
-                      <input
+                      <Inputs
+                        name="Dropoff Date & Time"
                         type="datetime-local"
-                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
-                      />
+                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                          throw new Error("Function not implemented.");
+                        } }                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -216,20 +225,22 @@ export default function Page3() {
           <div className="border-t border-gray-200 my-6 md:my-8" />
 
           {/* Trip Details Accordion */}
-          <details className="md:w-[580px] w-full overflow-hidden" open>
+          <details className="md:w-[550px] w-full overflow-hidden" open>
             <summary className="flex items-center justify-between gap-4 cursor-pointer select-none">
               <h2 className="text-xl sm:text-2xl font-bold">Trip Details</h2>
-              <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
+              <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
             </summary>
             <div className="border-1 bg-[#FCFCFC] border-[#DBDBDB] mt-4 rounded-2xl p-5 space-y-6">
               {/* Trip Name */}
               <div>
                 <p className="font-medium text-lg text-[#040401]">Trip Name</p>
-                <input
+                <Inputs
+                  name="Trip Name"
                   type="text"
                   placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
-                />
+                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                    throw new Error("Function not implemented.");
+                  } }                />
                 <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
 
@@ -237,22 +248,26 @@ export default function Page3() {
               <div className="flex flex-col md:flex-row md:gap-4 gap-6">
                 <div className="w-full md:w-1/2">
                   <p className="font-medium text-lg text-[#040401]">Luggage</p>
-                  <input
+                  <Inputs
+                    name="Luggage"
                     type="text"
                     placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
-                  />
+                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                      throw new Error("Function not implemented.");
+                    } }                  />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
                 <div className="w-full md:w-1/2">
                   <p className="font-medium text-lg text-[#040401]">
                     Event Types
                   </p>
-                  <input
+                  <Inputs
+                    name="Event Types"
                     type="text"
                     placeholder="Personal"
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
-                  />
+                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                      throw new Error("Function not implemented.");
+                    } }                  />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
               </div>
@@ -263,10 +278,12 @@ export default function Page3() {
                   Accessible Vehicle
                 </p>
                 <div className="flex items-center gap-3">
-                  <input
+                  <Inputs
+                    name="Accessible Vehicle"
                     type="checkbox"
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
-                  />
+                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
+                      throw new Error("Function not implemented.");
+                    } }                  />
                   <p className="text-sm lg:w-[350px]">
                     ADA standards Compliant
                   </p>
@@ -280,11 +297,10 @@ export default function Page3() {
             </div>
           </details>
 
-          <Link href="/services/page4">
-            <button className="w-full cursor-pointer max-w-[573px] h-12 mt-6 bg-[#3DBEC8] text-white font-bold text-sm rounded-full hover:bg-[#35aab1] transition-colors">
-              Next
-            </button>
-          </Link>
+          <div className="mt-[20px]">
+            {/* Next Buttons */}
+            <Button label="Next" href="/services/page4" size="full" />
+          </div>
         </div>
 
         {/* Right Panel */}

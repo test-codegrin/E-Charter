@@ -1,0 +1,62 @@
+"use client";
+
+import React from "react";
+import Link from "next/link";
+
+type UniversalButtonProps = {
+  label: string;
+  href?: string; // if button is a link
+  onClick?: () => void;
+  type?: "button" | "submit" | "reset";
+  variant?: "primary" | "secondary" | "danger" | "outline" | "gray";
+  size?: "sm" | "md" | "lg" | "xl" | "full";
+  className?: string; // for custom overrides
+};
+
+const baseStyles ="rounded-full font-semibold transition-colors duration-200 flex items-center justify-center";
+
+const sizeStyles: Record<string, string> = {
+  sm: "px-4 py-2 text-xs sm:text-sm h-[40px] w-auto",
+  md: "px-6 py-2 text-sm sm:text-base h-[45px] w-auto",
+  lg: "px-8 py-3 text-base md:text-lg h-[52px] w-auto",
+  xl: "px-10 py-3 text-lg md:text-xl h-[47px] w-[198px]",
+  full: "w-full h-12 sm:h-14",
+};
+
+const variantStyles: Record<string, string> = {
+  primary: "bg-[#3DBEC8] text-white hover:bg-[#35aab1]",
+  secondary: "bg-[#3DC1C4] text-white hover:bg-[#2da8ab]",
+  danger: "bg-[#FF6363] text-white hover:brightness-110",
+  outline: "border border-gray-300 text-gray-600 hover:bg-gray-100",
+  gray: "bg-gray-200 text-gray-700 hover:bg-gray-300",
+};
+
+export default function Button({
+  label,
+  href,
+  onClick,
+  type = "button",
+  variant = "primary",
+  size = "md",
+  className = "",
+}: UniversalButtonProps) {
+  const buttonClasses = `${baseStyles} ${sizeStyles[size]} ${
+    variantStyles[variant]
+  } ${className}`;
+
+  if (href) {
+    return (
+      <Link href={href}>
+        <button className={buttonClasses} type={type} onClick={onClick}>
+          {label}
+        </button>
+      </Link>
+    );
+  }
+
+  return (
+    <button className={buttonClasses} type={type} onClick={onClick}>
+      {label}
+    </button>
+  );
+}

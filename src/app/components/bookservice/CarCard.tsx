@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import Button from "../ui/Button";
 interface CarCardProps {
   title: string;
   subtitle: string;
@@ -104,11 +104,7 @@ const CarCard: React.FC<CarCardProps> = ({
               <p className="text-xl sm:text-2xl font-bold">Total {price}</p>
             </div>  
 
-            <Link href="/services/page5">
-              <button className="bg-[#3DBEC8] cursor-pointer hover:bg-[#35aab1] transition text-white py-3 font-semibold rounded-full w-full">
-                Reserve
-              </button>
-            </Link>
+            <Button label="Reserve" href="/services/page5" size="full" />
           </div>
         </div>
       </div>

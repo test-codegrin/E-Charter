@@ -10,7 +10,7 @@ interface MapCardProps {
 
 const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) => {
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full max-h-[877px] lg:mt-[0] mt-[30px] h-full">
       {/* Map Image */}
       <Image 
         src="/images/map.png" 

@@ -1,6 +1,8 @@
 "use client";
 import React, { JSX, useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "../ui/Button";
+import Inputs from "../ui/Inputs";
 
 type TripType = "single" | "round" | "multi";
 
@@ -131,16 +133,11 @@ export default function Hero(): JSX.Element {
                 </div>
 
                 {/* Button */}
-                <button
-                  onClick={handleSubmit}
-                  className="bg-[#3DBEC8] text-white px-5 py-2 rounded-full font-semibold hover:bg-[#36acb5] text-sm sm:text-base"
-                >
-                  Get Quote
-                </button>
+                <Button label="Get Quote" onClick={handleSubmit} variant="primary" size="sm" />
               </div>
             </div>
 
-            {/* Form Inputs */}
+            {/* Form Inputss */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pt-4">
               {/* Pickup */}
               <div className="flex items-center border-b border-gray-300">
@@ -149,7 +146,8 @@ export default function Hero(): JSX.Element {
                   className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
                   alt="pickup"
                 />
-                <input
+                <Inputs
+                  name="pickup"
                   type="text"
                   placeholder="Pickup Location"
                   value={pickupLocation}
@@ -165,7 +163,8 @@ export default function Hero(): JSX.Element {
                   className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
                   alt="dropoff"
                 />
-                <input
+                <Inputs
+                  name="dropoff"
                   type="text"
                   placeholder="Drop Off Location"
                   value={dropoffLocation}
@@ -181,7 +180,8 @@ export default function Hero(): JSX.Element {
                   className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
                   alt="pickup-date"
                 />
-                <input
+                <Inputs
+                  name="pickupDate"
                   type="date"
                   value={pickupDate}
                   onChange={(e) => setPickupDate(e.target.value)}
@@ -197,7 +197,8 @@ export default function Hero(): JSX.Element {
                     className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
                     alt="return-date"
                   />
-                  <input
+                  <Inputs
+                    name="returnDate"
                     type="date"
                     value={returnDate}
                     onChange={(e) => setReturnDate(e.target.value)}
@@ -209,9 +210,9 @@ export default function Hero(): JSX.Element {
 
             {/* Checkbox */}
             <div className="mt-4 flex items-center gap-2">
-              <input
+              <Inputs
+                name="agree"
                 type="checkbox"
-                id="agree"
                 checked={agreeTerms}
                 onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="w-4 h-4 border-2 border-[#3DBEC8] cursor-pointer"

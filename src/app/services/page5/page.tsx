@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "../../components/ui/Button";
+import Inputs from "../../components/ui/Inputs";
 
 function Page5() {
   const router = useRouter();
@@ -36,7 +38,7 @@ function Page5() {
   };
 
   return (
-    <div className="mt-[70px] max-w-[1760px] mx-auto">
+    <div className="mt-[70px] max-h-[1150px] max-w-[1760px] mx-auto">
       <div className="bg-white text-gray-900 min-h-screen">
         <div className="max-w-7xl sm:w-[573px] lg:w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <p className="text-3xl sm:text-4xl xl:ml-[85px] font-bold 2xl:ml-[90px] mb-10">
@@ -52,9 +54,9 @@ function Page5() {
 
               <div className="mt-6 space-y-6">
                 <div>
-                  <input
+                  <Inputs
+                    name="Name on Card"
                     type="text"
-                    name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Enter Name"
@@ -65,9 +67,9 @@ function Page5() {
 
                 <div className="mt-8">
                   <p className="text-lg font-medium">Card Number</p>
-                  <input
+                  <Inputs
+                    name="Card Number"
                     type="text"
-                    name="cardNumber"
                     value={formData.cardNumber}
                     onChange={handleChange}
                     placeholder="Enter card number"
@@ -79,7 +81,7 @@ function Page5() {
                 <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   <div className="flex-1">
                     <p className="text-lg font-medium">Expiration</p>
-                    <input
+                    <Inputs
                       type="text"
                       name="expiration"
                       value={formData.expiration}
@@ -91,7 +93,7 @@ function Page5() {
                   </div>
                   <div className="flex-1">
                     <p className="text-lg font-medium">Security Code</p>
-                    <input
+                    <Inputs
                       type="text"
                       name="securityCode"
                       value={formData.securityCode}
@@ -105,7 +107,7 @@ function Page5() {
 
                 <div className="mt-8">
                   <p className="text-lg font-medium">Address</p>
-                  <input
+                  <Inputs
                     type="text"
                     name="address"
                     value={formData.address}
@@ -117,7 +119,7 @@ function Page5() {
                 </div>
 
                 <div className="flex items-center gap-3 mt-6">
-                  <input
+                  <Inputs
                     type="checkbox"
                     name="adaCompliant"
                     checked={formData.adaCompliant}
@@ -131,13 +133,12 @@ function Page5() {
               </div>
 
               <div className="mt-8">
-                <button
-                  type="button"
+                {/* Reserve Now */}
+                <Button
+                  label="Reserve Now"
                   onClick={handleReserveClick}
-                  className="w-full max-w-full cursor-pointer sm:max-w-[537px] h-12 bg-[#3DBEC8] hover:bg-[#35a8b1] text-white font-bold text-base rounded-full transition-colors duration-200"
-                >
-                  Reserve Now
-                </button>
+                  size="full"
+                />
               </div>
 
               <p className="text-sm text-center mt-4 text-[#0D0D0D]">
