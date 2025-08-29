@@ -46,23 +46,6 @@ export default function MyJourneyPage() {
 
   return (
     <div className="w-full max-w-[1760px] mx-auto">
-      {/* Tabs Navigation */}
-      <div className="flex gap-6 border-b border-gray-200 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key as Tab)}
-            className={`pb-2 text-lg font-semibold ${
-              activeTab === tab.key
-                ? "text-[#3DBEC8] border-b-2 border-[#3DBEC8]"
-                : "text-gray-500 hover:text-[#3DBEC8]"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
       {/* Journey Tab */}
       {activeTab === "journey" && (
         <div>

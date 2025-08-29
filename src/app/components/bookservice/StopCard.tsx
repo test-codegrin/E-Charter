@@ -41,19 +41,19 @@ const StopCard: React.FC<StopCardProps> = ({
             Stop
           </h3>
         </div>
-        <div className="sm:flex items-center">
-          <Button
-            label="+ Add Stop"
+        <div className="flex items-center justify-between w-[250px] mt-[20px]">
+          <button
             onClick={() => onAdd(id)}
-            size="sm"
-            className="mr-3 mb-3 sm:mb-0"
-          />
-          <Button
-            label="Remove Stop"
+            className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+          >
+            + Add Stop
+          </button>
+          <button
             onClick={() => onRemove(id)}
-            variant="danger"
-            size="sm"
-          />
+            className="text-[#FFFFFF] font-semibold bg-[#FF6363] w-[119px] h-[36px] rounded-full"
+          >
+            Remove Stop
+          </button>
         </div>
       </div>
 

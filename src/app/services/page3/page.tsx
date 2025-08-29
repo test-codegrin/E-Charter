@@ -58,7 +58,7 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[75px] max-h-[977px] max-w-[1760px] mx-auto bg-white">
+    <section className="w-full mt-[75px] md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
@@ -120,12 +120,12 @@ export default function Page3() {
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
-                    <Button
-                      label="+ Add Stop"
-                      onClick={addStop}
-                      size="sm"
-                      className="mt-[10px] md:mt-[0]"
-                    />
+                    <button
+                      onClick={() => addStop()}
+                      className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+                    >
+                      + Add Stop
+                    </button>
                   )}
                 </div>
               </div>
@@ -314,9 +314,8 @@ export default function Page3() {
         </div>
 
         {/* Right Panel */}
-        <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[70%] 2xl:flex h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
-          <MapCard1
-          />
+        <div className="w-full max-h-[877px] lg:mx-auto xl:w-[60%] 2xl:w-[70%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+          <MapCard1 />
         </div>
       </div>
     </section>

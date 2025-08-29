@@ -49,7 +49,7 @@ const PlanJourney = () => {
   };
 
   return (
-    <section className="w-full max-w-[1760px] mx-auto mt-[75px] max-h-[877px] bg-white">
+    <section className="w-full max-w-[1760px] mx-auto mt-[75px] md:max-h-[877px] bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
@@ -111,12 +111,12 @@ const PlanJourney = () => {
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && multiStops.length === 0 && (
-                    <Button
-                      label="+ Add Stop"
+                    <button
                       onClick={() => handleAddStop()}
-                      variant="secondary"
-                      size="sm"
-                    />
+                      className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+                    >
+                      + Add Stop
+                    </button>
                   )}
                 </div>
               </div>
@@ -134,8 +134,8 @@ const PlanJourney = () => {
                       value={pickupLocation}
                       onChange={(e) => setPickupLocation(e.target.value)}
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none text-sm sm:text-base placeholder-gray-400" 
-                      name="Pickup Location"                    
+                      className="w-full bg-transparent focus:outline-none text-sm sm:text-base placeholder-gray-400"
+                      name="Pickup Location"
                     />
                   </label>
                   <div className="border-b border-gray-300" />

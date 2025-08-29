@@ -17,7 +17,7 @@ const MapCard1 = () => {
       </div>
 
       {/* Route Info Card */}
-      <div className="bg-white shadow-md rounded-lg px-3 sm:px-4 py-3 absolute bottom-3 sm:bottom-6 left-1/2 -translate-x-1/2 w-[92%] sm:w-[95%] max-w-[1177px]">
+      <div className="bg-white shadow-md rounded-lg px-3 sm:px-4 py-3 absolute bottom-10 sm:bottom-6 left-1/2 -translate-x-1/2 w-[92%] sm:w-[95%] max-w-[1177px]">
         {/* Icons Row */}
         <div className="flex justify-between items-center">
           <Image

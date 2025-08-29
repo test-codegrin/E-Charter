@@ -21,7 +21,7 @@ const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) =>
       />
 
       {/* Map Controls Overlay */}
-      <div className="bg-white shadow-sm md:shadow-md rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-[95%] max-w-[1177px]">
+      <div className="bg-white shadow-sm md:shadow-md rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-[95%] max-w-[1177px]">
         {/* Top Row - Icons */}
         <div className="flex justify-between items-center">
           <Image 
