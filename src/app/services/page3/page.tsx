@@ -26,6 +26,17 @@ export default function Page3() {
   const [tripType, setTripType] = useState<"single" | "return" | "multi">(
     "multi"
   );
+
+  const [formData, setFormData] = useState<Record<string, any>>({});
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
   const [persons, setPersons] = useState<number>(1);
   const [stops, setStops] = useState<Stop[]>([
     { id: generateId(), location: "", date: "" }, // ✅ fixed
@@ -87,7 +98,7 @@ export default function Page3() {
                   <option value="return">Round-Trip</option>
                   <option value="multi">Multi Stop</option>
                 </select>
-                <i className="fa-solid fa-chevron-up transition-transform duration-200 group-open:rotate-180" />
+                <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
               </div>
             </summary>
 
@@ -131,9 +142,9 @@ export default function Page3() {
                       name="Pickup Location"
                       type="text"
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                        throw new Error("Function not implemented.");
-                      } }                    />
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" 
+                      onChange={handleChange}                    
+                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -147,9 +158,9 @@ export default function Page3() {
                     <Inputs
                       name="Pickup Date & Time"
                       type="datetime-local"
-                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                        throw new Error("Function not implemented.");
-                      } }                    />
+                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" 
+                      onChange={handleChange}                   
+                    />
                   </label>
                   <div className="border-b border-gray-300" />
                 </div>
@@ -195,9 +206,9 @@ export default function Page3() {
                         name="Dropoff Location"
                         type="text"
                         placeholder="Dropoff Location"
-                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                          throw new Error("Function not implemented.");
-                        } }                      />
+                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" 
+                        onChange={handleChange}                    
+                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -211,9 +222,9 @@ export default function Page3() {
                       <Inputs
                         name="Dropoff Date & Time"
                         type="datetime-local"
-                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                          throw new Error("Function not implemented.");
-                        } }                      />
+                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" 
+                        onChange={handleChange}                      
+                      />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
@@ -238,9 +249,9 @@ export default function Page3() {
                   name="Trip Name"
                   type="text"
                   placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                    throw new Error("Function not implemented.");
-                  } }                />
+                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" 
+                  onChange={handleChange}                
+                />
                 <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
 
@@ -252,9 +263,9 @@ export default function Page3() {
                     name="Luggage"
                     type="text"
                     placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                      throw new Error("Function not implemented.");
-                    } }                  />
+                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" 
+                    onChange={handleChange}                  
+                  />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
                 <div className="w-full md:w-1/2">
@@ -265,9 +276,9 @@ export default function Page3() {
                     name="Event Types"
                     type="text"
                     placeholder="Personal"
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                      throw new Error("Function not implemented.");
-                    } }                  />
+                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full" 
+                    onChange={handleChange}                  
+                  />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
               </div>
@@ -281,9 +292,8 @@ export default function Page3() {
                   <Inputs
                     name="Accessible Vehicle"
                     type="checkbox"
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]" onChange={function (event: React.ChangeEvent<HTMLInputElement>): void {
-                      throw new Error("Function not implemented.");
-                    } }                  />
+                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]" onChange={handleChange}                  
+                  />
                   <p className="text-sm lg:w-[350px]">
                     ADA standards Compliant
                   </p>

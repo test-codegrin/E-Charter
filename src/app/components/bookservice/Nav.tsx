@@ -9,28 +9,49 @@ const Navbar: React.FC = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8">
-      <nav className="max-w-[1760px] mx-auto flex items-center justify-between h-[60px] my-2">
-        {/* Logo */}
+    <header className="fixed top-0 left-0 right-0 z-50 w-full bg-white px-4 sm:px-6 md:px-8 shadow">
+      <nav className="max-w-[1760px] mx-auto flex items-center justify-between h-[70px]">
+        {/* Left: Logo */}
         <div className="flex-shrink-0 w-[70px] sm:w-[80px] md:w-[90px]">
           <a href="/">
-            <img src="/images/Logo.png" alt="Logo" className="w-full" />  
+            <img src="/images/Logo.png" alt="Logo" className="w-full" />
           </a>
         </div>
 
-        {/* Desktop Navigation */}
-        <div className="hidden lg:flex flex-1 items-center justify-evenly ml-36">
-          {/* Nav Links */}
-          <div className="flex gap-4 xl:gap-12 2xl:gap-24 text-[16px] xl:text-[18px]">
-            <a href="/" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Home</a>
-            <a href="/services/page1" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Service</a>
-            <a href="/aboutus" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">About Us</a>
-            <a href="/contactus" className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]">Contact Us</a>
-          </div>
+        {/* Right: Links + Search + Button + Avatar + Hamburger */}
+        <div className="flex items-center gap-6">
+          {/* Desktop Navigation */}  
+          <div className="hidden lg:flex items-center gap-10">
+            {/* Nav Links */}
+            <div className="flex gap-7 xl:gap-10 text-[14px] xl:text-[18px]">
+              <a
+                href="/"
+                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+              >
+                Home
+              </a>
+              <a
+                href="/services/page1"
+                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+              >
+                Service
+              </a>
+              <a
+                href="/aboutus"
+                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+              >
+                About Us
+              </a>
+              <a
+                href="/contactus"
+                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+              >
+                Contact Us
+              </a>
+            </div>
 
-          {/* Search & Book Now */}
-          <div className="flex items-center">
-            <div className="relative w-[180px] md:w-[250px] xl:w-[310px] mr-4 xl:mr-6">
+            {/* Search */}
+            <div className="relative w-[180px] md:w-[240px] xl:w-[250px]">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
                 size={20}
@@ -41,13 +62,11 @@ const Navbar: React.FC = () => {
                 className="border border-[#3DBEC8] bg-white rounded-full h-[42px] md:h-[47px] w-full pl-12 pr-4 text-sm md:text-base focus:outline-none"
               />
             </div>
-            {/* Book Now */}
-              <Button label="Book Now" href="/services/page1" size="xl" />
-          </div>
-        </div>
 
-        {/* Right Section (Avatar + Hamburger) */}
-        <div className="flex items-center gap-4">
+            {/* Book Now */}
+            <Button label="Book Now" href="/services/page1" size="xl" />
+          </div>
+
           {/* User Avatar + Dropdown */}
           <div className="relative">
             <button
@@ -103,7 +122,7 @@ const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Hamburger Icon - Only Mobile */}
+          {/* Hamburger Icon - Mobile only */}
           <button
             className="lg:hidden"
             onClick={() => setIsMenuOpen((prev) => !prev)}
@@ -116,15 +135,23 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Slide Menu */}
       <div
-        className={`lg:hidden  fixed top-[84px] right-0 bottom-0 w-[80vw] sm:w-[60vw] bg-white shadow-xl z-50 transition-transform duration-300 ${
+        className={`lg:hidden fixed top-[70px] right-0 bottom-0 w-[80vw] sm:w-[60vw] bg-white shadow-xl z-50 transition-transform duration-300 ${
           isMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex flex-col gap-4 px-6 pt-6">
-          <a href="/" className="text-[18px] font-medium py-2">Home</a>
-          <a href="/services/page1" className="text-[18px] font-medium py-2">Service</a>
-          <a href="/about" className="text-[18px] font-medium py-2">About Us</a>
-          <a href="/contact" className="text-[18px] font-medium py-2">Contact Us</a>
+          <a href="/" className="text-[18px] font-medium py-2">
+            Home
+          </a>
+          <a href="/services/page1" className="text-[18px] font-medium py-2">
+            Service
+          </a>
+          <a href="/aboutus" className="text-[18px] font-medium py-2">
+            About Us
+          </a>
+          <a href="/contactus" className="text-[18px] font-medium py-2">
+            Contact Us
+          </a>
 
           <div className="relative mt-6">
             <Search
