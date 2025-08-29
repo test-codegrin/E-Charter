@@ -298,7 +298,7 @@ export default function Page3() {
                     ADA standards Compliant
                   </p>
                   <img
-                    src="/images/wheel-chair.png"
+                    src="/images/Wheel-chair.png"
                     alt="wheelchair"
                     className="w-[39px] h-[39px] lg:ml-auto"
                   />
