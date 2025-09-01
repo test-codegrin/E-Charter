@@ -44,7 +44,7 @@ export default function Page2() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full min-h-screen px-4 sm:px-6 md:px-4 2xl:px-[0px] mt-[75px] max-w-[1760px] mx-auto bg-white">
+    <section className="w-full 2xl:max-h-[1000px] px-4 sm:px-6 md:px-4 2xl:px-[0px] mt-[75px] max-w-[1760px] mx-auto bg-white">
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 py-6 md:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto md:w-[580px]">
@@ -236,7 +236,7 @@ export default function Page2() {
         </div>
 
         {/* Right Panel */}
-        <div className="w-full min-h-screen max-h-[877px] lg:mx-auto xl:w-[60%] 2xl:w-[70%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+        <div className="w-full max-h-[877px] lg:mx-auto xl:w-[60%] 2xl:w-[70%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
           <MapCard1 />
         </div>
       </div>
