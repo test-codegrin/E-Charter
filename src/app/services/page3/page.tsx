@@ -1,4 +1,4 @@
-// app/page3/page.tsx (or app/next-page/page.tsx)
+// app/page3/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -8,9 +8,8 @@ import StopCard from "../../components/bookservice/StopCard";
 import MapCard1 from "../../components/bookservice/MapCard1";
 import Button from "../../components/ui/Button";
 import Inputs from "../../components/ui/Inputs";
-import Input from "../../components/ui/Inputs";
 
-// ✅ Fallback ID generator (instead of crypto.randomUUID)
+// ✅ Simple ID generator
 function generateId() {
   return Math.random().toString(36).substring(2, 9) + Date.now().toString(36);
 }
@@ -23,12 +22,16 @@ interface Stop {
 
 export default function Page3() {
   const router = useRouter();
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
-    "multi"
-  );
 
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [persons, setPersons] = useState<number>(1);
 
+  const [stops, setStops] = useState<Stop[]>([
+    { id: generateId(), location: "", date: "" },
+  ]);
+
+  // ✅ Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -37,15 +40,11 @@ export default function Page3() {
     }));
   };
 
-  const [persons, setPersons] = useState<number>(1);
-  const [stops, setStops] = useState<Stop[]>([
-    { id: generateId(), location: "", date: "" }, // ✅ fixed
-  ]);
-
+  // ✅ Stops logic
   const addStop = () =>
     setStops((prev) => [
       ...prev,
-      { id: generateId(), location: "", date: "" }, // ✅ fixed
+      { id: generateId(), location: "", date: "" },
     ]);
 
   const removeStop = (id: string | number) =>
@@ -59,10 +58,9 @@ export default function Page3() {
 
   return (
     <section className="w-full mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-1 md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
-      {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
-        <div className="w-full max-h-[877px] overflow-scroll 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar 2xl:ml-[0px] md:mx-auto md:w-[580px] lg:py-0">
+        <div className="w-full max-h-[877px] overflow-scroll 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar md:w-[580px]">
           {/* Back Button */}
           <button
             onClick={() => router.back()}
@@ -121,8 +119,8 @@ export default function Page3() {
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
                     <button
-                      onClick={() => addStop()}
-                      className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+                      onClick={addStop}
+                      className="text-white font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
                     >
                       + Add Stop
                     </button>
@@ -135,15 +133,15 @@ export default function Page3() {
                   <label className="flex items-center gap-2 sm:gap-3">
                     <img
                       src="/images/Mask group1.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="location"
+                      className="w-5 h-5 sm:w-6 sm:h-6"
+                      alt="location"
                     />
                     <Inputs
                       name="Pickup Location"
                       type="text"
                       placeholder="Pickup Location"
-                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" 
-                      onChange={handleChange}                    
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
+                      onChange={handleChange}
                     />
                   </label>
                   <div className="border-b border-gray-300" />
@@ -158,8 +156,8 @@ export default function Page3() {
                     <Inputs
                       name="Pickup Date & Time"
                       type="datetime-local"
-                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" 
-                      onChange={handleChange}                   
+                      className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
+                      onChange={handleChange}
                     />
                   </label>
                   <div className="border-b border-gray-300" />
@@ -167,8 +165,9 @@ export default function Page3() {
               </div>
             </div>
 
-            {/* Multi Stops */}
-            {stops.map((s) => (
+            {/* Multi Stops Only if "multi" */}
+            {tripType === "multi" &&
+              stops.map((s) => (
                 <StopCard
                   key={s.id}
                   {...s}
@@ -178,59 +177,41 @@ export default function Page3() {
                 />
               ))}
 
-            {/* Dropoff Section */}
-            {(tripType === "return" || tripType === "multi") && (
-              <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
-                    <img
-                      src="/images/Dropoff.png"
-                      alt="dropoff"
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                    />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
-                    Dropoff
-                  </h3>
+            {/* Dropoff Section (for all types) */}
+            <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
+                  <img
+                    src="/images/Dropoff.png"
+                    alt="dropoff"
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                  />
                 </div>
+                <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
+                  Dropoff
+                </h3>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                  <div>
-                    <label className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src="/images/Mask group1.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="location"
-                      />
-                      <Inputs
-                        name="Dropoff Location"
-                        type="text"
-                        placeholder="Dropoff Location"
-                        className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400" 
-                        onChange={handleChange}                    
-                      />
-                    </label>
-                    <div className="border-b border-gray-300" />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src="/images/Clock.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="time"
-                      />
-                      <Inputs
-                        name="Dropoff Date & Time"
-                        type="datetime-local"
-                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base" 
-                        onChange={handleChange}                      
-                      />
-                    </label>
-                    <div className="border-b border-gray-300" />
-                  </div>
+              <div className="grid grid-cols-1">
+                <div>
+                  <label className="flex items-center gap-2 sm:gap-3">
+                    <img
+                      src="/images/Mask group1.png"
+                      className="w-5 h-5 sm:w-6 sm:h-6"
+                      alt="location"
+                    />
+                    <Inputs
+                      name="Dropoff Location"
+                      type="text"
+                      placeholder="Dropoff Location"
+                      className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
+                      onChange={handleChange}
+                    />
+                  </label>
+                  <div className="border-b border-gray-300" />
                 </div>
               </div>
-            )}
+            </div>
           </details>
 
           <div className="border-t border-gray-200 my-6 md:my-8" />
@@ -249,8 +230,8 @@ export default function Page3() {
                   name="Trip Name"
                   type="text"
                   placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" 
-                  onChange={handleChange}                
+                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
+                  onChange={handleChange}
                 />
                 <div className="border-b border-[#DBDBDB] mt-4"></div>
               </div>
@@ -263,8 +244,8 @@ export default function Page3() {
                     name="Luggage"
                     type="text"
                     placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full" 
-                    onChange={handleChange}                  
+                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full"
+                    onChange={handleChange}
                   />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
@@ -276,8 +257,8 @@ export default function Page3() {
                     name="Event Types"
                     type="text"
                     placeholder="Personal"
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full" 
-                    onChange={handleChange}                  
+                    className="text-md text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full"
+                    onChange={handleChange}
                   />
                   <div className="border-b border-[#DBDBDB] mt-4"></div>
                 </div>
@@ -292,7 +273,8 @@ export default function Page3() {
                   <Inputs
                     name="Accessible Vehicle"
                     type="checkbox"
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]" onChange={handleChange}                  
+                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
+                    onChange={handleChange}
                   />
                   <p className="text-sm lg:w-[350px]">
                     ADA standards Compliant
@@ -308,7 +290,6 @@ export default function Page3() {
           </details>
 
           <div className="mt-[20px]">
-            {/* Next Buttons */}
             <Button label="Next" href="/services/page4" size="full" />
           </div>
         </div>

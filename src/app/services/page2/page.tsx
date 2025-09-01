@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
 import PersonCounter from "../../components/bookservice/PersonCounter";
@@ -17,19 +17,25 @@ interface Stop {
 
 export default function Page2() {
   const router = useRouter();
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
-    "multi"
-  );
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
   const [persons, setPersons] = useState<number>(1);
 
-  // Pickup & Dropoff
+  // Pickup & Dropoff & Return
   const [pickup, setPickup] = useState({ location: "", date: "" });
   const [dropoff, setDropoff] = useState({ location: "", date: "" });
+  const [returnTrip, setReturnTrip] = useState({ location: "", date: "" });
 
   // Multi Stops
-  const [stops, setStops] = useState<Stop[]>([
-    { id: uuidv4(), location: "", date: "" },
-  ]);
+  const [stops, setStops] = useState<Stop[]>([]);
+
+  // Reset stops when tripType changes
+  useEffect(() => {
+    if (tripType !== "multi") {
+      setStops([]); // clear stops for single/return
+    } else if (stops.length === 0) {
+      setStops([{ id: uuidv4(), location: "", date: "" }]);
+    }
+  }, [tripType]);
 
   const addStop = () =>
     setStops((prev) => [...prev, { id: uuidv4(), location: "", date: "" }]);
@@ -45,7 +51,7 @@ export default function Page2() {
 
   return (
     <section className="w-full 2xl:max-h-[1000px] px-4 sm:px-6 md:px-4 2xl:px-[0px] mt-[75px] max-w-[1760px] mx-auto bg-white">
-      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 py-6 md:py-10 lg:gap-8 xl:gap-10">
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto py-6 md:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto md:w-[580px]">
           {/* Back Button */}
@@ -106,7 +112,7 @@ export default function Page2() {
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
                     <button
-                      onClick={() => addStop()}
+                      onClick={addStop}
                       className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
                     >
                       + Add Stop
@@ -159,18 +165,19 @@ export default function Page2() {
             </div>
 
             {/* Multi Stops */}
-            {stops.map((s) => (
-              <StopCard
-                key={s.id}
-                {...s}
-                onChange={updateStop}
-                onRemove={removeStop}
-                onAdd={addStop}
-              />
-            ))}
+            {tripType === "multi" &&
+              stops.map((s) => (
+                <StopCard
+                  key={s.id}
+                  {...s}
+                  onChange={updateStop}
+                  onRemove={removeStop}
+                  onAdd={addStop}
+                />
+              ))}
 
             {/* Dropoff Section */}
-            {(tripType === "return" || tripType === "multi") && (
+            {(tripType === "single" || tripType === "return" || tripType === "multi") && (
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
@@ -206,6 +213,68 @@ export default function Page2() {
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
+                  {tripType !== "single" && (
+                    <div>
+                      <label className="flex items-center gap-3">
+                        <img
+                          src="/images/Clock.png"
+                          className="w-5 h-5 sm:w-6 sm:h-6"
+                          alt="time"
+                        />
+                        <Inputs
+                          name="Dropoff Date & Time"
+                          type="datetime-local"
+                          value={dropoff.date}
+                          onChange={(e) =>
+                            setDropoff((d) => ({ ...d, date: e.target.value }))
+                          }
+                          className="w-full bg-transparent focus:outline-none text-gray-500 py-2 text-sm sm:text-base"
+                        />
+                      </label>
+                      <div className="border-b border-gray-300" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Return Section (only in round trip)
+            {tripType === "return" && (
+              <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
+                    <img
+                      src="/images/Mask group.png"
+                      alt="return"
+                      className="w-4 h-4 sm:w-5 sm:h-5"
+                    />
+                  </div>
+                  <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
+                    Return
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="flex items-center gap-3">
+                      <img
+                        src="/images/Mask group1.png"
+                        className="w-5 h-5 sm:w-6 sm:h-6"
+                        alt="location"
+                      />
+                      <Inputs
+                        name="Return Location"
+                        type="text"
+                        placeholder="Return Location"
+                        value={returnTrip.location}
+                        onChange={(e) =>
+                          setReturnTrip((r) => ({ ...r, location: e.target.value }))
+                        }
+                        className="w-full bg-transparent focus:outline-none py-2 text-sm sm:text-base placeholder-gray-400"
+                      />
+                    </label>
+                    <div className="border-b border-gray-300" />
+                  </div>
                   <div>
                     <label className="flex items-center gap-3">
                       <img
@@ -214,11 +283,11 @@ export default function Page2() {
                         alt="time"
                       />
                       <Inputs
-                        name="Dropoff Date & Time"
+                        name="Return Date & Time"
                         type="datetime-local"
-                        value={dropoff.date}
+                        value={returnTrip.date}
                         onChange={(e) =>
-                          setDropoff((d) => ({ ...d, date: e.target.value }))
+                          setReturnTrip((r) => ({ ...r, date: e.target.value }))
                         }
                         className="w-full bg-transparent focus:outline-none text-gray-500 py-2 text-sm sm:text-base"
                       />
@@ -227,7 +296,7 @@ export default function Page2() {
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </details>
 
           <div className="border-t border-gray-200 my-8" />

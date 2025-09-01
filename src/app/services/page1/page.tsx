@@ -16,9 +16,7 @@ interface Stop {
 const PlanJourney = () => {
   const router = useRouter();
 
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
-    "return"
-  );
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">("return");
   const [persons, setPersons] = useState<number>(1);
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
@@ -110,7 +108,7 @@ const PlanJourney = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
-                  {tripType === "multi" && multiStops.length === 0 && (
+                  {tripType === "multi" && (
                     <button
                       onClick={() => handleAddStop()}
                       className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
@@ -175,7 +173,7 @@ const PlanJourney = () => {
               ))}
 
             {/* Dropoff Section */}
-            {(tripType === "return" || tripType === "multi") && (
+            {(tripType === "single" || tripType === "return" || tripType === "multi") && (
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
@@ -190,7 +188,7 @@ const PlanJourney = () => {
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1">
                   <div>
                     <label className="flex items-center gap-2 sm:gap-3">
                       <img
@@ -205,23 +203,6 @@ const PlanJourney = () => {
                         onChange={(e) => setDropoffLocation(e.target.value)}
                         placeholder="Dropoff Location"
                         className="w-full bg-transparent focus:outline-none py-1 sm:py-2 text-sm sm:text-base placeholder-gray-400"
-                      />
-                    </label>
-                    <div className="border-b border-gray-300" />
-                  </div>
-                  <div>
-                    <label className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src="/images/Clock.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="time"
-                      />
-                      <Inputs
-                        name="Dropoff Date & Time"
-                        type="datetime-local"
-                        value={dropoffDateTime}
-                        onChange={(e) => setDropoffDateTime(e.target.value)}
-                        className="w-full bg-transparent focus:outline-none text-gray-500 py-1 sm:py-2 text-sm sm:text-base"
                       />
                     </label>
                     <div className="border-b border-gray-300" />

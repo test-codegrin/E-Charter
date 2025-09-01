@@ -85,7 +85,7 @@ export default function Footer(): JSX.Element {
             <div className="sm:flex w-full justify-between">
               {/* Each LinkSection in its own div */}
               <div className="flex justify-between">
-                <div className="text-left sm:w-[300px] xl:w-[300px] sm:text-left w-full xl:ml-[60px] ml-[20px]">
+                <div className="text-left sm:w-[300px] w-[350px] xl:w-[300px] sm:text-left xl:ml-[60px] ml-[20px]">
                   <h3 className="text-lg font-bold text-[#1E1E1E] mb-4">
                     {linkSections[0].title}
                   </h3>
