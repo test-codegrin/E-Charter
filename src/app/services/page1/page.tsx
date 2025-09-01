@@ -49,7 +49,7 @@ const PlanJourney = () => {
   };
 
   return (
-    <section className="w-full max-w-[1760px] mx-auto mt-[75px] md:max-h-[877px] bg-white">
+    <section className="w-full max-w-[1760px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[2px] bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}

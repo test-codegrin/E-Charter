@@ -58,7 +58,7 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[75px] md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
+    <section className="w-full mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-1 md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
       {/* Main Content */}
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}

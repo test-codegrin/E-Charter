@@ -26,7 +26,7 @@ export default function Hero(): JSX.Element {
   };
 
   return (
-    <div className="flex w-full mt-[80px] sm:px-0 px-3 max-w-[1760px] mx-auto relative">
+    <div className="flex w-full mt-[80px] px-4 sm:px-6 md:px-4 2xl:px-1.5 max-w-[1760px] mx-auto relative">
       <div className="w-full max-w-[1760px] mx-auto rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
         {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4">

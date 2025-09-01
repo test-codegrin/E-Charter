@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 
 const BookCar: FC = () => {
   return (
-    <section className="w-full mt-[80px] max-w-[1760px] mx-auto flex justify-center">
+    <section className="w-full px-4 sm:px-6 md:px-4 2xl:px-1.5  mt-[80px] max-w-[1760px] mx-auto flex justify-center">
       <div className="w-full max-w-[1480px]">
         <div className="w-full rounded-2xl md:rounded-3xl lg:rounded-4xl bg-[#21211D] flex flex-col lg:flex-row items-center p-6 md:p-8 lg:p-12 xl:p-16">
           {/* Text content - order changes based on screen size */}
