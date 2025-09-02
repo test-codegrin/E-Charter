@@ -13,16 +13,32 @@ export default function Hero(): JSX.Element {
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
   const [pickupDate, setPickupDate] = useState<string>("");
   const [returnDate, setReturnDate] = useState<string>("");
+
   const [personCount, setPersonCount] = useState<number>(1);
   const [luggageCount, setLuggageCount] = useState<number>(1);
   const [agreeTerms, setAgreeTerms] = useState<boolean>(false);
 
+  const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
+  const [showReturnDateDropdown, setShowReturnDateDropdown] =
+    useState<boolean>(false);
+
   const handleSubmit = () => {
+    if (!pickupLocation || !dropoffLocation) {
+      alert("Please enter both pickup and drop-off locations.");
+      return;
+    }
+
     if (!agreeTerms) {
       alert("Please agree to the terms before continuing.");
       return;
     }
-    router.push("/page1");
+
+    if (activeTab === "round" && (!pickupDate || !returnDate)) {
+      alert("Please select both pickup and return dates.");
+      return;
+    }
+
+    router.push("/services/page1");
   };
 
   return (
@@ -46,45 +62,51 @@ export default function Hero(): JSX.Element {
         {/* Booking Box */}
         <div className="w-full max-w-[1310px] mx-auto px-4 lg:px-6 xl:px-0 lg:absolute lg:bottom-32 lg:left-1/2 lg:-translate-x-1/2">
           <div className="bg-white w-full h-auto rounded-2xl md:rounded-[30px] mt-12 md:mt-[160px] lg:mt-0 shadow-lg px-4 md:px-8 py-6">
-              {/* Tabs + Counters + Button */}
+            {/* Tabs + Counters + Button */}
             <div className="flex flex-wrap items-center gap-3 border-b-2 border-gray-200 pb-4">
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 sm:gap-6">
                 <button
-                  className={`px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold`}
+                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold"
                   onClick={() => setActiveTab("single")}
                 >
                   Single Trip
-                  <p className={`2xl:w-[221px] ${
-                    activeTab === "single"
+                  <p
+                    className={`2xl:w-[221px] ${
+                      activeTab === "single"
                         ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
-                      : "text-gray-600"
-                  }`}></p>
+                        : "text-gray-600"
+                    }`}
+                  ></p>
                 </button>
                 <button
-                  className={`px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold `}
+                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold"
                   onClick={() => setActiveTab("round")}
                 >
                   Round-Trip
-                  <p className={`2xl:w-[221px] ${
-                    activeTab === "round"
-                      ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
-                      : "text-gray-600"
-                  }`}></p>
+                  <p
+                    className={`2xl:w-[221px] ${
+                      activeTab === "round"
+                        ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
+                        : "text-gray-600"
+                    }`}
+                  ></p>
                 </button>
                 <button
                   className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold hover:text-[#3DBEC8]"
                   onClick={() => {
-                    setActiveTab("multi")
+                    setActiveTab("multi");
                     router.push("/services/page2");
                   }}
                 >
                   Multi Stop
-                   <p className={` ${
-                    activeTab === "multi"
-                      ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
-                      : "text-gray-600"
-                  }`}></p>
+                  <p
+                    className={` ${
+                      activeTab === "multi"
+                        ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
+                        : "text-gray-600"
+                    }`}
+                  ></p>
                 </button>
               </div>
 
@@ -101,7 +123,9 @@ export default function Hero(): JSX.Element {
                   >
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
-                  <span className="min-w-[20px] text-center">{personCount}</span>
+                  <span className="min-w-[20px] text-center">
+                    {personCount}
+                  </span>
                   <button
                     onClick={() => setPersonCount(personCount + 1)}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
@@ -123,7 +147,9 @@ export default function Hero(): JSX.Element {
                   >
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
-                  <span className="min-w-[20px] text-center">{luggageCount}</span>
+                  <span className="min-w-[20px] text-center">
+                    {luggageCount}
+                  </span>
                   <button
                     onClick={() => setLuggageCount(luggageCount + 1)}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
@@ -133,11 +159,16 @@ export default function Hero(): JSX.Element {
                 </div>
 
                 {/* Button */}
-                <Button label="Get Quote" onClick={handleSubmit} variant="primary" size="sm" />
+                <Button
+                  label="Get Quote"
+                  onClick={handleSubmit}
+                  variant="primary"
+                  size="sm"
+                />
               </div>
             </div>
 
-            {/* Form Inputss */}
+            {/* Form Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pt-4">
               {/* Pickup */}
               <div className="flex items-center border-b border-gray-300">
@@ -173,40 +204,114 @@ export default function Hero(): JSX.Element {
                 />
               </div>
 
-              {/* Pickup Date */}
-              <div className="flex items-center border-b border-gray-300">
-                <img
-                  src="/images/PickupDate.png"
-                  className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
-                  alt="pickup-date"
-                />
-                <Inputs
-                  name="pickupDate"
-                  type="date"
-                  value={pickupDate}
-                  onChange={(e) => setPickupDate(e.target.value)}
-                  className="flex-1 p-2 focus:outline-none text-sm sm:text-base"
-                />
-              </div>
+              {/* Single Trip → Date & Time */}
+              {activeTab === "single" && (
+                <div className="relative flex items-center border-b border-gray-300">
+                  <img src="/images/PickupDate.png" />
+                  <button
+                    type="button"
+                    onClick={() => setShowDateDropdown(!showDateDropdown)}
+                    className="w-full text-[#9C9C9C] flex items-center justify-between px-3 py-2 text-sm sm:text-base"
+                  >
+                    {pickupDate ? pickupDate : "Departure Date"}
+                    <i className="fa-solid fa-calendar ml-2 text-[#3DBEC8]" />
+                  </button>
 
-              {/* Return Date (round-trip only) */}
-              {activeTab === "round" && (
-                <div className="flex items-center border-b border-gray-300">
-                  <img
-                    src="/images/PickupDate.png"
-                    className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
-                    alt="return-date"
-                  />
-                  <Inputs
-                    name="returnDate"
-                    type="date"
-                    value={returnDate}
-                    onChange={(e) => setReturnDate(e.target.value)}
-                    className="flex-1 p-2 focus:outline-none text-sm sm:text-base"
-                  />
+                  {showDateDropdown && (
+                    <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-full">
+                      <Inputs
+                        name="pickupDate"
+                        type="datetime-local"
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
+                        className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                      />
+                      <div className="mt-3 flex justify-end">
+                        <Button
+                          label="Done"
+                          onClick={() => setShowDateDropdown(false)}
+                          variant="primary"
+                          size="sm"
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
-            </div>  
+
+              {/* Round Trip → Pickup + Return Date */}
+              {activeTab === "round" && (
+                <>
+                  {/* Pickup Date */}
+                  <div className="relative flex items-center border-b border-gray-300">
+                    <img src="/images/PickupDate.png" />
+                    <button
+                      type="button"
+                      onClick={() => setShowDateDropdown(!showDateDropdown)}
+                      className="w-full flex items-center justify-between text-[#9C9C9C] px-3 py-2 text-sm sm:text-base"
+                    >
+                      {pickupDate ? pickupDate : "Departure Date"}
+                      <i className="fa-solid fa-calendar ml-2 text-[#3DBEC8]" />
+                    </button>
+
+                    {showDateDropdown && (
+                      <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-full">
+                        <Inputs
+                          name="pickupDate"
+                          type="datetime-local"
+                          value={pickupDate}
+                          onChange={(e) => setPickupDate(e.target.value)}
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        />
+                        <div className="mt-3 flex justify-end">
+                          <Button
+                            label="Done"
+                            onClick={() => setShowDateDropdown(false)}
+                            variant="primary"
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Return Date */}
+                  <div className="relative flex items-center border-b border-gray-300">
+                    <img src="/images/PickupDate.png" />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowReturnDateDropdown(!showReturnDateDropdown)
+                      }
+                      className="w-full flex items-center justify-between text-[#9C9C9C] px-3 py-2 text-sm sm:text-base"
+                    >
+                      {returnDate ? returnDate : "Return Date"}
+                      <i className="fa-solid fa-calendar ml-2 text-[#3DBEC8]" />
+                    </button>
+
+                    {showReturnDateDropdown && (
+                      <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg p-4 w-full">
+                        <Inputs
+                          name="returnDate"
+                          type="datetime-local"
+                          value={returnDate}
+                          onChange={(e) => setReturnDate(e.target.value)}
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md"
+                        />
+                        <div className="mt-3 flex justify-end">
+                          <Button
+                            label="Done"
+                            onClick={() => setShowReturnDateDropdown(false)}
+                            variant="primary"
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
 
             {/* Checkbox */}
             <div className="mt-4 flex items-center gap-2">

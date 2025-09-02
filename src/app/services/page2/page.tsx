@@ -108,7 +108,7 @@ export default function Page2() {
                     Pickup
                   </h3>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
                     <button
@@ -192,14 +192,14 @@ export default function Page2() {
                   </h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1">
                   <div>
                     <label className="flex items-center gap-3">
                       <img
                         src="/images/Mask group1.png"
                         className="w-5 h-5 sm:w-6 sm:h-6"
                         alt="location"
-                      />
+                      />  
                       <Inputs
                         name="Dropoff Location"
                         type="text"
@@ -213,7 +213,7 @@ export default function Page2() {
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
-                  {tripType !== "single" && (
+                  {/* {tripType !== "single" && (
                     <div>
                       <label className="flex items-center gap-3">
                         <img
@@ -233,12 +233,12 @@ export default function Page2() {
                       </label>
                       <div className="border-b border-gray-300" />
                     </div>
-                  )}
+                  )} */}
                 </div>
               </div>
             )}
 
-            {/* Return Section (only in round trip)
+            {/* Return Section (only in round trip) */}
             {tripType === "return" && (
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-6">
                 <div className="flex items-center gap-3">
@@ -296,7 +296,7 @@ export default function Page2() {
                   </div>
                 </div>
               </div>
-            )} */}
+            )}
           </details>
 
           <div className="border-t border-gray-200 my-8" />

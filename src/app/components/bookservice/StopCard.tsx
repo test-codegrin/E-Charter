@@ -28,32 +28,36 @@ const StopCard: React.FC<StopCardProps> = ({
   return (
     <article className="mt-6 p-4 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
       {/* Header row */}
-      <div className="sm:flex flex-wrap items-center justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
+      <div className="sm:flex flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+        <div className="flex items-center justify-center gap-2 sm:gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#3DC1C4] flex items-center justify-center">
             <img
               src="/images/Mask group.png"
               alt="pickup"
-              className="w-4 h-4 sm:w-5 sm:h-5"
+              className="w-5 h-5"
             />
           </div>
-          <h3 className="text-base sm:text-lg text-[#3DC1C4] font-semibold">
-            Stop
-          </h3>
+          <div className="">
+            <h3 className="text-lg text-[#3DC1C4] font-semibold">Stop</h3>
+          </div>
         </div>
-        <div className="flex items-center justify-between w-[250px] mt-[20px]">
-          <button
-            onClick={() => onAdd(id)}
-            className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
-          >
-            + Add Stop
-          </button>
-          <button
-            onClick={() => onRemove(id)}
-            className="text-[#FFFFFF] font-semibold bg-[#FF6363] w-[119px] h-[36px] rounded-full"
-          >
-            Remove Stop
-          </button>
+        <div className="sm:flex flex flex-wrap gap-3 items-center justify-between w-[250px] mt-[20px]">
+          <div>
+            <button
+              onClick={() => onAdd(id)}
+              className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+            >
+              + Add Stop
+            </button>
+          </div>
+          <div className="">
+            <button
+              onClick={() => onRemove(id)}
+              className="text-[#FFFFFF] font-semibold bg-[#FF6363] w-[119px] h-[36px] rounded-full"
+            >
+              Remove Stop
+            </button>
+          </div>
         </div>
       </div>
 

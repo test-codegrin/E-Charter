@@ -23,7 +23,9 @@ interface Stop {
 export default function Page3() {
   const router = useRouter();
 
-  const [tripType, setTripType] = useState<"single" | "return" | "multi">("multi");
+  const [tripType, setTripType] = useState<"single" | "return" | "multi">(
+    "multi"
+  );
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [persons, setPersons] = useState<number>(1);
 
@@ -42,10 +44,7 @@ export default function Page3() {
 
   // ✅ Stops logic
   const addStop = () =>
-    setStops((prev) => [
-      ...prev,
-      { id: generateId(), location: "", date: "" },
-    ]);
+    setStops((prev) => [...prev, { id: generateId(), location: "", date: "" }]);
 
   const removeStop = (id: string | number) =>
     setStops((prev) => prev.filter((s) => s.id !== id));
@@ -57,7 +56,7 @@ export default function Page3() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-1 md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
+    <section className="w-full mt-[75px] px-4 sm:px-6 md:px-4 xl:px-8 2xl:px-1 md:max-h-[977px] max-w-[1760px] mx-auto bg-white">
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full max-h-[877px] overflow-scroll 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto scroll-bar md:w-[580px]">
@@ -104,18 +103,18 @@ export default function Page3() {
             <div className="border border-gray-200 rounded-2xl p-4 sm:p-6 mt-4 bg-[#FCFCFC] space-y-4 sm:space-y-6">
               <div className="md:flex flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                     <img
                       src="/images/Mask group.png"
                       alt="pickup"
-                      className="w-4 h-4 sm:w-5 sm:h-5"
+                      className="w-5 h-5 sm:w-5 sm:h-5"
                     />
                   </div>
-                  <h3 className="text-base sm:text-lg text-[#3DC1C4] font-semibold">
+                  <h3 className="text-lg sm:text-lg text-[#3DC1C4] font-semibold">
                     Pickup
                   </h3>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <PersonCounter value={persons} onChange={setPersons} />
                   {tripType === "multi" && (
                     <button
@@ -180,14 +179,14 @@ export default function Page3() {
             {/* Dropoff Section (for all types) */}
             <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center flex-shrink-0">
                   <img
                     src="/images/Dropoff.png"
                     alt="dropoff"
-                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    className="w-5 h-5"
                   />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
+                <h3 className="text-lg font-semibold text-[#3DC1C4]">
                   Dropoff
                 </h3>
               </div>
@@ -269,21 +268,25 @@ export default function Page3() {
                 <p className="font-medium text-lg text-[#040401] mb-3">
                   Accessible Vehicle
                 </p>
-                <div className="flex items-center gap-3">
-                  <Inputs
-                    name="Accessible Vehicle"
-                    type="checkbox"
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
-                    onChange={handleChange}
-                  />
-                  <p className="text-sm lg:w-[350px]">
-                    ADA standards Compliant
-                  </p>
-                  <img
-                    src="/images/Wheel-chair.png"
-                    alt="wheelchair"
-                    className="w-[39px] h-[39px] lg:ml-auto"
-                  />
+                <div className="flex items-center justify-between  gap-3">
+                  <div className="flex justify-between items-center">
+                    <Inputs
+                      name="Accessible Vehicle"
+                      type="checkbox"
+                      className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
+                      onChange={handleChange}
+                    />
+                    <p className="text-sm ml-[10px] lg:w-[350px]">
+                      ADA standards Compliant
+                    </p>
+                  </div>
+                  <div className="">
+                    <img
+                      src="/images/Wheel-chair.png"
+                      alt="wheelchair"
+                      className="w-[39px] h-[39px] lg:ml-auto"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
