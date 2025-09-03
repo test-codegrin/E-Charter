@@ -9,7 +9,7 @@ export default function AboutPage() {
       <section className="relative h-[85vh] flex flex-col justify-center items-center md:text-left text-center px-4 sm:px-6 md:px-10">
         {/* Background image */}
         <Image
-          src="/images/Bg-Map.webp"
+          src="/images/Map-BG.jpg"
           alt="Background Map"
           fill
           className="object-cover"
@@ -30,7 +30,7 @@ export default function AboutPage() {
               src="/images/fleets.png"
               alt="Fleet Vehicles"
               width={1000}
-              height={400}
+              height={600}
               className="object-contain w-full max-w-[900px] max-h-64 sm:max-h-72 md:max-h-80"
               priority
             />

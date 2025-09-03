@@ -118,7 +118,7 @@ export default function ContactPage() {
       {/* Hero Banner */}
       <div className="relative max-w-[1760px] mx-auto mt-[71px]">
         <img 
-          src="/images/ContactUs.avif"
+          src="/images/Contact1.png"
         />
       </div>
 
