@@ -118,7 +118,7 @@ export default function ContactPage() {
       {/* Hero Banner */}
       <div className="relative max-w-[1760px] mx-auto mt-[71px]">
         <img 
-          src="/images/contactUs.avif"
+          src="/images/ContactUs.avif"
         />
       </div>
 
@@ -129,7 +129,7 @@ export default function ContactPage() {
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <div className="flex items-center mb-6">
               <Image
-                src="/images/logo.png"
+                src="/images/Logo.png"
                 alt="Leo Charter Services"
                 width={100}
                 height={100}
