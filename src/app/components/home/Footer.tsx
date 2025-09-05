@@ -63,7 +63,7 @@ export default function Footer(): JSX.Element {
   ];
 
   return (
-    <div className="lg:flex max-w-[1760px] w-full mx-auto justify-center px-4 sm:px-6 md:px-4 2xl:px-1.5 mt-[80px] mb-[20px]">
+    <div className="lg:flex max-w-[1320px] w-full mx-auto justify-center px-4 sm:px-6 md:px-4 2xl:px-1.5 mt-[80px] mb-[20px]">
       <footer className="w-full mx-auto max-w-[1760px] rounded-[30px] border border-[#CCCCCC] bg-[#F1F1F1]">
         {/* Top Section */}
         <div className="px-4 sm:px-8 lg:px-[40px] pt-[30px] pb-8">
@@ -101,7 +101,7 @@ export default function Footer(): JSX.Element {
                   </ul>
                 </div>
 
-                <div className="text-left 2xl:w-[400px] ml-[80px] w-full">
+                <div className="text-left 2xl:w-[300px] ml-[0px] w-full">
                   <h3 className="text-lg font-bold text-[#1E1E1E] mb-4">
                     {linkSections[1].title}
                   </h3>

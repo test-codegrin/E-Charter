@@ -10,13 +10,13 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: FC<ServiceCardProps> = ({ image, title, description }) => (
-  <div className="border border-gray-300 rounded-3xl flex flex-col sm:flex-row p-4">
+  <div className="border border-gray-300 rounded-3xl p-4">
     <img
       src={image}
       alt={title}
-      className="w-full sm:w-[40%] 2xl:w-[403px] rounded-3xl object-cover p-2"
+      className="w-full sm:w-[40%] 2xl:w-full rounded-3xl object-cover p-2"
     />
-    <div className="sm:ml-5 mt-4 2xl:w-[382px] sm:mt-0">
+    <div className="sm:m-5 2xl:m-4 mt-4 sm:mt-0">
       <p className="text-[24px] md:text-[28px] lg:text-[32px] font-bold">
         {title}
       </p>

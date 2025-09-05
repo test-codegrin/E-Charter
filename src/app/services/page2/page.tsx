@@ -50,7 +50,7 @@ export default function Page2() {
     setStops((prev) => prev.map((s) => (s.id === id ? { ...s, ...data } : s)));
 
   return (
-    <section className="w-full 2xl:max-h-[1000px] px-4 sm:px-6 md:px-4 2xl:px-[0px] mt-[75px] max-w-[1760px] mx-auto bg-white">
+    <section className="w-full 2xl:max-h-[1000px] px-4 sm:px-6 md:px-4 2xl:px-[0px] mt-[75px] max-w-[1320px] mx-auto bg-white">
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto py-6 md:py-10 lg:gap-8 xl:gap-10">
         {/* Left Panel */}
         <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] mx-auto md:w-[580px]">
@@ -143,7 +143,7 @@ export default function Page2() {
                   <div className="border-b border-gray-300" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-3">
+                  <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB]">
                     <img
                       src="/images/Clock.png"
                       className="w-5 h-5 sm:w-6 sm:h-6"
@@ -156,7 +156,7 @@ export default function Page2() {
                       onChange={(e) =>
                         setPickup((p) => ({ ...p, date: e.target.value }))
                       }
-                      className="w-full bg-transparent focus:outline-none text-gray-500 py-2 text-sm sm:text-base"
+                      className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-non"
                     />
                   </label>
                   <div className="border-b border-gray-300" />
@@ -312,3 +312,10 @@ export default function Page2() {
     </section>
   );
 }
+
+
+
+{/* Accordion */}
+          
+
+            

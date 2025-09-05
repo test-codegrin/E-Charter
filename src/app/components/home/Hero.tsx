@@ -9,6 +9,8 @@ type TripType = "single" | "round" | "multi";
 export default function Hero(): JSX.Element {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TripType>("single");
+
+  // Controlled states
   const [pickupLocation, setPickupLocation] = useState<string>("");
   const [dropoffLocation, setDropoffLocation] = useState<string>("");
   const [pickupDate, setPickupDate] = useState<string>("");
@@ -19,23 +21,41 @@ export default function Hero(): JSX.Element {
   const [agreeTerms, setAgreeTerms] = useState<boolean>(false);
 
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
-  const [showReturnDateDropdown, setShowReturnDateDropdown] =
-    useState<boolean>(false);
+  const [showReturnDateDropdown, setShowReturnDateDropdown] = useState<boolean>(false);
 
   const handleSubmit = () => {
+    // Validation
     if (!pickupLocation || !dropoffLocation) {
       alert("Please enter both pickup and drop-off locations.");
       return;
     }
-
-    if (!agreeTerms) {
-      alert("Please agree to the terms before continuing.");
-      return;
-    }
-
     if (activeTab === "round" && (!pickupDate || !returnDate)) {
       alert("Please select both pickup and return dates.");
       return;
+    }
+    if (activeTab === "single" && !pickupDate) {
+      alert("Please select a departure date.");
+      return;
+    }
+
+    // ✅ Normalize + save consistent payload
+    const normalized = {
+      tripType: activeTab === "round" ? "return" : activeTab, // normalize to: "single" | "return" | "multi"
+      pickupLocation,
+      dropoffLocation,
+      pickupDateTime: pickupDate || "",
+      dropoffDateTime: returnDate || "",
+      persons: personCount,
+      luggageCount,
+      multiStops: [] as Array<{ location: string; date: string }>, // empty by default
+    };
+
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("tripDataV1", JSON.stringify(normalized));
+      }
+    } catch (e) {
+      console.error("Failed to save trip data:", e);
     }
 
     router.push("/services/page1");
@@ -46,9 +66,7 @@ export default function Hero(): JSX.Element {
       <div className="w-full max-w-[1760px] mx-auto rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-10 md:pt-[140px] pb-16 md:pb-[100px] lg:min-h-[900px] xl:min-h-[1000px]">
         {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4">
-          <p className="text-[#3DBEC8] text-sm md:text-base">
-            ∗ Welcome To e CHARTER
-          </p>
+          <p className="text-[#3DBEC8] text-sm md:text-base">∗ Welcome To e CHARTER</p>
           <h1 className="text-white font-bold text-3xl sm:text-4xl md:text-5xl lg:text-[74px] leading-tight lg:leading-[95px] px-4 max-w-[90%] md:max-w-[1008px] mx-auto mt-4">
             Looking to save more on your rental car?
           </h1>
@@ -60,26 +78,26 @@ export default function Hero(): JSX.Element {
         </div>
 
         {/* Booking Box */}
-        <div className="w-full max-w-[1310px] mx-auto px-4 lg:px-6 xl:px-0 lg:absolute lg:bottom-32 lg:left-1/2 lg:-translate-x-1/2">
+        <div className="w-full max-w-[1210px] mx-auto px-4 lg:px-6 xl:px-0 lg:absolute lg:bottom-32 lg:left-1/2 lg:-translate-x-1/2">
           <div className="bg-white w-full h-auto rounded-2xl md:rounded-[30px] mt-12 md:mt-[160px] lg:mt-0 shadow-lg px-4 md:px-8 py-6">
             {/* Tabs + Counters + Button */}
-            <div className="flex flex-wrap items-center gap-3 border-b-2 border-gray-200 pb-4">
+            <div className="flex flex-wrap items-center gap-3 border-b-2 border-gray-200 pb-3.5">
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 sm:gap-6">
                 <button
-                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold"
+                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[121px] 2xl:h-[35px] sm:text-base font-semibold"
                   onClick={() => setActiveTab("single")}
                 >
                   Single Trip
                   <p
-                    className={`2xl:w-[221px] ${
+                    className={`2xl:w-[141px] ${
                       activeTab === "single"
                         ? "text-[#3DBEC8] border-b-2 sm:pt-[22px] border-[#3DBEC8]"
                         : "text-gray-600"
                     }`}
                   ></p>
                 </button>
-                <button
+                 <button
                   className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold"
                   onClick={() => setActiveTab("round")}
                 >
@@ -92,10 +110,31 @@ export default function Hero(): JSX.Element {
                     }`}
                   ></p>
                 </button>
+
                 <button
-                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold hover:text-[#3DBEC8]"
+                  className={`px-3 py-2 text-sm sm:text-base font-semibold ${
+                    activeTab === "multi" ? "text-[#3DBEC8] border-b-2 border-[#3DBEC8]" : "text-gray-600"
+                  }`}
                   onClick={() => {
                     setActiveTab("multi");
+                    // If you want to go to page2 directly for multi-stop, also save partial data:
+                    try {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem(
+                          "tripDataV1",
+                          JSON.stringify({
+                            tripType: "multi",
+                            pickupLocation,
+                            dropoffLocation,
+                            pickupDateTime: pickupDate || "",
+                            dropoffDateTime: returnDate || "",
+                            persons: personCount,
+                            luggageCount,
+                            multiStops: [],
+                          })
+                        );
+                      }
+                    } catch {}
                     router.push("/services/page2");
                   }}
                 >
@@ -114,18 +153,14 @@ export default function Hero(): JSX.Element {
               <div className="flex flex-wrap items-center gap-3 ml-auto">
                 {/* Person */}
                 <div className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded-full w-fit">
-                  <span className="text-sm sm:text-base font-medium">
-                    Person
-                  </span>
+                  <span className="text-sm sm:text-base font-medium">Person</span>
                   <button
                     onClick={() => setPersonCount(Math.max(1, personCount - 1))}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
                   >
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
-                  <span className="min-w-[20px] text-center">
-                    {personCount}
-                  </span>
+                  <span className="min-w-[20px] text-center">{personCount}</span>
                   <button
                     onClick={() => setPersonCount(personCount + 1)}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
@@ -136,20 +171,14 @@ export default function Hero(): JSX.Element {
 
                 {/* Luggage */}
                 <div className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded-full w-fit">
-                  <span className="text-sm sm:text-base font-medium">
-                    Luggage
-                  </span>
+                  <span className="text-sm sm:text-base font-medium">Luggage</span>
                   <button
-                    onClick={() =>
-                      setLuggageCount(Math.max(0, luggageCount - 1))
-                    }
+                    onClick={() => setLuggageCount(Math.max(0, luggageCount - 1))}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
                   >
                     <i className="fa-solid fa-minus text-xs" />
                   </button>
-                  <span className="min-w-[20px] text-center">
-                    {luggageCount}
-                  </span>
+                  <span className="min-w-[20px] text-center">{luggageCount}</span>
                   <button
                     onClick={() => setLuggageCount(luggageCount + 1)}
                     className="w-6 h-6 flex items-center justify-center bg-[#3DBEC8] text-white rounded-full"
@@ -159,12 +188,7 @@ export default function Hero(): JSX.Element {
                 </div>
 
                 {/* Button */}
-                <Button
-                  label="Get Quote"
-                  onClick={handleSubmit}
-                  variant="primary"
-                  size="sm"
-                />
+                <Button label="Get Quote" onClick={handleSubmit} variant="primary" size="sm" />
               </div>
             </div>
 
@@ -172,11 +196,7 @@ export default function Hero(): JSX.Element {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pt-4">
               {/* Pickup */}
               <div className="flex items-center border-b border-gray-300">
-                <img
-                  src="/images/Mask group1.png"
-                  className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
-                  alt="pickup"
-                />
+                <img src="/images/Mask group1.png" className="w-5 h-5 ml-2 sm:w-6 sm:h-6" alt="pickup" />
                 <Inputs
                   name="pickup"
                   type="text"
@@ -189,11 +209,7 @@ export default function Hero(): JSX.Element {
 
               {/* Dropoff */}
               <div className="flex items-center border-b border-gray-300">
-                <img
-                  src="/images/Drop.png"
-                  className="w-5 h-5 ml-2 sm:w-6 sm:h-6"
-                  alt="dropoff"
-                />
+                <img src="/images/Drop.png" className="w-5 h-5 ml-2 sm:w-6 sm:h-6" alt="dropoff" />
                 <Inputs
                   name="dropoff"
                   type="text"
@@ -207,7 +223,7 @@ export default function Hero(): JSX.Element {
               {/* Single Trip → Date & Time */}
               {activeTab === "single" && (
                 <div className="relative flex items-center border-b border-gray-300">
-                  <img src="/images/PickupDate.png" />
+                  <img src="/images/PickupDate.png" alt="date" />
                   <button
                     type="button"
                     onClick={() => setShowDateDropdown(!showDateDropdown)}
@@ -227,12 +243,7 @@ export default function Hero(): JSX.Element {
                         className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                       />
                       <div className="mt-3 flex justify-end">
-                        <Button
-                          label="Done"
-                          onClick={() => setShowDateDropdown(false)}
-                          variant="primary"
-                          size="sm"
-                        />
+                        <Button label="Done" onClick={() => setShowDateDropdown(false)} variant="primary" size="sm" />
                       </div>
                     </div>
                   )}
@@ -244,7 +255,7 @@ export default function Hero(): JSX.Element {
                 <>
                   {/* Pickup Date */}
                   <div className="relative flex items-center border-b border-gray-300">
-                    <img src="/images/PickupDate.png" />
+                    <img src="/images/PickupDate.png" alt="pickup-date" />
                     <button
                       type="button"
                       onClick={() => setShowDateDropdown(!showDateDropdown)}
@@ -264,12 +275,7 @@ export default function Hero(): JSX.Element {
                           className="w-full mt-1 p-2 border border-gray-300 rounded-md"
                         />
                         <div className="mt-3 flex justify-end">
-                          <Button
-                            label="Done"
-                            onClick={() => setShowDateDropdown(false)}
-                            variant="primary"
-                            size="sm"
-                          />
+                          <Button label="Done" onClick={() => setShowDateDropdown(false)} variant="primary" size="sm" />
                         </div>
                       </div>
                     )}
@@ -277,12 +283,10 @@ export default function Hero(): JSX.Element {
 
                   {/* Return Date */}
                   <div className="relative flex items-center border-b border-gray-300">
-                    <img src="/images/PickupDate.png" />
+                    <img src="/images/PickupDate.png" alt="return-date" />
                     <button
                       type="button"
-                      onClick={() =>
-                        setShowReturnDateDropdown(!showReturnDateDropdown)
-                      }
+                      onClick={() => setShowReturnDateDropdown(!showReturnDateDropdown)}
                       className="w-full flex items-center justify-between text-[#9C9C9C] px-3 py-2 text-sm sm:text-base"
                     >
                       {returnDate ? returnDate : "Return Date"}
@@ -313,7 +317,7 @@ export default function Hero(): JSX.Element {
               )}
             </div>
 
-            {/* Checkbox */}
+            {/* Checkbox
             <div className="mt-4 flex items-center gap-2">
               <Inputs
                 name="agree"
@@ -322,13 +326,10 @@ export default function Hero(): JSX.Element {
                 onChange={(e) => setAgreeTerms(e.target.checked)}
                 className="w-4 h-4 border-2 border-[#3DBEC8] cursor-pointer"
               />
-              <label
-                htmlFor="agree"
-                className="text-sm text-[#3DBEC8] cursor-pointer"
-              >
-                Add Stop
+              <label htmlFor="agree" className="text-sm text-[#3DBEC8] cursor-pointer">
+                Agree to Terms
               </label>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ const StopCard: React.FC<StopCardProps> = ({
             <h3 className="text-lg text-[#3DC1C4] font-semibold">Stop</h3>
           </div>
         </div>
-        <div className="sm:flex flex flex-wrap gap-3 items-center justify-between w-[250px] mt-[20px]">
+        <div className="sm:flex flex flex-wrap gap-3 items-center justify-between w-[250px] md:mt-[0] mt-[20px]">
           <div>
             <button
               onClick={() => onAdd(id)}

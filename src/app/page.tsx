@@ -9,13 +9,13 @@ import BookCar from "./components/home/BookCar";
 
 export default function Page() {
   return (
-    <>
+    <div className="max-w-[1320px] mx-auto">
       <Hero />
       <Choice />
       <Service />
       <Fleet />
       <Quality />
       <BookCar />
-    </>
+    </div>
   );
 }
