@@ -6,11 +6,11 @@ import Button from "../ui/Button";
 const BookCar: FC = () => {
   return (
     <>
-      <div className="mt-11 flex justify-center">
-        <div className="h-auto lg:h-[569px] w-full max-w-[1480px] flex items-center">
-          <div className="lg:h-[365px] w-full lg:w-[1480px] rounded-4xl bg-[#21211D] flex flex-col md:flex-col lg:flex-row items-center p-6 lg:p-0">
+      <div className="mt-11 max-w-[1320px] w-full md:w-[704px] lg:w-[960px] xl:w-full mx-auto flex justify-center">
+        <div className="h-auto lg:h-[569px] w-full max-w-[1320px] flex items-center">
+          <div className="lg:h-[430px] 2xl:h-[400px] w-full lg:w-[1480px] rounded-4xl bg-[#21211D] flex flex-col md:flex-col lg:flex-row items-center p-6 lg:p-0">
             {/* Image - shown first on md/sm, hidden on lg */}
-            <div className="w-full flex justify-center order-1 md:order-1 lg:hidden mb-6">
+            <div className="w-full flex justify-center order-1 md:order-1 lg:hidden mb-7">
               <img 
                 src="/homePage/book-car.png" 
                 alt="Car ready to book" 

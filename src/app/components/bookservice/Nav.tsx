@@ -51,7 +51,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Search */}
-            <div className="relative w-[180px] md:w-[240px] xl:w-[250px]">
+            <div className="relative lg:w-[150px] w-[180px] md:w-[240px] xl:w-[250px]">
               <Search
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"
                 size={20}
@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
             </div>
 
             {/* Book Now */}
-            <Button label="Book Now" href="/services/page1" size="xl" />
+            <Button label="Book Now" href="/services/page1" className="lg:w-[150px] text-xs" />
           </div>
 
           {/* User Avatar + Dropdown */}
@@ -103,7 +103,7 @@ const Navbar: React.FC = () => {
                 <ul className="py-1">
                   <li>
                     <a
-                      href="/page6"
+                      href="/profile"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                     >
                       My Profile

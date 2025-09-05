@@ -10,17 +10,17 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: FC<ServiceCardProps> = ({ image, title, description }) => (
-  <div className="border border-gray-300 rounded-3xl p-4">
+  <div className="border max-w-[1320px] border-gray-300 rounded-3xl p-4">
     <img
       src={image}
       alt={title}
-      className="w-full sm:w-[40%] 2xl:w-full rounded-3xl object-cover p-2"
+      className="w-full lg:w-full rounded-3xl p-2"
     />
     <div className="sm:m-5 2xl:m-4 mt-4 sm:mt-0">
-      <p className="text-[24px] md:text-[28px] lg:text-[32px] font-bold">
+      <p className="text-[24px] md:text-[25px] lg:text-[32px] font-bold">
         {title}
       </p>
-      <p className="text-base text-[#616161] leading-[27.2px] font-semibold mt-2">
+      <p className="text-base md:h-[180px] lg:h-[110px] xl:h-[80px] text-[#616161] leading-[27.2px] font-semibold mt-2">
         {description}
       </p>
       <Button label="Read More" href="/services" size="md" className="mt-6" />
@@ -57,8 +57,8 @@ const Service: FC = () => {
   ];
 
   return (
-    <div className="flex max-w-[1760px] w-full mt-[80px] mx-auto justify-center px-4 sm:px-6 md:px-4 2xl:px-1.5">
-      <div className="max-w-[1760px] w-full py-0">
+    <div className="flex w-full max-w-[1320px] lg:w-[960px] xl:w-full md:w-[704px] mt-[80px] mx-auto px-4 sm:px-6 md:px-0 2xl:px-1.5">
+      <div className="w-full py-0">
         <p className="text-[#3DBEC8] text-base font-bold text-center">
           ∗ Our Services
         </p>
@@ -70,9 +70,9 @@ const Service: FC = () => {
           personal to professional travel. Choose the service that best suits
           your journey.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-7 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 mt-12">
           {services.map((service, index) => (
-            <ServiceCard key={index} {...service} />
+            <ServiceCard key={index} {...service}/>
           ))}
         </div>
       </div>

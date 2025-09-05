@@ -5,7 +5,7 @@ import React from "react";
 
 function Quality() {
   return (
-    <div className="px-4 max-w-[1760px] w-full mx-auto mt-16 sm:mt-20">
+    <div className="px-4 lg:px-0 max-w-[1320px] lg:w-[960px] md:w-[704px] xl:w-full w-full mx-auto mt-16 sm:mt-20">
       <div className="max-w-[1500px] w-full mx-auto">
         {/* Section Title */}
         <p className="text-[#3DBEC8] text-sm sm:text-base font-bold text-center">
@@ -16,7 +16,7 @@ function Quality() {
         </h2>
 
         {/* Content Section */}
-        <div className="flex flex-col lg:flex-row justify-between items-center mt-10 gap-10 lg:gap-16">
+        <div className="flex flex-col xl:flex-row justify-between items-center mt-10 gap-10 lg:gap-16">
           {/* Left Services */}
           <div className="flex flex-col items-center sm:items-start">
             <div className="w-full max-w-[422px] border-b border-gray-200 flex my-6">

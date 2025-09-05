@@ -1,9 +1,10 @@
+// app/layout.tsx
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Roboto } from "next/font/google";
 import "./globals.css";
 import Nav from "./components/bookservice/Nav";
 import Footer from "./components/home/Footer";
-
+import { TripProvider } from "./context/tripContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,17 +40,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} antialiased`}
       >
-        {/* ✅ Move <link> into <head> for correctness */}
-          <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
-            integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
-            crossOrigin="anonymous"
-            referrerPolicy="no-referrer"
-          />
+        <link
+          rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+          integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+          crossOrigin="anonymous"
+          referrerPolicy="no-referrer"
+        />
 
         <Nav />
-        {children}
+        <TripProvider>
+          {children}
+        </TripProvider>
         <Footer />
       </body>
     </html>

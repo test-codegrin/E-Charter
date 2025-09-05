@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import React from "react";
@@ -8,31 +8,36 @@ interface MapCardProps {
   dropoffLocation?: string;
 }
 
-const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) => {
+const MapCard: React.FC<MapCardProps> = ({
+  pickupLocation,
+  dropoffLocation,
+}) => {
   return (
     <div className="relative w-full max-h-[877px] lg:mt-[0] mt-[30px] h-full">
       {/* Map Image */}
-      <Image 
-        src="/images/map.png" 
-        alt="map"
-        fill
-        className="object-cover rounded-lg md:rounded-xl"
-        priority
-      />
+      <div className="relative w-full h-full rounded-lg md:rounded-xl overflow-hidden">
+        <Image
+          src="/images/map.png"
+          alt="map"
+          fill
+          className="object-cover rounded-xl"
+          priority={false}
+        />
+      </div>
 
       {/* Map Controls Overlay */}
       <div className="bg-white shadow-sm md:shadow-md rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-[95%] max-w-[1177px]">
         {/* Top Row - Icons */}
         <div className="flex justify-between items-center">
-          <Image 
-            src="/images/Car.png" 
+          <Image
+            src="/images/Car.png"
             alt="car"
             width={40}
             height={24}
             className="rounded-sm md:rounded-md"
           />
-          <Image 
-            src="/images/Location.png" 
+          <Image
+            src="/images/Location.png"
             alt="pin"
             width={20}
             height={20}
@@ -53,8 +58,10 @@ const MapCard: React.FC<MapCardProps> = ({ pickupLocation, dropoffLocation }) =>
 
         {/* Location Labels */}
         <div className="flex justify-between text-sm md:text-base mt-1 md:mt-2 font-medium md:font-semibold">
-          <p className="truncate max-w-[40%]">{pickupLocation || 'Calgary'}</p>
-          <p className="truncate max-w-[40%] text-right">{dropoffLocation || 'Edmonton'}</p>
+          <p className="truncate max-w-[40%]">{pickupLocation || "Calgary"}</p>
+          <p className="truncate max-w-[40%] text-right">
+            {dropoffLocation || "Edmonton"}
+          </p>
         </div>
 
         {/* Time Labels */}

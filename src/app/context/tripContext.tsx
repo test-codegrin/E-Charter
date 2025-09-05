@@ -1,47 +1,75 @@
+// contexts/TripContext.tsx
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type TripType = "single" | "round" | "multi";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+interface Stop {
+  location: string;
+  date: string;
+}
 
 interface TripData {
-  activeTab: TripType;
+  tripType: "single" | "return" | "multi";
+  persons: number;
+  luggageCount: number,
   pickupLocation: string;
+  returnLocation: string;
   dropoffLocation: string;
-  pickupDate: string;
-  returnDate: string;
-  personCount: number;
-  luggageCount: number;
-  agreeTerms: boolean;
+  pickupDateTime: string;
+  returnDateTime: string;
+  multiStops: Stop[];
+  returnTrip: {
+    location: string;
+    date: string;
+  };
 }
 
-interface TripContextProps {
+interface TripContextType {
   tripData: TripData;
-  setTripData: React.Dispatch<React.SetStateAction<TripData>>;
+  updateTripData: (newData: Partial<TripData>) => void;
+  resetTripData: () => void;
 }
 
-const TripContext = createContext<TripContextProps | undefined>(undefined);
+const defaultTripData: TripData = {
+  tripType: "return",
+  persons: 1,
+  luggageCount: 1,
+  pickupLocation: "",
+  returnLocation: "",
+  dropoffLocation: "",
+  pickupDateTime: "",
+  returnDateTime: "",
+  multiStops: [],
+  returnTrip: {
+    location: "",
+    date: ""
+  }
+};
 
-export const TripProvider = ({ children }: { children: ReactNode }) => {
-  const [tripData, setTripData] = useState<TripData>({
-    activeTab: "single",
-    pickupLocation: "",
-    dropoffLocation: "",
-    pickupDate: "",
-    returnDate: "",
-    personCount: 1,
-    luggageCount: 1,
-    agreeTerms: false,
-  });
+const TripContext = createContext<TripContextType | undefined>(undefined);
+
+export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [tripData, setTripData] = useState<TripData>(defaultTripData);
+
+  const updateTripData = (newData: Partial<TripData>) => {
+    setTripData(prev => ({ ...prev, ...newData }));
+  };
+
+  const resetTripData = () => {
+    setTripData(defaultTripData);
+  };
 
   return (
-    <TripContext.Provider value={{ tripData, setTripData }}>
+    <TripContext.Provider value={{ tripData, updateTripData, resetTripData }}>
       {children}
     </TripContext.Provider>
   );
 };
 
-export const useTrip = (): TripContextProps => {
+export const useTrip = (): TripContextType => {
   const context = useContext(TripContext);
-  if (!context) throw new Error("useTrip must be used inside TripProvider");
+  if (!context) {
+    throw new Error('useTrip must be used within a TripProvider');
+  }
   return context;
 };
