@@ -56,7 +56,7 @@ const Page3 = () => {
 
   // ✅ Next button handler
   const handleNext = () => {
-    router.push("/services/page3");
+    router.push("/services/page4");
   };
 
   return (

@@ -15,8 +15,7 @@ export default function Hero(): JSX.Element {
 
   // Local UI states
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
-  const [showReturnDateDropdown, setShowReturnDateDropdown] =
-    useState<boolean>(false);
+  const [showReturnDateDropdown, setShowReturnDateDropdown] = useState<boolean>(false);
 
   // Check screen size on mount and resize
   useEffect(() => {
@@ -57,17 +56,28 @@ export default function Hero(): JSX.Element {
   };
 
   return (
-    <div className="flex w-full mt-16 md:mt-20 px-4 sm:px-6 md:px-8 lg:px-8 xl:px-0 2xl:px-0 max-w-screen-2xl mx-auto relative">
-      <div className="w-full mx-auto rounded-3xl lg:rounded-4xl bg-[url('/images/BG-Car.png')] bg-cover bg-center bg-no-repeat pt-8 md:pt-28 lg:pt-32 xl:pt-36 pb-12 md:pb-16 lg:pb-20 xl:pb-24 min-h-[600px] sm:min-h-[700px] md:min-h-[800px] lg:min-h-[900px] xl:min-h-[1000px]">
+    <div className="relative w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-8 xl:px-0 2xl:px-0">
+      {/* Background Image */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
+        <img 
+          src="/images/BG-Car.png" 
+          alt="Background" 
+          className="w-full h-full object-cover"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-20 w-full max-w-screen-2xl mx-auto mt-16 md:mt-20">
         {/* Text Section */}
-        <div className="flex flex-col items-center text-center px-4 sm:px-6 md:px-8">
-          <p className="text-[#3DBEC8] text-xs sm:text-sm md:text-base lg:text-lg">
+        <div className="flex flex-col items-center text-center px-4 sm:px-6 md:px-8 mb-8 md:mb-12 lg:mb-16">
+          <p className="text-[#3DBEC8] text-sm md:text-base lg:text-lg font-medium mb-2 md:mb-3">
             ∗ Welcome To e CHARTER
           </p>
-          <h1 className="text-white font-bold text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl leading-tight md:leading-snug lg:leading-tight xl:leading-relaxed px-2 max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mt-2 md:mt-4">
+          <h1 className="text-white font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight md:leading-snug lg:leading-tight xl:leading-relaxed px-2 max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-4 md:mb-6">
             Looking to save more on your rental car?
           </h1>
-          <p className="text-white text-xs sm:text-sm md:text-base lg:text-lg max-w-xs sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto mt-3 md:mt-4 lg:mt-5">
+          <p className="text-white text-sm sm:text-base md:text-lg max-w-xs sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto">
             Whether you're planning a weekend getaway, a business trip, or just
             need a reliable ride for the day, we offer a wide range of vehicles
             to suit your needs.
@@ -75,42 +85,40 @@ export default function Hero(): JSX.Element {
         </div>
 
         {/* Booking Box */}
-        <div className="w-full max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 lg:absolute lg:bottom-20 xl:bottom-24 2xl:bottom-32 lg:left-1/2 lg:-translate-x-1/2 mt-8 md:mt-12 lg:mt-0">
+        <div className="w-full max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mt-8 md:mt-12 lg:mt-0">
           <div className="bg-white w-full h-auto rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6">
             {/* Tabs + Counters + Button */}
             <div className="flex flex-col sm:flex-row flex-wrap items-start sm:items-center gap-3 md:gap-4 border-b border-gray-200 pb-3 md:pb-4 2xl:pb-2.5">
               {/* Tabs */}
               <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full sm:w-auto">
                 <button
-                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[121px] 2xl:h-[35px] sm:text-base font-semibold"
+                  className={`px-3 flex 2xl:w-[132px] justify-center items-center gap-2 py-2 text-sm sm:text-base font-semibold relative ${
+                    activeTab === "single" ? "text-[#3DBEC8]" : "text-gray-600"
+                  }`}
                   onClick={() => setActiveTab("single")}
                 >
+                  <img src="/images/Single-Trip.png" alt="Single Trip" className="w-5 h-5" />
                   Single Trip
-                  <p
-                    className={` ${
-                      activeTab === "single"
-                        ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
-                        : "text-gray-600"
-                    }`}
-                  ></p>
+                  {activeTab === "single" && (
+                    <div className="absolute bottom-[-11px] left-0 w-full h-0.5 bg-[#3DBEC8]"></div>
+                  )}
                 </button>
 
                 <button
-                  className="px-3 2xl:px-0 py-2 text-sm 2xl:w-[221px] 2xl:h-[35px] sm:text-base font-semibold"
+                  className={`px-3 flex 2xl:w-[221px] justify-center items-center gap-2 py-2 text-sm sm:text-base font-semibold relative ${
+                    activeTab === "round" ? "text-[#3DBEC8]" : "text-gray-600"
+                  }`}
                   onClick={() => setActiveTab("round")}
                 >
+                  <img src="/images/Round-Trip.png" alt="Round Trip" className="w-5 h-5" />
                   Round-Trip
-                  <p
-                    className={` ${
-                      activeTab === "round"
-                        ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
-                        : "text-gray-600"
-                    }`}
-                  ></p>
+                  {activeTab === "round" && (
+                    <div className="absolute bottom-[-11px] left-0 w-full h-0.5 bg-[#3DBEC8]"></div>
+                  )}
                 </button>
 
                 <button
-                  className={`px-3 py-2 text-sm sm:text-sm md:text-base font-medium ${
+                  className={`px-3 2xl:w-[221px] justify-center flex items-center gap-2 py-2 text-sm sm:text-base font-semibold relative ${
                     activeTab === "multi" ? "text-[#3DBEC8]" : "text-gray-600"
                   }`}
                   onClick={() => {
@@ -122,19 +130,11 @@ export default function Hero(): JSX.Element {
                     router.push("/services/page2");
                   }}
                 >
+                  <img src="/images/Multi-Stop.png" alt="Multi Stop" className="w-5 h-5" />
                   Multi Stop
-                  <p
-                    className={` ${
-                      activeTab === "multi"
-                        ? "text-[#3DBEC8] border-b-2 2xl:pt-[22px] border-[#3DBEC8]"
-                        : "text-gray-600"
-                    }`}
-                  ></p>
-                  <div
-                    className={`h-0.5 mt-1 ${
-                      activeTab === "multi" ? "bg-[#3DBEC8]" : "bg-transparent"
-                    }`}
-                  ></div>
+                  {activeTab === "multi" && (
+                    <div className="absolute bottom-[-11px] left-0 w-full h-0.5 bg-[#3DBEC8]"></div>
+                  )}
                 </button>
               </div>
 

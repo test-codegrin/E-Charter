@@ -60,10 +60,10 @@ const PlanJourney = () => {
   };
 
   return (
-    <section className="w-full max-w-[1320px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[2px] bg-white">
-      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10">
+    <section className="w-full max-w-[1320px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[0px] bg-white">
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10 2xl:gap-10">
         {/* Left Panel */}
-        <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[580px] mx-auto md:w-[580px]">
+        <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] md:w-[580px]">
           {/* Back Button */}
           <button
             onClick={() => router.push("/")}
@@ -299,7 +299,7 @@ const PlanJourney = () => {
         </div>
 
         {/* Right Panel */}
-        <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[70%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
+        <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[55%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
           <MapCard
             pickupLocation={tripData.pickupLocation}
             dropoffLocation={tripData.dropoffLocation}
