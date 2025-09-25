@@ -67,7 +67,7 @@ const Fleet: FC = () => {
   return (
     <div className="flex max-w-[1320px] lg:w-[960px] md:w-[704px] xl:w-full w-full mx-auto mt-[80px] justify-center px-4 sm:px-6 md:px-0 2xl:px-1.5">
       <div className="w-full max-w-[1320px] relative">
-        <p className="text-[#3DBEC8] text-base font-bold text-center">
+        <p className="text-primary text-base font-bold text-center">
           ∗ Our Fleets
         </p>
         <h2 className="text-[28px] sm:text-[32px] md:text-[36px] lg:text-[44px] text-[#040401] mx-auto leading-snug text-center font-bold max-w-[600px] mt-2">
@@ -144,7 +144,7 @@ const Fleet: FC = () => {
                         <span className="text-xl font-bold">${slide.price}</span>
                         <span className="text-sm text-gray-500 ml-1">/day</span>
                       </div>
-                      <button className="w-10 h-10 rounded-full bg-[#3DBEC8] hover:bg-[#35a7b0] flex items-center justify-center text-white transition-colors">
+                      <button className="w-10 h-10 rounded-full bg-primary hover:bg-[#35a7b0] flex items-center justify-center text-white transition-colors">
                         <ArrowUpRight className="w-5 h-5" />
                       </button>
                     </div>
@@ -158,13 +158,13 @@ const Fleet: FC = () => {
           <div className="flex justify-center items-center gap-6 mt-8">
             <button
               ref={prevRef}
-              className="custom-prev w-10 h-10 rounded-full bg-[#3DBEC8] text-white flex items-center justify-center hover:bg-[#35a7b0] transition"
+              className="custom-prev w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-[#35a7b0] transition"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <button
               ref={nextRef}
-              className="custom-next w-10 h-10 rounded-full bg-[#3DBEC8] text-white flex items-center justify-center hover:bg-[#35a7b0] transition"
+              className="custom-next w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center hover:bg-[#35a7b0] transition"
             >
               <ChevronRight className="w-6 h-6" />
             </button>

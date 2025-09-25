@@ -26,13 +26,13 @@
               onClick={() => setActiveTab(tab.key)}
               className={`relative pb-2 transition whitespace-nowrap ${
                 activeTab === tab.key
-                  ? "text-[#3DBEC8] font-semibold"
-                  : "text-gray-600 hover:text-[#3DBEC8]"
+                  ? "text-primary font-semibold"
+                  : "text-gray-600 hover:text-primary"
               }`}
             >
               {tab.label}
               {activeTab === tab.key && (
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#3DBEC8]" />
+                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-primary" />
               )}
             </button>
           ))}

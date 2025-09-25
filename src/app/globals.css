@@ -1,5 +1,4 @@
 @import "tailwindcss";
-
 .scroll-bar {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -16,4 +15,17 @@
 .scrollbar-hide {
   -ms-overflow-style: none;  
   scrollbar-width: none;  
+}
+
+
+/* Your existing scroll styles... */
+
+@theme {
+  --font-sans: "Epilogue", ui-sans-serif, system-ui, sans-serif;
+
+
+  --color-primary: #3DBEC8;
+  --color-secondary: #adadad;
+  --color-primary-gray: #9C9C9C;
+  --color-primary-border: #2a2a2a;
 }

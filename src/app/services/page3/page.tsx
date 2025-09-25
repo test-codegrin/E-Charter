@@ -125,7 +125,7 @@ const Page3 = () => {
                   {tripData.tripType === "multi" && (
                     <button
                       onClick={() => handleAddStop()}
-                      className="text-white font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+                      className="text-white font-semibold bg-primary w-[119px] h-[36px] rounded-full"
                     >
                       + Add Stop
                     </button>

@@ -59,7 +59,7 @@ const Service: FC = () => {
   return (
     <div className="flex w-full max-w-[1320px] lg:w-[960px] xl:w-full md:w-[704px] mt-[80px] mx-auto px-4 sm:px-6 md:px-0 2xl:px-1.5">
       <div className="w-full py-0">
-        <p className="text-[#3DBEC8] text-base font-bold text-center">
+        <p className="text-primary text-base font-bold text-center">
           ∗ Our Services
         </p>
         <p className="text-[28px] sm:text-[32px] md:text-[36px] lg:text-[44px] text-[#040401] mx-auto leading-snug text-center font-bold max-w-[600px] mt-2">

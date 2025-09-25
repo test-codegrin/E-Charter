@@ -30,7 +30,7 @@ export default function PersonalPage() {
 
   return (
     <div className="mt-6 max-w-[1176px] min-h-[519px] w-full">
-      <h3 className="text-[22px] font-semibold text-[#3DBEC8] mb-4">
+      <h3 className="text-[22px] font-semibold text-primary mb-4">
         Personal Info
       </h3>
 

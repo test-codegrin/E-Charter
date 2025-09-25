@@ -8,7 +8,7 @@ function Quality() {
     <div className="px-4 lg:px-0 max-w-[1320px] lg:w-[960px] md:w-[704px] xl:w-full w-full mx-auto mt-16 sm:mt-20">
       <div className="max-w-[1500px] w-full mx-auto">
         {/* Section Title */}
-        <p className="text-[#3DBEC8] text-sm sm:text-base font-bold text-center">
+        <p className="text-primary text-sm sm:text-base font-bold text-center">
           ∗ Why Choose Us
         </p>
         <h2 className="text-[24px] sm:text-[28px] md:text-[32px] lg:text-[44px] text-[#040401] mx-auto leading-snug text-center font-bold max-w-[650px] mt-2">

@@ -26,25 +26,25 @@ const Navbar: React.FC = () => {
             <div className="flex gap-7 xl:gap-10 text-[14px] xl:text-[18px]">
               <a
                 href="/"
-                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+                className="hover:text-primary text-lg font-semibold text-[#040401]"
               >
                 Home
               </a>
               <a
                 href="/services/page1"
-                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+                className="hover:text-primary text-lg font-semibold text-[#040401]"
               >
                 Service
               </a>
               <a
                 href="/about"
-                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+                className="hover:text-primary text-lg font-semibold text-[#040401]"
               >
                 About Us
               </a>
               <a
                 href="/contact"
-                className="hover:text-[#3DBEC8] text-lg font-semibold text-[#040401]"
+                className="hover:text-primary text-lg font-semibold text-[#040401]"
               >
                 Contact Us
               </a>
@@ -59,7 +59,7 @@ const Navbar: React.FC = () => {
               <input
                 type="search"
                 placeholder="Search..."
-                className="border border-[#3DBEC8] bg-white rounded-full h-[42px] md:h-[47px] w-full pl-12 pr-4 text-sm md:text-base focus:outline-none"
+                className="border border-primary bg-white rounded-full h-[42px] md:h-[47px] w-full pl-12 pr-4 text-sm md:text-base focus:outline-none"
               />
             </div>
 
@@ -161,7 +161,7 @@ const Navbar: React.FC = () => {
             <input
               type="search"
               placeholder="Search..."
-              className="border border-[#3DBEC8] rounded-full h-[42px] w-full pl-12 pr-4 text-sm focus:outline-none"
+              className="border border-primary rounded-full h-[42px] w-full pl-12 pr-4 text-sm focus:outline-none"
             />
           </div>
 

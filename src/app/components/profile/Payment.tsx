@@ -26,11 +26,11 @@ export default function PaymentPage() {
     <div className="mt-6 max-w-[1176px] min-h-[450px] w-full">
       {/* Header */}
       <div className="sm:flex items-center justify-between">
-        <h3 className="text-[22px] text-center sm:text-left font-semibold text-[#3DBEC8] mb-4">
+        <h3 className="text-[22px] text-center sm:text-left font-semibold text-primary mb-4">
           Payment Method
         </h3>
 
-        <div className="bg-[#3DBEC8] w-[261px] h-[52px] rounded-full ml-[16px] sm:ml-[0px] flex items-center justify-center">
+        <div className="bg-primary w-[261px] h-[52px] rounded-full ml-[16px] sm:ml-[0px] flex items-center justify-center">
           <Button
             label="Add Payment Method"
             variant="primary"
