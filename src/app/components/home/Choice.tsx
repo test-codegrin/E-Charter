@@ -18,7 +18,7 @@ const Choice: FC = () => {
         {/* Text Content */}
         <div className="w-full lg:w-1/2">
           <div className="w-full max-w-2xl mx-auto lg:mx-0">
-            <p className="text-base font-semibold text-[#3DBEC8] mb-2 md:mb-3">
+            <p className="text-base font-semibold text-primary mb-2 md:mb-3">
               ∗ About Us
             </p>
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight sm:leading-tight md:leading-tight">

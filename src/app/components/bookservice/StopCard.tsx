@@ -45,7 +45,7 @@ const StopCard: React.FC<StopCardProps> = ({
           <div>
             <button
               onClick={() => onAdd(id)}
-              className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+              className="text-[#FFFFFF] font-semibold bg-primary w-[119px] h-[36px] rounded-full"
             >
               + Add Stop
             </button>

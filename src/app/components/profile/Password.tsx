@@ -44,7 +44,7 @@ export default function PasswordPage() {
   return (
     <div className="max-w-[1176px] w-full">
       {/* Page Title */}
-      <h3 className="text-[22px] font-semibold text-[#3DBEC8] mb-6">
+      <h3 className="text-[22px] font-semibold text-primary mb-6">
         Security Settings
       </h3>
 
@@ -57,7 +57,7 @@ export default function PasswordPage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="mt-4 sm:mt-0 w-full sm:w-auto px-6 py-2 rounded-full text-white font-semibold text-lg bg-[#3DBEC8] hover:bg-[#34a7af] transition"
+            className="mt-4 sm:mt-0 w-full sm:w-auto px-6 py-2 rounded-full text-white font-semibold text-lg bg-primary hover:bg-[#34a7af] transition"
           >
             Change Password
           </button>
@@ -93,12 +93,12 @@ export default function PasswordPage() {
                     placeholder="Enter current password"
                     value={formData.currentPassword}
                     onChange={handleChange}
-                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
+                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-primary pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
                   >
                     {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -117,12 +117,12 @@ export default function PasswordPage() {
                     placeholder="Enter new password"
                     value={formData.newPassword}
                     onChange={handleChange}
-                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
+                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-primary pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNew(!showNew)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
                   >
                     {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
@@ -141,12 +141,12 @@ export default function PasswordPage() {
                     placeholder="Confirm new password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-[#3DBEC8] pr-10"
+                    className="w-full border-b border-gray-300 px-2 py-2 text-sm focus:outline-none focus:border-primary pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirm(!showConfirm)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#3DBEC8]"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary"
                   >
                     {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>

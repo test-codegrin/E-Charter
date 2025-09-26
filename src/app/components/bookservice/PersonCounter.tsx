@@ -15,14 +15,14 @@ const PersonCounter: React.FC<PersonCounterProps> = ({ value = 1, onChange }) =>
       <p>Person</p>
       <button
         onClick={dec}
-        className="w-6 h-6 cursor-pointer flex items-center justify-center bg-[#3DBEC8] rounded-full text-white"
+        className="w-6 h-6 cursor-pointer flex items-center justify-center bg-primary rounded-full text-white"
       >
         <i className="fa-solid fa-minus text-xs" />
       </button>
       <span className="text-sm font-semibold">{value}</span>
       <button
         onClick={inc}
-        className="w-6 h-6 cursor-pointer flex items-center justify-center bg-[#3DBEC8] rounded-full text-white"
+        className="w-6 h-6 cursor-pointer flex items-center justify-center bg-primary rounded-full text-white"
       >
         <i className="fa-solid fa-plus text-xs" />
       </button>

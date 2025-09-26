@@ -113,7 +113,7 @@ export default function Page2() {
                   {tripType === "multi" && (
                     <button
                       onClick={addStop}
-                      className="text-[#FFFFFF] font-semibold bg-[#3DBEC8] w-[119px] h-[36px] rounded-full"
+                      className="text-[#FFFFFF] font-semibold bg-primary w-[119px] h-[36px] rounded-full"
                     >
                       + Add Stop
                     </button>

@@ -19,7 +19,7 @@ export default function Page() {
   }, []);
 
   return (
-    <div className="max-w-[1320px] mx-auto">
+    <div className="max-w-screen mx-auto">
       <Hero />
       <Choice />
       <Service />

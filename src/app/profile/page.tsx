@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Nav from "../components/bookservice/Nav";
+import Nav from "../components/home/Nav";
 import ProfileCard from "../components/profile/ProfileCard";
 import Tabs from "../components/profile/Tabs";
 

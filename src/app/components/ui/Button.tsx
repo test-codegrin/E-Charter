@@ -24,7 +24,7 @@ const sizeStyles: Record<string, string> = {
 };
 
 const variantStyles: Record<string, string> = {
-  primary: "bg-[#3DBEC8] text-white hover:bg-[#35aab1]",
+  primary: "bg-primary text-white hover:bg-[#35aab1]",
   secondary: "bg-[#3DC1C4] text-white hover:bg-[#2da8ab]",
   danger: "bg-[#FF6363] text-white hover:brightness-110",
   outline: "border border-gray-300 text-gray-600 hover:bg-gray-100",
@@ -47,7 +47,7 @@ export default function Button({
   if (href) {
     return (
       <Link href={href}>
-        <button className={buttonClasses} type={type} onClick={onClick}>
+        <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick}>
           {label}
         </button>
       </Link>
@@ -55,7 +55,7 @@ export default function Button({
   }
 
   return (
-    <button className={buttonClasses} type={type} onClick={onClick}>
+    <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick}>
       {label}
     </button>
   );
