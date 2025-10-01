@@ -170,6 +170,7 @@ export default function Page2() {
                 <StopCard
                   key={s.id}
                   {...s}
+                  totalStops={stops.length}
                   onChange={updateStop}
                   onRemove={removeStop}
                   onAdd={addStop}

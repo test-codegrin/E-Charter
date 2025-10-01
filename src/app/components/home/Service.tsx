@@ -2,6 +2,7 @@
 "use client";
 import React, { FC } from "react";
 import Button from "../ui/Button";
+import { ROUTES } from "@/app/constants/RoutesConstant";
 
 interface ServiceCardProps {
   image: string;
@@ -10,22 +11,27 @@ interface ServiceCardProps {
 }
 
 const ServiceCard: FC<ServiceCardProps> = ({ image, title, description }) => (
-  <div className="border max-w-[1320px] border-gray-300 rounded-3xl p-4">
-    <img
+  <div className="max-w-[1320px] flex flex-col cursor-pointer mb-5 sm:mb-0">
+  <div className="w-full sm:p-4 p-0 overflow-hidden rounded-2xl">
+   <div className="w-full overflow-hidden rounded-2xl border border-primary-gray">
+   <img
       src={image}
       alt={title}
-      className="w-full lg:w-full rounded-3xl p-2"
+      className="w-full rounded-2xl hover:scale-105 transition-all duration-300"
     />
-    <div className="sm:m-5 2xl:m-4 mt-4 sm:mt-0">
-      <p className="text-[24px] md:text-[25px] lg:text-[32px] font-bold">
-        {title}
-      </p>
-      <p className="text-base md:h-[180px] lg:h-[110px] xl:h-[80px] text-[#616161] leading-[27.2px] font-semibold mt-2">
-        {description}
-      </p>
-      <Button label="Read More" href="/services" size="md" className="mt-6" />
-    </div>
+   </div>
   </div>
+  <div className="sm:m-5 mt-4 sm:mt-0 flex flex-col flex-1 min-h-0">
+    <p className="text-[24px] md:text-[25px] lg:text-3xl font-bold">
+      {title}
+    </p>
+    <p className="text-base text-secondary text-justify leading-tight mt-2 flex-1 overflow-auto">
+      {description}
+    </p>
+    <Button label="Read More" href={ROUTES.SERVICES} size="md" className="mt-3" />
+  </div>
+</div>
+
 );
 
 const Service: FC = () => {

@@ -1,13 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { forwardRef } from "react";
 import Button from "../ui/Button";
 import Inputs from "../ui/Inputs";
+import { ICON_DATA } from "@/app/constants/IconConstants";
+import { Icon } from "@iconify/react";
 
 interface StopCardProps {
   id: string | number;
   location: string;
   date: string;
+  totalStops: number;
   onAdd: (id: string | number) => void;
   onRemove: (id: string | number) => void;
   onChange: (
@@ -16,17 +19,17 @@ interface StopCardProps {
   ) => void;
 }
 
-const StopCard: React.FC<StopCardProps> = ({
+const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
   id,
   location,
   date,
+  totalStops,
   onAdd,
   onRemove,
   onChange,
-}) => {
-  // Function to handle adding a stop
+}, ref) => {
   return (
-    <article className="mt-6 p-4 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
+    <div className="mt-6 p-6 bg-[#FCFCFC] border border-[#DBDBDB] rounded-2xl stop-card">
       {/* Header row */}
       <div className="sm:flex flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center justify-center gap-2 sm:gap-3">
@@ -41,37 +44,28 @@ const StopCard: React.FC<StopCardProps> = ({
             <h3 className="text-lg text-[#3DC1C4] font-semibold">Stop</h3>
           </div>
         </div>
-        <div className="sm:flex flex flex-wrap gap-3 items-center justify-between w-[250px] md:mt-[0] mt-[20px]">
-          <div>
-            <button
-              onClick={() => onAdd(id)}
-              className="text-[#FFFFFF] font-semibold bg-primary w-[119px] h-[36px] rounded-full"
-            >
-              + Add Stop
-            </button>
-          </div>
+        
+        {/* Only show remove button if there's more than one stop */}
+        {totalStops > 1 && (
           <div className="">
             <button
               onClick={() => onRemove(id)}
-              className="text-[#FFFFFF] font-semibold bg-[#FF6363] w-[119px] h-[36px] rounded-full"
+              className="text-[#FFFFFF] font-semibold bg-danger w-[120px] h-[36px] rounded-full cursor-pointer"
             >
               Remove Stop
             </button>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Inputs section */}
       <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
         {/* Stop location */}
         <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB]">
-          <img
-            src="/images/Mask group1.png"
-            alt="location"
-            className="w-6 h-6 shrink-0"
-            loading="lazy"
-          />
+          <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
           <Inputs
+            ref={ref}
+            autoFocus={true}
             name="Stop Location"
             type="text"
             value={location}
@@ -98,8 +92,10 @@ const StopCard: React.FC<StopCardProps> = ({
           />
         </label>
       </section>
-    </article>
+    </div>
   );
-};
+});
+
+StopCard.displayName = "StopCard";
 
 export default StopCard;

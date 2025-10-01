@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PersonCounter from "../../components/bookservice/PersonCounter";
 import MapCard from "../../components/bookservice/MapCard";
 import StopCard from "../../components/bookservice/StopCard";
 import Button from "../../components/ui/Button";
 import Inputs from "../../components/ui/Inputs";
 import { useTrip } from "../../context/tripContext";
+import { Icon } from "@iconify/react";
+import { ICON_DATA } from "@/app/constants/IconConstants";
 
 interface Stop {
   location: string;
@@ -16,7 +18,12 @@ interface Stop {
 
 const PlanJourney = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { tripData, updateTripData } = useTrip();
+  const stopInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Check if we should focus on stop input from URL params
+  const shouldFocusStop = searchParams.get('focusStop') === 'true';
 
   // Add stop
   const handleAddStop = (index?: number) => {
@@ -27,6 +34,14 @@ const PlanJourney = () => {
       updated.push({ location: "", date: "" });
     }
     updateTripData({ multiStops: updated });
+    
+    // Focus on the newly added stop input after state update
+    setTimeout(() => {
+      const newIndex = typeof index === "number" ? index + 1 : updated.length - 1;
+      if (stopInputRefs.current[newIndex]) {
+        stopInputRefs.current[newIndex]?.focus();
+      }
+    }, 50);
   };
 
   // Update stop
@@ -43,20 +58,55 @@ const PlanJourney = () => {
     updateTripData({ multiStops: updated });
   };
 
-  // Handle trip type change
+  // Handle trip type change with automatic stop card addition
   const handleTripTypeChange = (value: "single" | "return" | "multi") => {
     updateTripData({ tripType: value });
-    if (value === "multi" && tripData.multiStops.length === 0) {
-      updateTripData({ multiStops: [{ location: "", date: "" }] });
-    }
-    if (value !== "multi") {
+    
+    if (value === "multi") {
+      // Always ensure there's at least one stop when multi is selected
+      if (tripData.multiStops.length === 0) {
+        updateTripData({ multiStops: [{ location: "", date: "" }] });
+      }
+    } else {
+      // Clear stops for single/return trips
       updateTripData({ multiStops: [] });
     }
   };
 
-  // ✅ Next button handler
+  // Ensure default stop card exists when component mounts and tripType is multi
+  useEffect(() => {
+    if (tripData.tripType === "multi" && tripData.multiStops.length === 0) {
+      updateTripData({ multiStops: [{ location: "", date: "" }] });
+    }
+  }, [tripData.tripType, tripData.multiStops.length, updateTripData]);
+
+  // Focus on first stop input when coming from Hero "Add Stop" button
+  useEffect(() => {
+    if (shouldFocusStop && tripData.tripType === "multi") {
+      // Wait for the component to render and the stop card to be created
+      const timer = setTimeout(() => {
+        if (stopInputRefs.current[0]) {
+          stopInputRefs.current[0].focus();
+          console.log("Focused on stop input"); // Debug log
+        }
+      }, 300); // Increased timeout for better reliability
+      
+      // Clean up the URL parameter
+      const newUrl = window.location.pathname;
+      window.history.replaceState(null, '', newUrl);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [shouldFocusStop, tripData.tripType, tripData.multiStops]);
+
+  // Next button handler
   const handleNext = () => {
     router.push("/services/page3");
+  };
+
+  // Helper function to set stop input ref
+  const setStopInputRef = (index: number) => (el: HTMLInputElement | null) => {
+    stopInputRefs.current[index] = el;
   };
 
   return (
@@ -95,7 +145,7 @@ const PlanJourney = () => {
                       e.target.value as "single" | "return" | "multi"
                     )
                   }
-                  className="border-2 w-[153px] border-[#E5E5E5] bg-white text-sm font-medium rounded-full px-4 py-2 focus:outline-none transition-all duration-100"
+                  className="border-2 w-35 border-[#E5E5E5] bg-white text-sm font-medium rounded-full px-4 py-2 focus:outline-none cursor-pointer transition-all duration-100"
                 >
                   <option value="single">Single Trip</option>
                   <option value="return">Round-Trip</option>
@@ -110,11 +160,7 @@ const PlanJourney = () => {
               <div className="sm:flex flex flex-wrap justify-between items-center gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
-                    <img
-                      src="/images/Mask group.png"
-                      alt="pickup"
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                    />
+                   <Icon icon={ICON_DATA.HOME} className="text-white w-4 h-4 sm:w-5 sm:h-5"/>
                   </div>
                   <h3 className="text-base sm:text-lg text-[#3DC1C4] font-semibold">
                     Pickup
@@ -125,7 +171,7 @@ const PlanJourney = () => {
                   {tripData.tripType === "multi" && (
                     <button
                       onClick={() => handleAddStop()}
-                      className="text-white font-semibold bg-primary w-[119px] h-[36px] rounded-full"
+                      className="text-white font-semibold bg-primary w-[119px] h-[36px] rounded-full cursor-pointer"
                     >
                       + Add Stop
                     </button>
@@ -136,11 +182,7 @@ const PlanJourney = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label className="flex items-center gap-2 sm:gap-3">
-                    <img
-                      src="/images/Mask group1.png"
-                      className="w-5 h-5 sm:w-6 sm:h-6"
-                      alt="location"
-                    />
+                    <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
                     <Inputs
                       type="text"
                       value={tripData.pickupLocation}
@@ -153,44 +195,38 @@ const PlanJourney = () => {
                   <div className="border-b border-gray-300" />
                 </div>
                 <div>
-                  <label className="flex items-center gap-3 w-full sm:w-1/2">
-                    <img
-                      src="/images/Clock.png"
-                      alt="date-time"
-                      className="w-6 h-6 shrink-0"
-                      loading="lazy"
-                    />
-                    <Inputs
-                      name="Pickup Date & Time"
-                      type="datetime-local"
-                      value={tripData.pickupDateTime}
-                      onChange={(e) => updateTripData({ pickupDateTime: e.target.value })}
-                      className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
-                    />
-                  </label>
-                  <div className="border-b border-gray-300" />
-                </div>
+                    <div className="col-span-1 sm:col-span-1">
+                      <label className="flex items-center gap-3 w-full">
+                        <Icon icon={ICON_DATA.CALENDAR_PICKUP} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
+                        <Inputs
+                          name="Pickup Date & Time"
+                          type="datetime-local"
+                          value={tripData.pickupDateTime}
+                          onChange={(e) => updateTripData({ pickupDateTime: e.target.value })}
+                          className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+                        />
+                      </label>
+                    </div>
+                    <div className="border-b border-gray-300" />
+                  </div>
               </div>
             </div>
 
-            {/* Multi Stops */}
-            {tripData.tripType === "multi" && tripData.multiStops.length > 0 && (
-              <div className="space-y-4 mt-4">
-                {tripData.multiStops.map((stop, index) => (
-                  <StopCard
-                    key={index}
-                    id={index}
-                    location={stop.location}
-                    date={stop.date}
-                    onAdd={() => handleAddStop(index)}
-                    onRemove={() => handleRemoveStop(index)}
-                    onChange={(id, data) =>
-                      handleUpdateStop(id as number, data)
-                    }
-                  />
-                ))}
-              </div>
-            )}
+            {/* Multi Stops - Only render if multi is selected and stops exist */}
+            {tripData.tripType === "multi" && tripData.multiStops.length > 0 &&
+              tripData.multiStops.map((s, index) => (
+                <StopCard
+                  key={`stop-${index}`}
+                  id={index}
+                  location={s.location}
+                  date={s.date}
+                  totalStops={tripData.multiStops.length}
+                  onChange={(id, data) => handleUpdateStop(id as number, data)}
+                  onRemove={(id) => handleRemoveStop(id as number)}
+                  onAdd={(id) => handleAddStop(id as number)}
+                  ref={setStopInputRef(index)}
+                />
+              ))}
 
             {/* Dropoff Section */}
             {(tripData.tripType === "single" ||
@@ -199,11 +235,7 @@ const PlanJourney = () => {
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
-                    <img
-                      src="/images/Dropoff.png"
-                      alt="dropoff"
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                    />
+                  <Icon icon={ICON_DATA.DROP_LOCATION} className="text-white w-4 h-4 sm:w-5 sm:h-5"/>
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
                     Dropoff
@@ -212,11 +244,7 @@ const PlanJourney = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="col-span-1 sm:col-span-2">
                     <label className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src="/images/Mask group1.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="location"
-                      />
+                     <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
                       <Inputs
                         name="Dropoff Location"
                         type="text"
@@ -237,11 +265,7 @@ const PlanJourney = () => {
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
-                    <img
-                      src="/images/Mask group.png"
-                      alt="return"
-                      className="w-4 h-4 sm:w-5 sm:h-5"
-                    />
+                  <Icon icon={ICON_DATA.HOME} className="text-white w-4 h-4 sm:w-5 sm:h-5"/>
                   </div>
                   <h3 className="text-base sm:text-lg font-semibold text-[#3DC1C4]">
                     Return
@@ -250,41 +274,31 @@ const PlanJourney = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="flex items-center gap-2 sm:gap-3">
-                      <img
-                        src="/images/Mask group1.png"
-                        className="w-5 h-5 sm:w-6 sm:h-6"
-                        alt="location"
-                      />
+                      <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
                       <Inputs
                         type="text"
                         value={tripData.returnLocation}
                         onChange={(e) => updateTripData({ returnLocation: e.target.value })}
-                        placeholder="Pickup Location"
+                        placeholder="Return Location"
                         className="w-full bg-transparent focus:outline-none text-sm placeholder-gray-400"
-                        name="Pickup Location"
+                        name="Return Location"
                       />
                     </label>
                     <div className="border-b border-gray-300" />
                   </div>
                   <div>
-                    {tripData.tripType === "return" && (
-                      <div className="col-span-1 sm:col-span-1">
-                        <label className="flex items-center gap-3 w-full  ">
-                          <img
-                            src="/images/Clock.png"
-                            alt="return-date-time"
-                            className="w-6 h-6 shrink-0"
-                          />
-                          <Inputs
-                            name="Return Date & Time"
-                            type="datetime-local"
-                            value={tripData.returnDateTime}
-                            onChange={(e) => updateTripData({ returnDateTime: e.target.value })}
-                            className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
-                          />
-                        </label>
-                      </div>
-                    )}
+                    <div className="col-span-1 sm:col-span-1">
+                      <label className="flex items-center gap-3 w-full">
+                        <Icon icon={ICON_DATA.CALENDAR_RETURN} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
+                        <Inputs
+                          name="Return Date & Time"
+                          type="datetime-local"
+                          value={tripData.returnDateTime}
+                          onChange={(e) => updateTripData({ returnDateTime: e.target.value })}
+                          className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+                        />
+                      </label>
+                    </div>
                     <div className="border-b border-gray-300" />
                   </div>
                 </div>
@@ -300,10 +314,15 @@ const PlanJourney = () => {
 
         {/* Right Panel */}
         <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[55%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
-          <MapCard
+        <MapCard
             pickupLocation={tripData.pickupLocation}
             dropoffLocation={tripData.dropoffLocation}
+            multiStops={tripData.multiStops}
+            tripType={tripData.tripType}
+            pickupDateTime={tripData.pickupDateTime}
+            returnDateTime={tripData.returnDateTime}
           />
+
         </div>
       </div>
     </section>
