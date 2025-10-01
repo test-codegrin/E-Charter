@@ -15,20 +15,25 @@ export default function Hero(): JSX.Element {
   const [activeTab, setActiveTab] = useState<TripType>("single");
   const [isMobile, setIsMobile] = useState(false);
   const [isTabDropdownOpen, setIsTabDropdownOpen] = useState(false);
+  const [isPersonDropdownOpen, setIsPersonDropdownOpen] = useState(false);
+  const [isLuggageDropdownOpen, setIsLuggageDropdownOpen] = useState(false);
 
   // Local UI states
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
   const [showReturnDateDropdown, setShowReturnDateDropdown] =
     useState<boolean>(false);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  // Separate refs for each dropdown
+  const tabDropdownRef = useRef<HTMLDivElement>(null);
+  const personDropdownRef = useRef<HTMLDivElement>(null);
+  const luggageDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Tabs configuration
-  const tabs = [
+  // TRIPS configuration
+  const TRIPS = [
     {
       id: "single" as TripType,
       label: "Single Trip",
-      icon: "/images/Single-Trip.png",
+      icon: "/images/single-trip.svg",
       onClick: () => {
         setActiveTab("single");
         setIsTabDropdownOpen(false);
@@ -37,7 +42,7 @@ export default function Hero(): JSX.Element {
     {
       id: "round" as TripType,
       label: "Round-Trip",
-      icon: "/images/Round-Trip.png",
+      icon: "/images/round-trip.svg",
       onClick: () => {
         setActiveTab("round");
         setIsTabDropdownOpen(false);
@@ -46,7 +51,7 @@ export default function Hero(): JSX.Element {
     {
       id: "multi" as TripType,
       label: "Multi Stop",
-      icon: "/images/Multi-Stop.png",
+      icon: "/images/multistop-trip.svg",
       onClick: () => {
         setActiveTab("multi");
         updateTripData({
@@ -74,20 +79,35 @@ export default function Hero(): JSX.Element {
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Check each dropdown separately
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        tabDropdownRef.current &&
+        !tabDropdownRef.current.contains(event.target as Node)
       ) {
         setIsTabDropdownOpen(false);
       }
+
+      if (
+        personDropdownRef.current &&
+        !personDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsPersonDropdownOpen(false);
+      }
+
+      if (
+        luggageDropdownRef.current &&
+        !luggageDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsLuggageDropdownOpen(false);
+      }
     };
 
-    if (isTabDropdownOpen) {
+    if (isTabDropdownOpen || isPersonDropdownOpen || isLuggageDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isTabDropdownOpen]);
+  }, [isTabDropdownOpen, isPersonDropdownOpen, isLuggageDropdownOpen]);
 
   const handleSubmit = () => {
     // Validation
@@ -115,7 +135,18 @@ export default function Hero(): JSX.Element {
     router.push("/services/page1");
   };
 
-  const getActiveTab = () => tabs.find((tab) => tab.id === activeTab);
+  const getActiveTab = () => TRIPS.find((tab) => tab.id === activeTab);
+
+  // Handler functions to prevent dropdown closing
+  const handlePersonChange = (newCount: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent event bubbling
+    updateTripData({ persons: newCount });
+  };
+
+  const handleLuggageChange = (newCount: number, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent event bubbling
+    updateTripData({ luggageCount: newCount });
+  };
 
   return (
     <div className="relative w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-8 xl:px-0 2xl:px-0">
@@ -149,22 +180,24 @@ export default function Hero(): JSX.Element {
         {/* Booking Box */}
         <div className="w-full max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mt-8 md:mt-12 lg:mt-0">
           <div className="bg-white w-full h-auto rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6">
-            {/* Tabs + Counters + Button */}
-            <div className="flex flex-col gap-4 lg:flex-row justify-between items-start sm:items-center border-b border-gray-200 pb-3 md:pb-4 2xl:pb-2.5">
-              {/* Mobile Dropdown */}
-              {isMobile ? (
-                <div className="relative w-full" ref={dropdownRef}>
+            {/* TRIPS + Counters + Button */}
+
+            <div className="flex flex-col lg:flex-row items-center md:pb-4 justify-between border-b border-primary-gray/50">
+              <div className="flex flex-col md:flex-row gap-5 items-center sm:items-start">
+                
+                {/* TRIPS Dropdown */}
+                <div className="relative w-45 lg:w-50" ref={tabDropdownRef}>
                   <button
                     onClick={() => setIsTabDropdownOpen(!isTabDropdownOpen)}
-                    className="w-full flex items-center justify-between px-4 py-3  border border-primary-gray/70 rounded-lg text-sm font-semibold text-primary-gray"
+                    className="w-full flex items-center justify-between px-4 py-3 bg-primary-gray/10 hover:bg-primary-gray/20 transition-colors duration-300 cursor-pointer rounded-full text-sm font-semibold text-primary-gray"
                   >
                     <div className="flex items-center gap-3">
                       <img
                         src={getActiveTab()?.icon}
                         alt={getActiveTab()?.label}
-                        className="w-5 h-5"
+                        className="w-6 h-6 color"
                       />
-                      <span className="text-primary">
+                      <span className="text-black font-medium">
                         {getActiveTab()?.label}
                       </span>
                     </div>
@@ -174,17 +207,17 @@ export default function Hero(): JSX.Element {
                           ? "mdi:chevron-up"
                           : "mdi:chevron-down"
                       }
-                      className="w-5 h-5 text-primary-gray"
+                      className="w-5 h-5 text-primary"
                     />
                   </button>
 
                   {isTabDropdownOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-gray/50 rounded-lg shadow-lg z-50">
-                      {tabs.map((tab) => (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50">
+                      {TRIPS.map((tab) => (
                         <button
                           key={tab.id}
                           onClick={tab.onClick}
-                          className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-gray-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                          className={`w-full flex cursor-pointer items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-primary-gray/20 transition-colors first:rounded-t-lg last:rounded-b-lg ${
                             activeTab === tab.id
                               ? "text-primary bg-primary/5"
                               : "text-primary-gray"
@@ -196,10 +229,15 @@ export default function Hero(): JSX.Element {
                             className="w-5 h-5"
                           />
                           <span>{tab.label}</span>
-                          {activeTab === tab.id && (
+                          {activeTab === tab.id ? (
                             <Icon
-                              icon="mdi:check"
+                              icon={ICON_DATA.RADIO_ACTIVE}
                               className="w-5 h-5 text-primary ml-auto"
+                            />
+                          ) : (
+                            <Icon
+                              icon={ICON_DATA.RADIO_INACTIVE}
+                              className="w-5 h-5 text-primary-gray ml-auto"
                             />
                           )}
                         </button>
@@ -207,170 +245,206 @@ export default function Hero(): JSX.Element {
                     </div>
                   )}
                 </div>
-              ) : (
-                /* Desktop Tabs */
-                <div className="flex flex-row gap-2 sm:gap-3 md:gap-4 lg:gap-5 w-full sm:w-auto">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      className={`px-5 flex justify-center items-center gap-3 py-2 hover:bg-primary-gray/10 rounded-full cursor-pointer text-sm sm:text-base font-semibold relative ${
-                        activeTab === tab.id
-                          ? "text-primary"
-                          : "text-primary-gray"
-                      }`}
-                      onClick={tab.onClick}
-                    >
-                      <img src={tab.icon} alt={tab.label} className="w-5 h-5" />
-                      <div className="text-center">{tab.label}</div>
-                      {activeTab === tab.id && (
-                        <div className="absolute bottom-[-11px] left-0 w-full h-0.5 bg-primary"></div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              )}
 
-              {/* Counters + Submit */}
-              <div className="flex md:mt-4 sm:mt-0 lg:mt-0  items-center gap-2 sm:gap-3 md:gap-4 w-full sm:w-auto justify-between sm:justify-end">
-                {/* Person */}
-                <div className="flex w-1/2 sm:flex-row flex-col items-center gap-2 sm:gap-2 px-2 sm:px-3 py-1 border border-primary-gray/50 rounded-xl sm:rounded-full">
-                  <span className="text-xs sm:text-sm font-medium">Person</span>
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    <button
-                      onClick={() =>
-                        updateTripData({
-                          persons: Math.max(1, tripData.persons - 1),
-                        })
+               <div className="flex items-center gap-3">
+                 {/* Person Dropdown */}
+                 <div className="relative w-30 md:w-40 lg:w-50" ref={personDropdownRef}>
+                  <button
+                    onClick={() =>
+                      setIsPersonDropdownOpen(!isPersonDropdownOpen)
+                    }
+                    className="w-full flex items-center justify-between px-4 py-3 bg-primary-gray/10 hover:bg-primary-gray/20 transition-colors duration-300 cursor-pointer rounded-full text-sm font-semibold text-primary-gray"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-black text-xs md:text-sm">
+                        {tripData.persons === 1
+                          ? ` ${tripData.persons} Person`
+                          : ` ${tripData.persons} Persons`}
+                      </span>
+                    </div>
+                    <Icon
+                      icon={
+                        isPersonDropdownOpen
+                          ? "mdi:chevron-up"
+                          : "mdi:chevron-down"
                       }
-                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
-                    >
-                      <i className="fa-solid fa-minus text-xs cursor-pointer" />
-                    </button>
-                    <span className="min-w-[16px] sm:min-w-[20px] text-center text-xs sm:text-sm">
-                      {tripData.persons}
-                    </span>
-                    <button
-                      onClick={() =>
-                        updateTripData({ persons: tripData.persons + 1 })
-                      }
-                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
-                    >
-                      <i className="fa-solid fa-plus text-xs cursor-pointer" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Luggage */}
-                <div className="flex w-1/2 sm:flex-row flex-col items-center gap-2 sm:gap-2 px-2 sm:px-3 py-1 border border-primary-gray/50 rounded-xl sm:rounded-full">
-                 
-                    <span className="text-xs sm:text-sm font-medium">
-                      Luggage
-                    </span>
-                    <div className="flex items-center gap-1 sm:gap-2">
-                    <button
-                      onClick={() =>
-                        updateTripData({
-                          luggageCount: Math.max(1, tripData.luggageCount - 1),
-                        })
-                      }
-                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
-                    >
-                      <i className="fa-solid fa-minus text-xs cursor-pointer" />
-                    </button>
-                    <span className="min-w-[16px] sm:min-w-[20px] text-center text-xs sm:text-sm">
-                      {tripData.luggageCount}
-                    </span>
-                    <button
-                      onClick={() =>
-                        updateTripData({
-                          luggageCount: tripData.luggageCount + 1,
-                        })
-                      }
-                      className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
-                    >
-                      <i className="fa-solid fa-plus text-xs cursor-pointer" />
-                    </button>
-                  </div>
+                      className="w-5 h-5 text-primary"
+                    />
+                  </button>
+                  {isPersonDropdownOpen && (
+                    <div className="absolute w-fit top-full left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50">
+                      <div className="flex flex-col lg:flex-row items-center lg:gap-3 px-4 py-3">
+                        <p>Persons</p>
+                        <div className="flex items-center gap-3 px-4 py-3">
+                          <button
+                            onClick={(e) =>
+                              handlePersonChange(
+                                Math.max(1, tripData.persons - 1),
+                                e
+                              )
+                            }
+                            disabled={tripData.persons === 1}
+                            className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center ${
+                              tripData.persons === 1
+                                ? "bg-primary-gray"
+                                : "bg-primary"
+                            } text-white rounded-full cursor-pointer`}
+                          >
+                            <i className="fa-solid fa-minus text-xs" />
+                          </button>
+                          <span className="min-w-[16px] sm:min-w-[20px] text-center text-sm sm:text-base">
+                            {tripData.persons}
+                          </span>
+                          <button
+                            onClick={(e) =>
+                              handlePersonChange(tripData.persons + 1, e)
+                            }
+                            className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
+                          >
+                            <i className="fa-solid fa-plus text-xs cursor-pointer" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-               {/* Button */}
-                <Button
-                  label="Get Quote"
-                  onClick={handleSubmit}
-                  variant="primary"
-                  className="text-xs hidden sm:block sm:text-sm w-full sm:min-w-fit"
-                  size="sm"
-                />
+                {/* Luggage Dropdown */}
+                <div className="relative w-30 md:w-40 lg:w-50" ref={luggageDropdownRef}>
+                  <button
+                    onClick={() =>
+                      setIsLuggageDropdownOpen(!isLuggageDropdownOpen)
+                    }
+                    className="w-full flex items-center justify-between px-4 py-3 bg-primary-gray/10 hover:bg-primary-gray/20 transition-colors duration-300 cursor-pointer rounded-full text-sm font-semibold text-primary-gray"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-black text-xs md:text-sm">
+                        {tripData.luggageCount === 1
+                          ? ` ${tripData.luggageCount} Luggage`
+                          : ` ${tripData.luggageCount} Luggages`}
+                      </span>
+                    </div>
+                    <Icon
+                      icon={
+                        isLuggageDropdownOpen
+                          ? "mdi:chevron-up"
+                          : "mdi:chevron-down"
+                      }
+                      className="w-5 h-5 text-primary"
+                    />
+                  </button>
+                  {isLuggageDropdownOpen && (
+                    <div className="absolute w-fit top-full left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50">
+                      <div className="flex flex-col lg:flex-row items-center lg:gap-3 px-4 py-3">
+                        <p>Luggage</p>
+
+                        <div className="flex items-center gap-3 px-4 py-3">
+                          <button
+                            onClick={(e) =>
+                              handleLuggageChange(
+                                Math.max(1, tripData.luggageCount - 1),
+                                e
+                              )
+                            }
+                            disabled={tripData.luggageCount === 1}
+                            className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center ${
+                              tripData.luggageCount === 1
+                                ? "bg-primary-gray"
+                                : "bg-primary"
+                            } text-white rounded-full cursor-pointer`}
+                          >
+                            <i className="fa-solid fa-minus text-xs " />
+                          </button>
+                          <span className="min-w-[16px] sm:min-w-[20px] text-center text-xs sm:text-base">
+                            {tripData.luggageCount}
+                          </span>
+                          <button
+                            onClick={(e) =>
+                              handleLuggageChange(tripData.luggageCount + 1, e)
+                            }
+                            className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
+                          >
+                            <i className="fa-solid fa-plus text-xs cursor-pointer" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+               </div>
               </div>
               <Button
-                  label="Get Quote"
-                  onClick={handleSubmit}
-                  variant="primary"
-                  className="text-xs block sm:hidden sm:text-sm w-full sm:min-w-fit"
-                  size="sm"
-                />
+                label="Get Quote"
+                onClick={handleSubmit}
+                variant="primary"
+                className="text-xs block mb-2 sm:mb-0 mt-4 lg:mt-0 sm:text-sm min-w-fit sm:min-w-fit"
+                size="sm"
+              />
             </div>
 
             {/* Form Inputs */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 pt-3 md:pt-4">
-              {/* Pickup */}
-              <div className="flex items-center border-b border-gray-300 py-1 sm:py-2">
-                <Icon
-                  icon={ICON_DATA.HOME}
-                  className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
-                />
-                <Inputs
-                  name="pickup"
-                  type="text"
-                  placeholder="Pickup Location"
-                  value={tripData.pickupLocation}
-                  onChange={(e) =>
-                    updateTripData({ pickupLocation: e.target.value })
-                  }
-                  className="flex-1 p-1 sm:p-2 focus:outline-none text-xs sm:text-sm md:text-base"
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 py-3 md:py-4">
+              {(activeTab === "single" || activeTab === "round") && (
+                <>
+                  {/* Pickup */}
+                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
+                    <Icon
+                      icon={ICON_DATA.HOME}
+                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
+                    />
+                    <Inputs
+                      name="pickup"
+                      type="text"
+                      placeholder="Pickup Location"
+                      value={tripData.pickupLocation}
+                      onChange={(e) =>
+                        updateTripData({ pickupLocation: e.target.value })
+                      }
+                      className="flex-1 p-1 sm:p-2 focus:outline-none border-none bg-transparent text-xs sm:text-sm md:text-base"
+                    />
+                  </div>
 
-              {/* Dropoff */}
-              <div className="flex items-center border-b border-gray-300 py-1 sm:py-2">
-                <Icon
-                  icon={ICON_DATA.DROP_LOCATION}
-                  className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
-                />
-                <Inputs
-                  name="dropoff"
-                  type="text"
-                  placeholder="Drop Off Location"
-                  value={tripData.dropoffLocation}
-                  onChange={(e) =>
-                    updateTripData({ dropoffLocation: e.target.value })
-                  }
-                  className="flex-1 p-1 sm:p-2 focus:outline-none text-xs sm:text-sm md:text-base"
-                />
-              </div>
+                  {/* Dropoff */}
+                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
+                    <Icon
+                      icon={ICON_DATA.DROP_LOCATION}
+                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
+                    />
+                    <Inputs
+                      name="dropoff"
+                      type="text"
+                      placeholder="Drop Off Location"
+                      value={tripData.dropoffLocation}
+                      onChange={(e) =>
+                        updateTripData({ dropoffLocation: e.target.value })
+                      }
+                      className="flex-1 p-1 sm:p-2 focus:outline-none border-none bg-transparent text-xs sm:text-sm md:text-base"
+                    />
+                  </div>
+                </>
+              )}
 
               {/* Single Trip → Date & Time */}
               {activeTab === "single" && (
-                <div className="relative flex items-center border-b border-gray-300 py-1 sm:py-2 gap-2">
+                <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
                   <Icon
                     icon={ICON_DATA.CALENDAR_PICKUP}
-                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
+                    className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6  text-primary-gray flex-shrink-0"
                   />
-                  <div className="flex-1">
-                    <Inputs
-                      name="pickupDate"
-                      type="datetime-local"
-                      value={tripData.pickupDateTime}
-                      onChange={(e) =>
-                        updateTripData({ pickupDateTime: e.target.value })
-                      }
-                      className={`w-full p-2 border-none rounded-md focus:outline-none ${
-                        tripData.pickupDateTime
-                          ? "text-black"
-                          : "text-primary-gray"
-                      } text-xs sm:text-sm md:text-base`}
-                    />
-                  </div>
+
+                  <Inputs
+                    name="pickupDate"
+                    type="datetime-local"
+                    value={tripData.pickupDateTime}
+                    onChange={(e) =>
+                      updateTripData({ pickupDateTime: e.target.value })
+                    }
+                    className={`flex-1 w-full p-2 border-none rounded-md focus:outline-none ${
+                      tripData.pickupDateTime
+                        ? "text-black"
+                        : "text-primary-gray"
+                    } text-xs sm:text-sm md:text-base`}
+                  />
                 </div>
               )}
 
@@ -378,53 +452,68 @@ export default function Hero(): JSX.Element {
               {activeTab === "round" && (
                 <>
                   {/* Pickup Date */}
-                  <div className="relative flex items-center border-b border-gray-300 py-1 sm:py-2 gap-2">
+                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
                     <Icon
                       icon={ICON_DATA.CALENDAR_PICKUP}
-                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
+                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6  text-primary-gray flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <Inputs
-                        name="pickupDate"
-                        type="datetime-local"
-                        value={tripData.pickupDateTime}
-                        onChange={(e) =>
-                          updateTripData({ pickupDateTime: e.target.value })
-                        }
-                        className={`w-full p-2 border-none rounded-md focus:outline-none ${
-                          tripData.pickupDateTime
-                            ? "text-black"
-                            : "text-primary-gray"
-                        } text-xs sm:text-sm md:text-base`}
-                      />
-                    </div>
+
+                    <Inputs
+                      name="pickupDate"
+                      type="datetime-local"
+                      value={tripData.pickupDateTime}
+                      onChange={(e) =>
+                        updateTripData({ pickupDateTime: e.target.value })
+                      }
+                      className={`flex-1 w-full p-2 border-none rounded-md focus:outline-none ${
+                        tripData.pickupDateTime
+                          ? "text-black"
+                          : "text-primary-gray"
+                      } text-xs sm:text-sm md:text-base`}
+                    />
                   </div>
 
                   {/* Return Date */}
-                  <div className="relative flex items-center border-b border-gray-300 py-1 sm:py-2 gap-2">
+                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
                     <Icon
                       icon={ICON_DATA.CALENDAR_RETURN}
-                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
+                      className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6  text-primary-gray flex-shrink-0"
                     />
-                    <div className="flex-1">
-                      <Inputs
-                        name="returnDate"
-                        type="datetime-local"
-                        value={tripData.returnDateTime}
-                        onChange={(e) =>
-                          updateTripData({ returnDateTime: e.target.value })
-                        }
-                        className={`w-full p-2 border-none rounded-md focus:outline-none ${
-                          tripData.returnDateTime
-                            ? "text-black"
-                            : "text-primary-gray"
-                        } text-xs sm:text-sm md:text-base`}
-                      />
-                    </div>
+
+                    <Inputs
+                      name="returnDate"
+                      type="datetime-local"
+                      value={tripData.returnDateTime}
+                      onChange={(e) =>
+                        updateTripData({ returnDateTime: e.target.value })
+                      }
+                      className={`flex-1 w-full p-2 border-none rounded-md focus:outline-none ${
+                        tripData.returnDateTime
+                          ? "text-black"
+                          : "text-primary-gray"
+                      } text-xs sm:text-sm md:text-base`}
+                    />
                   </div>
                 </>
               )}
             </div>
+
+            {/* Multi Stop Button */}
+            <Button
+              label="Add Stop"
+              onClick={() => {
+                setActiveTab("multi");
+                updateTripData({
+                  tripType: "multi",
+                  multiStops: [],
+                });
+                setIsTabDropdownOpen(false);
+                router.push("/services/page2");
+              }}
+              variant="primary"
+              className="text-xs block  sm:text-sm min-w-fit sm:min-w-fit"
+              size="sm"
+            />
           </div>
         </div>
       </div>

@@ -70,7 +70,7 @@ const Service: FC = () => {
           personal to professional travel. Choose the service that best suits
           your journey.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-5 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
           {services.map((service, index) => (
             <ServiceCard key={index} {...service}/>
           ))}

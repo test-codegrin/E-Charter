@@ -34,7 +34,7 @@ export default function Input({
         value={value}
         onChange={onChange}
         required={required}
-        className={`w-full rounded-lg py-2 focus:outline-none ${className}`}
+        className={`w-full rounded-lg py-2 focus:outline-none leading-none border-none bg-transparent ${className}`}
       />
     </div>
   );

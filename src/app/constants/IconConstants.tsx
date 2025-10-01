@@ -6,5 +6,7 @@ export const ICON_DATA = {
     DROP_LOCATION: "fluent:location-ripple-16-regular",
     CALENDAR_PICKUP: "iconoir:calendar-arrow-up",
     CALENDAR_RETURN: "iconoir:calendar-arrow-down",
+    RADIO_ACTIVE: "fluent:radio-button-24-filled",
+    RADIO_INACTIVE: "fluent:radio-button-24-regular",
     
 };
