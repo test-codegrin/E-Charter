@@ -15,5 +15,7 @@ export const ICON_DATA = {
     EYE : "solar:eye-outline",
     EYE_SLASH : "solar:eye-closed-bold",
     CLOSE : "fluent:dismiss-16-regular",
+    GPS : "mdi:crosshairs-gps",
+    MAP_LOCATION : "mdi:location",
     
 };

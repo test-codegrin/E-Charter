@@ -43,13 +43,6 @@ class AuthService {
   }
 }
 
-// Create axios instance
-const apiClient = axios.create({
-  timeout: 10000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState("personal");
@@ -77,8 +70,9 @@ export default function Page() {
     setError(null);
 
     try {
-      const response = await apiClient.get(API.USER_PROFILE, {
+      const response = await axios.get(API.USER_PROFILE, {
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });
