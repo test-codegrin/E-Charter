@@ -1,11 +1,9 @@
+// MapCard.tsx - Show middle dots without labels, reveal on hover
 "use client";
 
 import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
 import Image from "next/image";
-import React, { useRef, useEffect, useState } from "react";
-import tt from '@tomtom-international/web-sdk-maps';
-import ttServices from '@tomtom-international/web-sdk-services';
-import '@tomtom-international/web-sdk-maps/dist/maps.css';
+import React from "react";
 
 interface Stop {
   location: string;
@@ -29,13 +27,6 @@ const MapCard: React.FC<MapCardProps> = ({
   pickupDateTime,
   returnDateTime,
 }) => {
-  const mapElement = useRef<HTMLDivElement | null>(null);
-  const [map, setMap] = useState<any>(null);
-  const [markers, setMarkers] = useState<any[]>([]);
-  
-  // TomTom API Key - Replace with your actual API key
-  const API_KEY = "ddFpxxGJhInyWJ4RxeDSFkvhLf3IUlXV";
-
   // Format datetime
   const formatDateTime = (dateTimeString?: string) => {
     if (!dateTimeString) return "Not set";
@@ -53,195 +44,6 @@ const MapCard: React.FC<MapCardProps> = ({
       return "Invalid date";
     }
   };
-
-  // Initialize TomTom Map
-  useEffect(() => {
-    if (!mapElement.current || map) return;
-
-    const newMap = tt.map({
-      key: API_KEY,
-      container: mapElement.current,
-      center: [-121.91599, 37.36765], // Default center (San Francisco)
-      zoom: 12,
-      style: {
-        map: 'basic_main',
-        poi: 'poi_main'
-      }
-    });
-
-    setMap(newMap);
-
-    return () => {
-      if (newMap) {
-        newMap.remove();
-      }
-    };
-  }, []);
-
-  // Geocode location string to coordinates
-  const geocodeLocation = async (locationString: string): Promise<[number, number] | null> => {
-    if (!locationString.trim()) return null;
-    
-    try {
-      const response = await ttServices.services.fuzzySearch({
-        key: API_KEY,
-        query: locationString,
-        limit: 1
-      });
-
-      if (response.results && response.results.length > 0) {
-        const result = response.results[0];
-        return [result.position.lng, result.position.lat];
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-    }
-    
-    return null;
-  };
-
-  // Clear existing markers
-  const clearMarkers = () => {
-    markers.forEach(marker => marker.remove());
-    setMarkers([]);
-  };
-
-  // Add marker to map
-  const addMarker = (coordinates: [number, number], color: string, label?: string) => {
-    if (!map) return;
-
-    const markerElement = document.createElement('div');
-    markerElement.className = 'custom-marker';
-    markerElement.style.cssText = `
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      background-color: ${color};
-    `;
-
-    const marker = new tt.Marker({ element: markerElement })
-      .setLngLat(coordinates)
-      .addTo(map);
-
-    if (label) {
-      const popup = new tt.Popup({ offset: 25, closeButton: false })
-        .setHTML(`<div style="font-size: 12px; padding: 4px;">${label}</div>`);
-      
-      marker.setPopup(popup);
-    }
-
-    setMarkers(prev => [...prev, marker]);
-    return marker;
-  };
-
-  // Calculate route and display on map
-  const displayRoute = async (locations: string[]) => {
-    if (!map || locations.length < 2) return;
-
-    // Geocode all locations
-    const coordinates: [number, number][] = [];
-    for (const location of locations) {
-      const coords = await geocodeLocation(location);
-      if (coords) {
-        coordinates.push(coords);
-      }
-    }
-
-    if (coordinates.length < 2) return;
-
-    // Clear existing markers and routes
-    clearMarkers();
-    
-    // Add markers for pickup, stops, and dropoff
-    coordinates.forEach((coord, index) => {
-      let color: string;
-      let label: string;
-      
-      if (index === 0) {
-        color = '#1FC091'; // Pickup - Green
-        label = 'Pickup';
-      } else if (index === coordinates.length - 1) {
-        color = '#D21313'; // Dropoff - Red  
-        label = 'Dropoff';
-      } else {
-        color = '#FFB800'; // Stop - Yellow
-        label = `Stop ${index}`;
-      }
-      
-      addMarker(coord, color, label);
-    });
-
-    // Calculate and display route if more than one location
-    if (coordinates.length >= 2) {
-      try {
-        const routeResponse = await ttServices.services.calculateRoute({
-          key: API_KEY,
-          locations: coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':')
-        });
-
-        if (routeResponse.routes && routeResponse.routes.length > 0) {
-          const route = routeResponse.routes[0];
-          const routeGeoJson = route.toGeoJson();
-
-          // Add route line to map
-          map.addLayer({
-            id: 'route',
-            type: 'line',
-            source: {
-              type: 'geojson',
-              data: routeGeoJson
-            },
-            layout: {
-              'line-join': 'round',
-              'line-cap': 'round'
-            },
-            paint: {
-              'line-color': '#3DC1C4',
-              'line-width': 4
-            }
-          });
-        }
-      } catch (error) {
-        console.error('Route calculation error:', error);
-      }
-    }
-
-    // Fit map to show all markers
-    if (coordinates.length > 0) {
-      const bounds = new tt.LngLatBounds();
-      coordinates.forEach(coord => bounds.extend(coord));
-      map.fitBounds(bounds, { padding: 50 });
-    }
-  };
-
-  // Update map when locations change
-  useEffect(() => {
-    if (!map) return;
-
-    const locations: string[] = [];
-    
-    if (pickupLocation) {
-      locations.push(pickupLocation);
-    }
-
-    if (tripType === "multi" && multiStops.length > 0) {
-      multiStops.forEach(stop => {
-        if (stop.location) {
-          locations.push(stop.location);
-        }
-      });
-    }
-
-    if (dropoffLocation) {
-      locations.push(dropoffLocation);
-    }
-
-    if (locations.length > 0) {
-      displayRoute(locations);
-    }
-  }, [map, pickupLocation, dropoffLocation, multiStops, tripType]);
 
   // Route visualization for single/return
   const renderRouteVisualization = () => {
@@ -380,15 +182,18 @@ const MapCard: React.FC<MapCardProps> = ({
       </div>
     );
   };
+  
 
   return (
     <div className="relative w-full max-h-[877px] lg:mt-[0] mt-[30px] h-full">
-      {/* TomTom Map Container */}
+      {/* Map */}
       <div className="relative w-full h-full rounded-lg md:rounded-xl overflow-hidden">
-        <div 
-          ref={mapElement} 
-          className="w-full h-full rounded-xl"
-          style={{ minHeight: '400px' }}
+        <Image
+          src="/images/map.png"
+          alt="map"
+          fill
+          className="object-cover rounded-xl"
+          priority={false}
         />
       </div>
 
@@ -396,8 +201,8 @@ const MapCard: React.FC<MapCardProps> = ({
       <div className="bg-white shadow-sm md:shadow-md rounded-md md:rounded-lg px-3 py-2 md:px-4 md:py-3 absolute bottom-10 md:bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] md:w-[95%] max-w-[1177px]">
         {/* Top icons */}
         <div className="hidden sm:flex justify-between items-center">
-          <Image src={IMAGES_ASSETS.CAR} alt="car" width={40} height={24} />
-          <Image src={IMAGES_ASSETS.LOCATION} alt="pin" width={20} height={20} />
+          <Image src={IMAGES_ASSETS.CAR} alt="car" width={40} height={24}  />
+          <Image src={IMAGES_ASSETS.LOCATION} alt="pin" width={20} height={20}  />
         </div>
 
         {/* Route */}
@@ -406,13 +211,6 @@ const MapCard: React.FC<MapCardProps> = ({
         {/* Labels */}
         {renderLocationLabels()}
       </div>
-
-      {/* Loading indicator (optional) */}
-      {!map && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl">
-          <div className="text-gray-500">Loading map...</div>
-        </div>
-      )}
     </div>
   );
 };
