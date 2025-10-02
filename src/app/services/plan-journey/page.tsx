@@ -10,6 +10,7 @@ import Inputs from "../../components/ui/Inputs";
 import { useTrip } from "../../context/tripContext";
 import { Icon } from "@iconify/react";
 import { ICON_DATA } from "@/app/constants/IconConstants";
+import { ROUTES } from "@/app/constants/RoutesConstant";
 
 interface Stop {
   location: string;
@@ -101,7 +102,7 @@ const PlanJourney = () => {
 
   // Next button handler
   const handleNext = () => {
-    router.push("/services/page3");
+    router.push(ROUTES.RESERVE_CAR);
   };
 
   // Helper function to set stop input ref
@@ -111,9 +112,9 @@ const PlanJourney = () => {
 
   return (
     <section className="w-full max-w-[1320px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[0px] bg-white">
-      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto px-4 sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10 2xl:gap-10">
+      <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto  sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10 2xl:gap-10">
         {/* Left Panel */}
-        <div className="w-full 2xl:w-[580px] xl:w-[600px] sm:max-w-[573px] md:w-[580px]">
+        <div className="w-full 2xl:w-[580px] xl:w-[600px] md:w-full">
           {/* Back Button */}
           <button
             onClick={() => router.push("/")}
@@ -131,26 +132,28 @@ const PlanJourney = () => {
             service
           </p>
 
-          {/* Accordion */}
+          {/* Itinerary Accordion */}
           <details className="group mt-6 md:mt-8" open>
             <summary className="flex justify-between items-center py-4 cursor-pointer select-none list-none">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Itinerary
               </h2>
               <div className="flex items-center gap-2 sm:gap-4">
-                <select
+               <div className="border-2 border-primary-border/10 rounded-full px-2">
+               <select
                   value={tripData.tripType}
                   onChange={(e) =>
                     handleTripTypeChange(
                       e.target.value as "single" | "return" | "multi"
                     )
                   }
-                  className="border-2 w-35 border-[#E5E5E5] bg-white text-sm font-medium rounded-full px-4 py-2 focus:outline-none cursor-pointer transition-all duration-100"
+                  className="w-35 bg-white text-sm font-medium rounded-full px-2 py-2 focus:outline-none cursor-pointer transition-all duration-100"
                 >
                   <option value="single">Single Trip</option>
                   <option value="return">Round-Trip</option>
                   <option value="multi">Multi Stop</option>
                 </select>
+               </div>
                 <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
               </div>
             </summary>
@@ -277,11 +280,12 @@ const PlanJourney = () => {
                       <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
                       <Inputs
                         type="text"
-                        value={tripData.returnLocation}
-                        onChange={(e) => updateTripData({ returnLocation: e.target.value })}
+                        value={tripData.pickupLocation}
+                        onChange={(e) => updateTripData({ pickupLocation: e.target.value })}
                         placeholder="Return Location"
                         className="w-full bg-transparent focus:outline-none text-sm placeholder-gray-400"
                         name="Return Location"
+                        disabled
                       />
                     </label>
                     <div className="border-b border-gray-300" />
@@ -308,8 +312,88 @@ const PlanJourney = () => {
 
           <div className="border-t border-gray-200 my-6 md:my-8" />
 
+          {/* Trip Details Accordion */}
+          <details className="group md:w-[580px] w-full overflow-hidden" open>
+            <summary className="flex items-center justify-between gap-4 py-4 cursor-pointer select-none list-none">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Trip Details</h2>
+              <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
+            </summary>
+            <div className="border border-[#DBDBDB] bg-[#FCFCFC] mt-4 rounded-2xl p-5 space-y-6">
+              {/* Trip Name */}
+              <div>
+                <p className="font-medium text-lg text-[#040401]">Trip Name</p>
+                <Inputs
+                  type="text"
+                  value={tripData.tripName || ""}
+                  onChange={(e) => updateTripData({ tripName: e.target.value })}
+                  placeholder="Round trip"
+                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
+                  name="Trip Name"
+                />
+                <div className="border-b border-[#DBDBDB] mt-4"></div>
+              </div>
+
+              {/* Luggage & Event Types */}
+              <div className="flex flex-col md:flex-row md:gap-4 gap-6">
+                <div className="w-full md:w-1/2">
+                  <p className="font-medium text-lg text-[#040401]">Luggage</p>
+                  <Inputs
+                    type="number"
+                    value={tripData.luggageCount.toString() || ""}
+                    onChange={(e) => updateTripData({ luggageCount: parseInt(e.target.value) || 0 })}
+                    placeholder="2"
+                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
+                    name="Luggage"
+                  />
+                  <div className="border-b border-[#DBDBDB] mt-4"></div>
+                </div>
+                <div className="w-full md:w-1/2">
+                  <p className="font-medium text-lg text-[#040401]">
+                    Event Types
+                  </p>
+                  <select
+                    value={tripData.eventType || ""}
+                    onChange={(e) => updateTripData({ eventType: e.target.value })}
+                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full bg-transparent cursor-pointer"
+                  >
+                    <option value="">Select event type</option>
+                    <option value="personal">Personal</option>
+                    <option value="business">Business</option>
+                    <option value="airport">Airport Transfer</option>
+                    <option value="wedding">Wedding</option>
+                    <option value="corporate">Corporate</option>
+                  </select>
+                  <div className="border-b border-[#DBDBDB] mt-4"></div>
+                </div>
+              </div>
+
+              {/* Accessible Vehicle */}
+              <div>
+                <p className="font-medium text-lg text-[#040401] mb-3">
+                  Accessible Vehicle
+                </p>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={tripData.accessibleVehicle || false}
+                    onChange={(e) => updateTripData({ accessibleVehicle: e.target.checked })}
+                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
+                  />
+                  <p className="text-sm lg:w-[350px]">
+                    ADA standards Compliant
+                  </p>
+                  <img
+                    src="/images/wheel-chair.png"
+                    alt="wheelchair"
+                    className="w-[39px] h-[39px] lg:ml-auto"
+                  />
+                </div>
+              </div>
+            </div>
+          </details>
+
           {/* Next Button */}
-          <Button label="Next" onClick={handleNext} size="full" />
+          <Button label="Next" onClick={handleNext} size="full" className="mt-[30px]" />
         </div>
 
         {/* Right Panel */}
@@ -322,7 +406,6 @@ const PlanJourney = () => {
             pickupDateTime={tripData.pickupDateTime}
             returnDateTime={tripData.returnDateTime}
           />
-
         </div>
       </div>
     </section>

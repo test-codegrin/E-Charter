@@ -382,7 +382,7 @@ const Navbar: React.FC = () => {
             <Button 
               label="Book Now" 
               href={ROUTES.PLAN_JOURNEY} 
-              className="lg:w-[150px] text-xs hover:scale-105 transition-transform duration-200" 
+              className="lg:w-[150px] text-xs transition-transform duration-200" 
             />
           </div>
 
@@ -391,11 +391,12 @@ const Navbar: React.FC = () => {
             /* User Avatar + Dropdown */
             <div className="relative user-dropdown z-100">
               <button
-                className="flex items-center hover:opacity-80 transition-opacity duration-200"
+                className="flex items-center"
                 onClick={() => setIsDropdownOpen((prev) => !prev)}
                 aria-label="User menu"
                 disabled={isLoadingProfile}
               >
+                <div className="flex hover:bg-primary-gray/20  p-2 rounded-lg items-center transition-all duration-200 cursor-pointer gap-2">
                 <div className="rounded-full h-[36px] w-[36px] md:h-[40px] md:w-[40px] overflow-hidden ring-2 ring-primary/20 hover:ring-primary/40 transition-all duration-200 relative">
                   {isLoadingProfile ? (
                     <Skeleton animation="shimmer" className="w-full h-full" />
@@ -426,6 +427,7 @@ const Navbar: React.FC = () => {
                     d="M19 9l-7 7-7-7"
                   />
                 </svg>
+                </div>
               </button>
 
               {isDropdownOpen && (
@@ -433,7 +435,7 @@ const Navbar: React.FC = () => {
                   <div className="py-2">
                     <button
                       onClick={handleProfileClick}
-                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-200 flex items-center"
+                      className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors duration-200 flex items-center cursor-pointer"
                     >
                       <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -445,7 +447,7 @@ const Navbar: React.FC = () => {
                     <hr className="border-gray-100" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200 flex items-center"
+                      className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200 flex items-center cursor-pointer"
                     >
                       <svg className="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

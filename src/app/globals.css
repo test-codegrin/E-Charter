@@ -32,6 +32,8 @@
   --color-primary-gray: #9C9C9C;
   --color-primary-border: #2a2a2a;
   --color-danger: #FF6363;
+
+  
 }
 
 @keyframes loading {
@@ -61,4 +63,22 @@
   );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3DBEC8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #246d72;
 }

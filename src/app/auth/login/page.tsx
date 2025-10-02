@@ -111,8 +111,8 @@ class AuthService {
 // Custom hook for form management
 const useLoginForm = () => {
   const [formData, setFormData] = useState<LoginFormData>({
-    email: "",
-    password: "",
+    email: "test9@gmail.com",
+    password: "test9",
   });
 
   const [errors, setErrors] = useState<FormErrors>({
