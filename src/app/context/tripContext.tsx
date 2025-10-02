@@ -22,6 +22,9 @@ interface TripData {
     location: string;
     date: string;
   };
+  accessibleVehicle: boolean;
+  eventType: string;
+  tripName: string;
 }
 
 interface TripContextType {
@@ -43,7 +46,10 @@ const defaultTripData: TripData = {
   returnTrip: {
     location: "",
     date: ""
-  }
+  },
+  accessibleVehicle: false,
+  eventType: "",
+  tripName: ""
 };
 
 const TripContext = createContext<TripContextType | undefined>(undefined);

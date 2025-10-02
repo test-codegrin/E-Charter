@@ -11,9 +11,11 @@ type UniversalButtonProps = {
   variant?: "primary" | "secondary" | "danger" | "outline" | "gray";
   size?: "sm" | "md" | "lg" | "xl" | "full";
   className?: string; // for custom overrides
+  disabled?: boolean;
+  rounded?: boolean;
 };
 
-const baseStyles ="rounded-full font-semibold transition-colors duration-200 flex items-center justify-center";
+const baseStyles ="font-semibold transition-colors duration-200 flex items-center justify-center";
 
 const sizeStyles: Record<string, string> = {
   sm: "px-4 py-2 text-xs sm:text-sm h-[40px] w-auto",
@@ -35,19 +37,21 @@ export default function Button({
   label,
   href,
   onClick,
+  rounded = true,
   type = "button",
   variant = "primary",
   size = "md",
   className = "",
+  disabled = false,
 }: UniversalButtonProps) {
-  const buttonClasses = `${baseStyles} ${sizeStyles[size]} ${
+  const buttonClasses = `${baseStyles} ${sizeStyles[size]} ${rounded ? "rounded-full" : ""} ${
     variantStyles[variant]
   } ${className}`;
 
   if (href) {
     return (
       <Link href={href}>
-        <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick}>
+        <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick} disabled={disabled}>
           {label}
         </button>
       </Link>
@@ -55,7 +59,7 @@ export default function Button({
   }
 
   return (
-    <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick}>
+    <button className={`${buttonClasses} cursor-pointer`} type={type} onClick={onClick} disabled={disabled}>
       {label}
     </button>
   );

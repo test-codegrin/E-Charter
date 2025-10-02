@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { IMAGES_ASSETS } from "../constants/ImageConstant";
 
 export default function NotFoundPage() {
   const router = useRouter();
@@ -26,5 +27,7 @@ export default function NotFoundPage() {
         </button>
       </div>
     </main>
+    
+
   );
 }

@@ -8,5 +8,12 @@ export const ICON_DATA = {
     CALENDAR_RETURN: "iconoir:calendar-arrow-down",
     RADIO_ACTIVE: "fluent:radio-button-24-filled",
     RADIO_INACTIVE: "fluent:radio-button-24-regular",
+    LOCATION : "tdesign:location",
+    STOP : "hugeicons:stop-loss-order",
+    EMAIL : "mdi:email-outline",
+    PASSWORD : "solar:key-broken",
+    EYE : "solar:eye-outline",
+    EYE_SLASH : "solar:eye-closed-bold",
+    CLOSE : "fluent:dismiss-16-regular",
     
 };

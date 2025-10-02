@@ -23,9 +23,62 @@
 @theme {
   --font-sans: "Epilogue", ui-sans-serif, system-ui, sans-serif;
 
+  --animate-loading: loading 1s ease-in-out infinite;
+  --animate-shimmer: shimmer 1s ease-in-out infinite;
+
 
   --color-primary: #3DBEC8;
-  --color-secondary: #adadad;
+  --color-secondary: #616161;
   --color-primary-gray: #9C9C9C;
   --color-primary-border: #2a2a2a;
+  --color-danger: #FF6363;
+
+  
+}
+
+@keyframes loading {
+  0% {
+    left: -33%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Chrome, Edge, Safari */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3DBEC8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #246d72;
 }
