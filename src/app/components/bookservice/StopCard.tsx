@@ -5,6 +5,8 @@ import Button from "../ui/Button";
 import Inputs from "../ui/Inputs";
 import { ICON_DATA } from "@/app/constants/IconConstants";
 import { Icon } from "@iconify/react";
+import tt from "@tomtom-international/web-sdk-maps";
+import toast from "react-hot-toast";
 
 // TomTom Search Result Interface
 interface TomTomSearchResult {
@@ -56,6 +58,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
   onRemove,
   onChange,
 }, ref) => {
+  
   // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
 
@@ -74,14 +77,114 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
   // Flag to track dropdown selection
   const [isSelectingFromDropdown, setIsSelectingFromDropdown] = useState(false);
 
+  // Map modal states
+  const [isMapOpen, setIsMapOpen] = useState(false);
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<tt.Map | null>(null);
+
   // Refs
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Initialize map when modal opens
+  useEffect(() => {
+    if (isMapOpen && mapContainerRef.current && TOMTOM_API_KEY) {
+      // Initialize TomTom map
+      mapRef.current = tt.map({
+        key: TOMTOM_API_KEY,
+        container: mapContainerRef.current,
+        center: [0, 0], // Default center
+        zoom: 16,
+      });
+
+      // Use existing coordinates from location if available
+      let initialCoordinates: { lat: number; lng: number } | null = null;
+      if (location && validated) {
+        // Assuming coordinates are passed via onChange and stored elsewhere (e.g., parent component)
+        // Fallback to Toronto, Canada if coordinates aren't available
+        mapRef.current.setCenter([-79.3832, 43.6532]); // Default: Toronto, Canada
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
+      } else {
+        mapRef.current.setCenter([-79.3832, 43.6532]); // Default: Toronto, Canada
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
+      }
+
+      // Resize map after centering
+      setTimeout(() => {
+        if (mapRef.current) {
+          mapRef.current.resize();
+        }
+      }, 200);
+
+      // Update selected coordinates on map move or zoom
+      const updateCoordinates = () => {
+        if (mapRef.current) {
+          const center = mapRef.current.getCenter();
+          setSelectedCoordinates({ lat: center.lat, lng: center.lng });
+        }
+      };
+
+      mapRef.current.on("moveend", updateCoordinates);
+      mapRef.current.on("zoomend", updateCoordinates);
+
+      return () => {
+        if (mapRef.current) {
+          mapRef.current.off("moveend", updateCoordinates);
+          mapRef.current.off("zoomend", updateCoordinates);
+          mapRef.current.remove();
+          mapRef.current = null;
+        }
+      };
+    }
+  }, [isMapOpen, TOMTOM_API_KEY]);
+
+  // Handle Done button click
+  const handleDoneClick = async () => {
+    if (selectedCoordinates && TOMTOM_API_KEY) {
+      try {
+        const { lat, lng } = selectedCoordinates;
+        const response = await fetch(
+          `https://api.tomtom.com/search/2/reverseGeocode/${lat},${lng}.json?key=${TOMTOM_API_KEY}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data.addresses && data.addresses.length > 0) {
+            const address = data.addresses[0].address.freeformAddress;
+            const country = data.addresses[0].address.country;
+            if (country !== "Canada") {
+              toast.error("Selected location must be in Canada.");
+              return;
+            }
+            const coordinates = { latitude: lat, longitude: lng };
+            setSearchValue(address);
+            setValidated(true);
+            setError("");
+            setIsMapOpen(false);
+
+            // Only call onChange if both location and date are non-empty
+            if (address && date) {
+              onChange(id, { location: address, date, coordinates });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Reverse geocoding error:", error);
+        toast.error("Could not get address for the selected location.");
+      }
+    }
+  };
+
+  // Handle Close button click
+  const handleCloseClick = () => {
+    setIsMapOpen(false);
+    setSelectedCoordinates(null);
+  };
+
   // Get current location using Geolocation API
   const getCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
       return;
     }
 
@@ -109,19 +212,30 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               
               if (data.addresses && data.addresses.length > 0) {
                 const address = data.addresses[0].address.freeformAddress;
+                const country = data.addresses[0].address.country;
+                if (country !== "Canada") {
+                  toast.error("Current location must be in Canada.");
+                  setIsGettingCurrentLocation(false);
+                  setIsSelectingFromDropdown(false);
+                  return;
+                }
                 const coordinates = { latitude, longitude };
 
                 setSearchValue(address);
-                onChange(id, { location: address, date, coordinates });
                 setValidated(true);
                 setError("");
                 setIsDropdownOpen(false);
+
+                // Only call onChange if both location and date are non-empty
+                if (address && date) {
+                  onChange(id, { location: address, date, coordinates });
+                }
               }
             }
           }
         } catch (error) {
           console.error('Reverse geocoding error:', error);
-          alert("Could not get address for your location. Please try again.");
+          toast.error("Could not get address for your location. Please try again.");
         } finally {
           setIsGettingCurrentLocation(false);
           setIsSelectingFromDropdown(false);
@@ -145,7 +259,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
             errorMessage += "An unknown error occurred.";
         }
         
-        alert(errorMessage);
+        toast.error(errorMessage);
         setIsGettingCurrentLocation(false);
         setIsSelectingFromDropdown(false);
       },
@@ -159,7 +273,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
 
     try {
       const response = await fetch(
-        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true`
+        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
       );
 
       if (!response.ok) {
@@ -188,7 +302,6 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
     setSearchValue(value);
     setValidated(false);
     setError("");
-    onChange(id, { location: value, date });
 
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -204,21 +317,38 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
         setIsDropdownOpen(false);
       }
     }, 300);
+
+    // Only call onChange if both new location and current date are non-empty
+    if (value && date) {
+      onChange(id, { location: value, date });
+    }
   };
 
   // Handle location selection
   const handleLocationSelect = (suggestion: LocationSuggestion) => {
     setIsSelectingFromDropdown(true);
     setSearchValue(suggestion.address);
-    onChange(id, { location: suggestion.address, date, coordinates: suggestion.coordinates });
     setValidated(true);
     setError("");
     setIsDropdownOpen(false);
     setSuggestions([]);
     
+    // Only call onChange if both location and date are non-empty
+    if (suggestion.address && date) {
+      onChange(id, { location: suggestion.address, date, coordinates: suggestion.coordinates });
+    }
+    
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
+  };
+
+  // Handle date change
+  const handleDateChange = (newDate: string) => {
+    // Only call onChange if both current location (searchValue) and new date are non-empty
+    if (searchValue && newDate) {
+      onChange(id, { location: searchValue, date: newDate });
+    }
   };
 
   // Handle blur validation
@@ -226,6 +356,11 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
     if (searchValue && !validated && !isSelectingFromDropdown) {
       setError("Please select a location from the dropdown suggestions.");
     }
+  };
+
+  // Open map for stop location
+  const openMap = () => {
+    setIsMapOpen(true);
   };
 
   // Initialize search value from props
@@ -250,12 +385,11 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
       }
     };
 
-    if (isDropdownOpen) {
+    if (isDropdownOpen || isMapOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
     }
-
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isDropdownOpen, isSelectingFromDropdown, searchValue, validated]);
+  }, [isDropdownOpen, isMapOpen, isSelectingFromDropdown, searchValue, validated]);
 
   // Cleanup timeout
   useEffect(() => {
@@ -288,7 +422,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
           <div className="">
             <button
               onClick={() => onRemove(id)}
-              className="text-[#FFFFFF] font-semibold bg-danger w-[120px] h-[36px] rounded-full cursor-pointer"
+              className="text-[#FFFFFF] font-semibold bg-danger w-[125px] h-[36px] rounded-full cursor-pointer"
             >
               Remove Stop
             </button>
@@ -299,9 +433,14 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
       {/* Inputs section */}
       <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
         {/* Stop location with Search Dropdown */}
-        <div className="w-full sm:w-1/2 relative" ref={dropdownRef}>
-          <label className={`flex items-center gap-3 w-full border-b ${error ? 'border-red-500' : 'border-[#DBDBDB]'}`}>
-            <Icon icon={ICON_DATA.LOCATION} className="text-primary-gray w-4 h-4 sm:w-5 sm:h-5"/>
+       <div className="flex flex-col gap-2 w-full sm:w-1/2">
+       <div className="w-full relative h-[40px] sm:h-[44px] flex flex-col" ref={dropdownRef}>
+       <label
+                      className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
+                        error ? "border-red-500" : "border-[#DBDBDB]"
+                      }`}
+                    >
+            <Icon icon={ICON_DATA.LOCATION} className={`text-primary-gray w-5 h-5 flex-shrink-0 ${error ? "text-red-500" : ""}`}/>
             <input
               ref={ref}
               autoFocus={true}
@@ -325,24 +464,21 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
                 }, 150);
               }}
               placeholder="Stop Location"
-              className={`w-full bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${error ? 'text-red-600' : ''}`}
+              className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${error ? 'text-red-600' : ''}`}
               autoComplete="off"
             />
             {validated && (
               <Icon
                 icon="mdi:check-circle"
-                className="w-4 h-4 text-green-500"
+                className="w-5 h-5 text-green-500 flex-shrink-0"
               />
             )}
           </label>
           
-          {error && (
-            <p className="text-red-500 text-xs mt-1">{error}</p>
-          )}
 
           {/* Location Search Dropdown */}
           {isDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
+            <div className="absolute top-[40px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
               {/* Current Location Option */}
               <button
                 onMouseDown={() => setIsSelectingFromDropdown(true)}
@@ -405,37 +541,88 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               {/* No results message */}
               {searchValue.length >= 3 && suggestions.length === 0 && (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  No locations found. Try a different search term.
+                  No locations found in Canada. Try a different search term.
                 </div>
               )}
 
               {/* Initial message */}
               {searchValue.length < 3 && suggestions.length === 0 && (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  Type at least 3 characters to search for locations
+                  Type at least 3 characters to search for locations in Canada
                 </div>
               )}
             </div>
           )}
         </div>
+        {error && (
+              <p className="text-red-500 text-xs ml-2">{error}</p>
+            )}
+        <button
+            onClick={openMap}
+            className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
+          >
+            Open Map
+          </button>
+         
+         
+       </div>
 
-        {/* Date & Time */}
-        <label className="flex items-center gap-3 w-full sm:w-1/2 border-b border-[#DBDBDB]">
-          <img
-            src="/images/Clock.png"
-            alt="date-time"
-            className="w-6 h-6 shrink-0"
-            loading="lazy"
-          />
-          <Inputs
-            name="Stop Date & Time"
-            type="datetime-local"
-            value={date}
-            onChange={(e) => onChange(id, { location: searchValue, date: e.target.value })}
-            className="w-full bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
-          />
-        </label>
+        {/* Date only */}
+        <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
+          <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-[#DBDBDB]">
+            <img
+              src="/images/Clock.png"
+              alt="date-time"
+              className="w-5 h-5 flex-shrink-0"
+              loading="lazy"
+            />
+            <input
+              name="Stop Date"
+              type="date"
+              value={date}
+              onChange={(e) => handleDateChange(e.target.value)}
+              className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+            />
+          </label>
+        </div>
       </section>
+
+      {/* Map Modal */}
+      {isMapOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-[90vw] sm:max-w-3xl min-h-[60vh] max-h-[90vh] flex flex-col">
+            <div className="flex flex-row justify-between">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                Select Stop Location
+              </h3>
+              <Icon
+                onClick={handleCloseClick}
+                icon="mdi:close"
+                className="w-6 h-6 cursor-pointer"
+              />
+            </div>
+            <div
+              id="map"
+              ref={mapContainerRef}
+              className="w-full flex-1 bg-gray-200 rounded-lg relative"
+            >
+              <Icon
+                icon={ICON_DATA.MAP_LOCATION}
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10"
+              />
+            </div>
+            <div className="flex mt-2 justify-end">
+              <Button
+                label="Done"
+                onClick={handleDoneClick}
+                variant="primary"
+                className="text-xs sm:text-sm"
+                size="sm"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

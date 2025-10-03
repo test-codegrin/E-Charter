@@ -16,7 +16,7 @@ interface Stop {
 }
 
 interface TripData {
-  tripType: "single" | "return" | "multi";
+  tripType: "single" | "round" | "multi";
   persons: number;
   luggageCount: number;
   pickupLocation: string;
@@ -50,13 +50,13 @@ interface TripContextType {
   getAllLocationsWithCoordinates: () => Array<{
     location: string;
     coordinates?: Coordinates;
-    type: 'pickup' | 'dropoff' | 'return' | 'stop';
+    type: 'pickup' | 'dropoff' | "round" | 'stop';
     index?: number;
   }>;
 }
 
 const defaultTripData: TripData = {
-  tripType: "return",
+  tripType: "single",
   persons: 1,
   luggageCount: 1,
   pickupLocation: "",
@@ -137,7 +137,7 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const locations: Array<{
       location: string;
       coordinates?: Coordinates;
-      type: 'pickup' | 'dropoff' | 'return' | 'stop';
+      type: 'pickup' | 'dropoff' | "round" | 'stop';
       index?: number;
     }> = [];
 
@@ -174,11 +174,11 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
 
     // Add return location (for return trips)
-    if (tripData.tripType === 'return' && tripData.returnLocation) {
+    if (tripData.tripType === "round" && tripData.returnLocation) {
       locations.push({
         location: tripData.returnLocation,
         coordinates: tripData.returnCoordinates,
-        type: 'return'
+        type: "round"
       });
     }
 
