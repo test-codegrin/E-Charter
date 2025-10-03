@@ -128,7 +128,6 @@ const MapCard: React.FC = () => {
       border: 3px solid white;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
       background-color: ${color};
-      position: relative;
       cursor: pointer;
     `;
 
@@ -143,6 +142,7 @@ const MapCard: React.FC = () => {
       left: 50%;
       transform: translate(-50%, -50%);
     `;
+    
 
     markerElement.appendChild(innerDot);
     return markerElement;
@@ -516,13 +516,8 @@ const MapCard: React.FC = () => {
           style={{ minHeight: '400px' }}
         />
         
-        {!isMapLoaded && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl">
-            <div className="text-gray-500">Loading map...</div>
-          </div>
-        )}
 
-        {isRouteLoading && (
+        {!isMapLoaded || isRouteLoading && (
           <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 rounded-xl">
             <div className="text-white text-lg font-medium">Loading Route...</div>
           </div>
