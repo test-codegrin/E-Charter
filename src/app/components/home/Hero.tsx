@@ -64,6 +64,9 @@ export default function Hero(): JSX.Element {
   const [dropoffValidated, setDropoffValidated] = useState(false);
   const [pickupError, setPickupError] = useState("");
   const [dropoffError, setDropoffError] = useState("");
+  // Current location states
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
+  const [currentLocationFor, setCurrentLocationFor] = useState<'pickup' | 'dropoff' | null>(null);
   // Map modal states
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapType, setMapType] = useState<"pickup" | "dropoff" | null>(null);
@@ -129,7 +132,7 @@ export default function Hero(): JSX.Element {
         key: TOMTOM_API_KEY,
         container: mapContainerRef.current,
         center: [0, 0], // Default center
-        zoom: 12,
+        zoom: 15,
       });
 
       // Check for existing coordinates
@@ -225,6 +228,94 @@ export default function Hero(): JSX.Element {
   const handleCloseClick = () => {
     setIsMapOpen(false);
     setSelectedCoordinates(null);
+  };
+
+  // Get current location using Geolocation API
+  const getCurrentLocation = async (type: 'pickup' | 'dropoff') => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by this browser.");
+      return;
+    }
+
+    setIsGettingCurrentLocation(true);
+    setCurrentLocationFor(type);
+    setIsSelectingFromDropdown(true);
+
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 60000,
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+
+          if (TOMTOM_API_KEY) {
+            const response = await fetch(
+              `https://api.tomtom.com/search/2/reverseGeocode/${latitude},${longitude}.json?key=${TOMTOM_API_KEY}`
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+
+              if (data.addresses && data.addresses.length > 0) {
+                const address = data.addresses[0].address.freeformAddress;
+                const coordinates = { latitude, longitude };
+
+                if (type === 'pickup') {
+                  setPickupSearchValue(address);
+                  updateTripData({ pickupLocation: address });
+                  updatePickupCoordinates(coordinates);
+                  setPickupValidated(true);
+                  setPickupError("");
+                  setIsPickupDropdownOpen(false);
+                } else if (type === 'dropoff') {
+                  setDropoffSearchValue(address);
+                  updateTripData({ dropoffLocation: address });
+                  updateDropoffCoordinates(coordinates);
+                  setDropoffValidated(true);
+                  setDropoffError("");
+                  setIsDropoffDropdownOpen(false);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Reverse geocoding error:', error);
+          alert("Could not get address for your location. Please try again.");
+        } finally {
+          setIsGettingCurrentLocation(false);
+          setCurrentLocationFor(null);
+          setIsSelectingFromDropdown(false);
+        }
+      },
+      (error) => {
+        console.error('Geolocation error:', error);
+        let errorMessage = "Could not get your location. ";
+
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += "Permission denied. Please enable location access.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += "Location unavailable.";
+            break;
+          case error.TIMEOUT:
+            errorMessage += "Request timeout.";
+            break;
+          default:
+            errorMessage += "An unknown error occurred.";
+        }
+
+        alert(errorMessage);
+        setIsGettingCurrentLocation(false);
+        setCurrentLocationFor(null);
+        setIsSelectingFromDropdown(false);
+      },
+      options
+    );
   };
 
   // Search TomTom API for locations
@@ -479,6 +570,94 @@ export default function Hero(): JSX.Element {
   const openMap = (type: "pickup" | "dropoff") => {
     setMapType(type);
     setIsMapOpen(true);
+  };
+
+  // Render location dropdown
+  const renderLocationDropdown = (
+    type: 'pickup' | 'dropoff',
+    suggestions: LocationSuggestion[],
+    isOpen: boolean,
+    searchValue: string,
+    onSelect: (suggestion: LocationSuggestion) => void
+  ) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="absolute top-[80px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
+        {/* Current Location Option */}
+        <button
+          onMouseDown={() => setIsSelectingFromDropdown(true)}
+          onClick={() => getCurrentLocation(type)}
+          disabled={isGettingCurrentLocation && currentLocationFor === type}
+          className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors border-b border-gray-100 disabled:opacity-50"
+        >
+          <div className="flex items-center gap-3">
+            {isGettingCurrentLocation && currentLocationFor === type ? (
+              <Icon icon="mdi:loading" className="w-4 h-4 text-primary animate-spin flex-shrink-0" />
+            ) : (
+              <Icon
+                icon="mdi:crosshairs-gps"
+                className="w-4 h-4 text-primary flex-shrink-0"
+              />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-primary">
+                {isGettingCurrentLocation && currentLocationFor === type
+                  ? 'Getting your location...'
+                  : 'Use current location'
+                }
+              </p>
+              <p className="text-xs text-gray-500">
+                Detect your current position
+              </p>
+            </div>
+          </div>
+        </button>
+
+        {/* Search Results */}
+        {suggestions.length > 0 && (
+          <>
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion.id}
+                onMouseDown={() => setIsSelectingFromDropdown(true)}
+                onClick={() => onSelect(suggestion)}
+                className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    icon={ICON_DATA.LOCATION}
+                    className="w-4 h-4 text-primary-gray flex-shrink-0"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">
+                      {suggestion.name}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      {suggestion.address}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </>
+        )}
+
+        {/* No results message */}
+        {searchValue.length >= 3 && suggestions.length === 0 && (
+          <div className="px-4 py-3 text-sm text-gray-500 text-center">
+            No locations found. Try a different search term.
+          </div>
+        )}
+
+        {/* Initial message */}
+        {searchValue.length < 3 && suggestions.length === 0 && (
+          <div className="px-4 py-3 text-sm text-gray-500 text-center">
+            Type at least 3 characters to search for locations
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -760,53 +939,21 @@ export default function Hero(): JSX.Element {
                     </div>
                     <button
                       onClick={() => openMap("pickup")}
-                      className="text-primary text-xs mt-1 ml-2 underline hover:text-primary-dark"
+                      className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                    <div className="h-5 mt-1">
+                    <div className={`h-5 mt-1 ${pickupError ? 'flex' : 'hidden'}`}>
                       {pickupError && (
                         <p className="text-red-500 text-xs ml-2">{pickupError}</p>
                       )}
                     </div>
-                    {isPickupDropdownOpen && (
-                      <div className="absolute top-[80px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
-                        {pickupSuggestions.length > 0 ? (
-                          <>
-                            {pickupSuggestions.map((suggestion) => (
-                              <button
-                                key={suggestion.id}
-                                onMouseDown={() => setIsSelectingFromDropdown(true)}
-                                onClick={() => handlePickupSelect(suggestion)}
-                                className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Icon
-                                    icon={ICON_DATA.LOCATION}
-                                    className="w-4 h-4 text-primary-gray flex-shrink-0"
-                                  />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                      {suggestion.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">
-                                      {suggestion.address}
-                                    </p>
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        ) : pickupSearchValue.length >= 3 ? (
-                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                            No locations found. Try a different search term.
-                          </div>
-                        ) : (
-                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                            Type at least 3 characters to search for locations
-                          </div>
-                        )}
-                      </div>
+                    {renderLocationDropdown(
+                      'pickup',
+                      pickupSuggestions,
+                      isPickupDropdownOpen,
+                      pickupSearchValue,
+                      handlePickupSelect
                     )}
                   </div>
                   {/* Dropoff with Search Dropdown */}
@@ -853,53 +1000,21 @@ export default function Hero(): JSX.Element {
                     </div>
                     <button
                       onClick={() => openMap("dropoff")}
-                      className="text-primary text-xs mt-1 ml-2 underline hover:text-primary-dark"
+                      className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                    <div className="h-5 mt-1">
+                    <div className={`h-5 mt-1 ${dropoffError ? 'flex' : 'hidden'}`}>
                       {dropoffError && (
                         <p className="text-red-500 text-xs ml-2">{dropoffError}</p>
                       )}
                     </div>
-                    {isDropoffDropdownOpen && (
-                      <div className="absolute top-[80px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
-                        {dropoffSuggestions.length > 0 ? (
-                          <>
-                            {dropoffSuggestions.map((suggestion) => (
-                              <button
-                                key={suggestion.id}
-                                onMouseDown={() => setIsSelectingFromDropdown(true)}
-                                onClick={() => handleDropoffSelect(suggestion)}
-                                className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <Icon
-                                    icon={ICON_DATA.LOCATION}
-                                    className="w-4 h-4 text-primary-gray flex-shrink-0"
-                                  />
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                      {suggestion.name}
-                                    </p>
-                                    <p className="text-xs text-gray-500 truncate">
-                                      {suggestion.address}
-                                    </p>
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          </>
-                        ) : dropoffSearchValue.length >= 3 ? (
-                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                            No locations found. Try a different search term.
-                          </div>
-                        ) : (
-                          <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                            Type at least 3 characters to search for locations
-                          </div>
-                        )}
-                      </div>
+                    {renderLocationDropdown(
+                      'dropoff',
+                      dropoffSuggestions,
+                      isDropoffDropdownOpen,
+                      dropoffSearchValue,
+                      handleDropoffSelect
                     )}
                   </div>
                 </>
@@ -1019,34 +1134,13 @@ export default function Hero(): JSX.Element {
       {isMapOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-[90vw] sm:max-w-3xl min-h-[60vh] max-h-[90vh] flex flex-col">
-            <button
-              onClick={handleCloseClick}
-              className="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-800 rounded-full p-2 transition-colors"
-            >
-              <Icon icon="mdi:close" className="w-6 h-6" />
-            </button>
-            <h3 className="text-lg sm:text-xl font-semibold mb-2">
+        
+           <div className="flex flex-row justify-between">
+           <h3 className="text-lg sm:text-xl font-semibold mb-2">
               Select {mapType === "pickup" ? "Pickup" : "Dropoff"} Location
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              Move or zoom the map to select a location and click Done.
-            </p>
-            <div className="flex gap-2 mb-4">
-              <Button
-                label="Done"
-                onClick={handleDoneClick}
-                variant="primary"
-                className="text-xs sm:text-sm"
-                size="sm"
-              />
-              <Button
-                label="Close"
-                onClick={handleCloseClick}
-                variant="secondary"
-                className="text-xs sm:text-sm"
-                size="sm"
-              />
-            </div>
+              <Icon onClick={handleCloseClick} icon="mdi:close" className="w-6 h-6 cursor-pointer" />
+           </div>
             <div
               id="map"
               ref={mapContainerRef}
@@ -1055,6 +1149,15 @@ export default function Hero(): JSX.Element {
               <Icon
                 icon={ICON_DATA.MAP_LOCATION}
                 className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10"
+              />
+            </div>
+            <div className="flex mt-2 justify-end">
+              <Button
+                label="Done"
+                onClick={handleDoneClick}
+                variant="primary"
+                className="text-xs sm:text-sm"
+                size="sm"
               />
             </div>
           </div>
