@@ -581,7 +581,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               type="date"
               value={date}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+              className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
             />
           </label>
         </div>

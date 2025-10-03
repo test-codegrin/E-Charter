@@ -1055,7 +1055,7 @@ const PlanJourney = () => {
                       type="datetime-local"
                       value={tripData.pickupDateTime}
                       onChange={(e) => handlePickupTimeChange(e.target.value)}
-                      className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+                      className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
                     />
                   </label>
                   {pickupTimeError && (
@@ -1189,7 +1189,7 @@ const PlanJourney = () => {
                           type="datetime-local"
                           value={tripData.returnDateTime}
                           onChange={(e) => handleDropoffTimeChange(e.target.value)}
-                          className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
+                          className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
                         />
                       </label>
                       {dropoffTimeError && (
