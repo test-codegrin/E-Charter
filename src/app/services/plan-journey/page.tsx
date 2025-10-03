@@ -13,6 +13,7 @@ import { ICON_DATA } from "@/app/constants/IconConstants";
 import { ROUTES } from "@/app/constants/RoutesConstant";
 import tt from "@tomtom-international/web-sdk-maps";
 import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
+import toast from "react-hot-toast";
 
 interface Stop {
   location: string;
@@ -155,9 +156,9 @@ const PlanJourney = () => {
         ]);
         setSelectedCoordinates(initialCoordinates);
       } else {
-        // Fallback to default location (London)
-        mapRef.current.setCenter([-0.1278, 51.5074]);
-        setSelectedCoordinates({ lat: 51.5074, lng: -0.1278 });
+        // Fallback to default location (Toronto, Canada)
+        mapRef.current.setCenter([-79.3832, 43.6532]);
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
       }
 
       // Resize map after centering
@@ -207,6 +208,12 @@ const PlanJourney = () => {
           const data = await response.json();
           if (data.addresses && data.addresses.length > 0) {
             const address = data.addresses[0].address.freeformAddress;
+            const country = data.addresses[0].address.country;
+            if (country !== "Canada") {
+              // alert("Selected location must be in Canada.");
+              toast.error("Selected location must be in Canada.");
+              return;
+            }
             const coordinates = { latitude: lat, longitude: lng };
             if (mapType === "pickup") {
               setPickupSearchValue(address);
@@ -226,7 +233,8 @@ const PlanJourney = () => {
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
-        alert("Could not get address for the selected location.");
+        // alert("Could not get address for the selected location.");
+        toast.error("Could not get address for the selected location.");
       }
     }
   };
@@ -240,7 +248,8 @@ const PlanJourney = () => {
   // Get current location using Geolocation API
   const getCurrentLocation = async (type: "pickup" | "dropoff" | "round") => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+      // alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
       return;
     }
 
@@ -268,6 +277,15 @@ const PlanJourney = () => {
               const data = await response.json();
               if (data.addresses && data.addresses.length > 0) {
                 const address = data.addresses[0].address.freeformAddress;
+                const country = data.addresses[0].address.country;
+                if (country !== "Canada") {
+                  // alert("Current location must be in Canada.");
+                  toast.error("Current location must be in Canada.");
+                  setIsGettingCurrentLocation(false);
+                  setCurrentLocationFor(null);
+                  setIsSelectingFromDropdown(false);
+                  return;
+                }
                 const coordinates = { latitude, longitude };
 
                 if (type === "pickup") {
@@ -284,13 +302,18 @@ const PlanJourney = () => {
                   setDropoffValidated(true);
                   setDropoffError("");
                   setIsDropoffDropdownOpen(false);
+                } else if (type === "round") {
+                  setReturnSearchValue(address);
+                  updateTripData({ returnLocation: address });
+                  updateReturnCoordinates(coordinates);
+                  setIsReturnDropdownOpen(false);
                 }
               }
             }
           }
         } catch (error) {
           console.error("Reverse geocoding error:", error);
-          alert("Could not get address for your location. Please try again.");
+          toast.error("Could not get address for your location. Please try again.");
         } finally {
           setIsGettingCurrentLocation(false);
           setCurrentLocationFor(null);
@@ -315,7 +338,7 @@ const PlanJourney = () => {
             errorMessage += "An unknown error occurred.";
         }
 
-        alert(errorMessage);
+        toast.error(errorMessage);
         setIsGettingCurrentLocation(false);
         setCurrentLocationFor(null);
         setIsSelectingFromDropdown(false);
@@ -334,7 +357,7 @@ const PlanJourney = () => {
       const response = await fetch(
         `https://api.tomtom.com/search/2/search/${encodeURIComponent(
           query
-        )}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true`
+        )}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
       );
 
       if (!response.ok) {
@@ -638,13 +661,13 @@ const PlanJourney = () => {
 
         {searchValue.length >= 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
-            No locations found. Try a different search term.
+            No locations found in Canada. Try a different search term.
           </div>
         )}
 
         {searchValue.length < 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
-            Type at least 3 characters to search for locations
+            Type at least 3 characters to search for locations in Canada
           </div>
         )}
       </div>
@@ -1078,7 +1101,7 @@ const PlanJourney = () => {
                 </div>
 
                 <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
-                  {/* Pickup Location with Search Dropdown */}
+                  {/* Dropoff Location with Search Dropdown */}
                   <div className="flex flex-col gap-2 w-full sm:w-1/2">
                     <div
                       className="w-full relative h-[40px] sm:h-[44px] flex flex-col"
@@ -1147,7 +1170,7 @@ const PlanJourney = () => {
                     )}
                     <button
                       onClick={() => openMap("dropoff")}
-                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
+                      className="text-primary text-xs mt-1 ml-2 self-start hover:text-primary-dark"
                     >
                       Open Map
                     </button>

@@ -6,6 +6,7 @@ import Inputs from "../ui/Inputs";
 import { ICON_DATA } from "@/app/constants/IconConstants";
 import { Icon } from "@iconify/react";
 import tt from "@tomtom-international/web-sdk-maps";
+import toast from "react-hot-toast";
 
 // TomTom Search Result Interface
 interface TomTomSearchResult {
@@ -101,12 +102,12 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
       let initialCoordinates: { lat: number; lng: number } | null = null;
       if (location && validated) {
         // Assuming coordinates are passed via onChange and stored elsewhere (e.g., parent component)
-        // Fallback to a default location if coordinates aren't available
-        mapRef.current.setCenter([-0.1278, 51.5074]); // Default: London
-        setSelectedCoordinates({ lat: 51.5074, lng: -0.1278 });
+        // Fallback to Toronto, Canada if coordinates aren't available
+        mapRef.current.setCenter([-79.3832, 43.6532]); // Default: Toronto, Canada
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
       } else {
-        mapRef.current.setCenter([-0.1278, 51.5074]); // Default: London
-        setSelectedCoordinates({ lat: 51.5074, lng: -0.1278 });
+        mapRef.current.setCenter([-79.3832, 43.6532]); // Default: Toronto, Canada
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
       }
 
       // Resize map after centering
@@ -150,6 +151,11 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
           const data = await response.json();
           if (data.addresses && data.addresses.length > 0) {
             const address = data.addresses[0].address.freeformAddress;
+            const country = data.addresses[0].address.country;
+            if (country !== "Canada") {
+              toast.error("Selected location must be in Canada.");
+              return;
+            }
             const coordinates = { latitude: lat, longitude: lng };
             setSearchValue(address);
             setValidated(true);
@@ -164,7 +170,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
-        alert("Could not get address for the selected location.");
+        toast.error("Could not get address for the selected location.");
       }
     }
   };
@@ -178,7 +184,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
   // Get current location using Geolocation API
   const getCurrentLocation = async () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
       return;
     }
 
@@ -206,6 +212,13 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               
               if (data.addresses && data.addresses.length > 0) {
                 const address = data.addresses[0].address.freeformAddress;
+                const country = data.addresses[0].address.country;
+                if (country !== "Canada") {
+                  toast.error("Current location must be in Canada.");
+                  setIsGettingCurrentLocation(false);
+                  setIsSelectingFromDropdown(false);
+                  return;
+                }
                 const coordinates = { latitude, longitude };
 
                 setSearchValue(address);
@@ -222,7 +235,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
           }
         } catch (error) {
           console.error('Reverse geocoding error:', error);
-          alert("Could not get address for your location. Please try again.");
+          toast.error("Could not get address for your location. Please try again.");
         } finally {
           setIsGettingCurrentLocation(false);
           setIsSelectingFromDropdown(false);
@@ -246,7 +259,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
             errorMessage += "An unknown error occurred.";
         }
         
-        alert(errorMessage);
+        toast.error(errorMessage);
         setIsGettingCurrentLocation(false);
         setIsSelectingFromDropdown(false);
       },
@@ -260,7 +273,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
 
     try {
       const response = await fetch(
-        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true`
+        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
       );
 
       if (!response.ok) {
@@ -528,14 +541,14 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               {/* No results message */}
               {searchValue.length >= 3 && suggestions.length === 0 && (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  No locations found. Try a different search term.
+                  No locations found in Canada. Try a different search term.
                 </div>
               )}
 
               {/* Initial message */}
               {searchValue.length < 3 && suggestions.length === 0 && (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
-                  Type at least 3 characters to search for locations
+                  Type at least 3 characters to search for locations in Canada
                 </div>
               )}
             </div>

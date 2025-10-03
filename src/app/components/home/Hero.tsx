@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import { ICON_DATA } from "@/app/constants/IconConstants";
 import { ROUTES } from "@/app/constants/RoutesConstant";
 import tt from "@tomtom-international/web-sdk-maps";
+import toast from "react-hot-toast";
 
 // TomTom Search Result Interface
 interface TomTomSearchResult {
@@ -154,9 +155,9 @@ export default function Hero(): JSX.Element {
         mapRef.current.setCenter([initialCoordinates.lng, initialCoordinates.lat]);
         setSelectedCoordinates(initialCoordinates);
       } else {
-        // Fallback to default location (London)
-        mapRef.current.setCenter([-0.1278, 51.5074]);
-        setSelectedCoordinates({ lat: 51.5074, lng: -0.1278 });
+        // Fallback to default location (Toronto, Canada)
+        mapRef.current.setCenter([-79.3832, 43.6532]);
+        setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
       }
 
       // Resize map after centering
@@ -200,6 +201,12 @@ export default function Hero(): JSX.Element {
           const data = await response.json();
           if (data.addresses && data.addresses.length > 0) {
             const address = data.addresses[0].address.freeformAddress;
+            const country = data.addresses[0].address.country;
+            if (country !== "Canada") {
+              // alert("Selected location must be in Canada.");
+              toast.error("Selected location must be in Canada.");
+              return;
+            }
             const coordinates = { latitude: lat, longitude: lng };
             if (mapType === "pickup") {
               setPickupSearchValue(address);
@@ -221,7 +228,7 @@ export default function Hero(): JSX.Element {
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
-        alert("Could not get address for the selected location.");
+        toast.error("Could not get address for the selected location.");
       }
     }
   };
@@ -235,7 +242,7 @@ export default function Hero(): JSX.Element {
   // Get current location using Geolocation API
   const getCurrentLocation = async (type: 'pickup' | 'dropoff') => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by this browser.");
+      toast.error("Geolocation is not supported by this browser.");
       return;
     }
 
@@ -264,6 +271,14 @@ export default function Hero(): JSX.Element {
 
               if (data.addresses && data.addresses.length > 0) {
                 const address = data.addresses[0].address.freeformAddress;
+                const country = data.addresses[0].address.country;
+                if (country !== "Canada") {
+                  toast.error("Current location must be in Canada.");
+                  setIsGettingCurrentLocation(false);
+                  setCurrentLocationFor(null);
+                  setIsSelectingFromDropdown(false);
+                  return;
+                }
                 const coordinates = { latitude, longitude };
 
                 if (type === 'pickup') {
@@ -286,7 +301,7 @@ export default function Hero(): JSX.Element {
           }
         } catch (error) {
           console.error('Reverse geocoding error:', error);
-          alert("Could not get address for your location. Please try again.");
+          toast.error("Could not get address for your location. Please try again.");
         } finally {
           setIsGettingCurrentLocation(false);
           setCurrentLocationFor(null);
@@ -311,7 +326,7 @@ export default function Hero(): JSX.Element {
             errorMessage += "An unknown error occurred.";
         }
 
-        alert(errorMessage);
+        toast.error(errorMessage);
         setIsGettingCurrentLocation(false);
         setCurrentLocationFor(null);
         setIsSelectingFromDropdown(false);
@@ -325,7 +340,7 @@ export default function Hero(): JSX.Element {
     if (!query || query.length < 3 || !TOMTOM_API_KEY) return [];
     try {
       const response = await fetch(
-        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true`
+        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
       );
       if (!response.ok) {
         throw new Error("Search request failed");
@@ -543,11 +558,11 @@ export default function Hero(): JSX.Element {
       activeTab === "round" &&
       (!tripData.pickupDateTime || !tripData.returnDateTime)
     ) {
-      alert("Please select both pickup and return dates.");
+      toast.error("Please select both pickup and return dates.");
       return;
     }
     if (activeTab === "single" && !tripData.pickupDateTime) {
-      alert("Please select a departure date.");
+      toast.error("Please select a departure date.");
       return;
     }
     updateTripData({
@@ -648,14 +663,14 @@ export default function Hero(): JSX.Element {
         {/* No results message */}
         {searchValue.length >= 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
-            No locations found. Try a different search term.
+            No locations found in Canada. Try a different search term.
           </div>
         )}
 
         {/* Initial message */}
         {searchValue.length < 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
-            Type at least 3 characters to search for locations
+            Type at least 3 characters to search for locations in Canada
           </div>
         )}
       </div>
@@ -1087,7 +1102,7 @@ export default function Hero(): JSX.Element {
                             tripData.pickupDateTime &&
                             e.target.value < tripData.pickupDateTime
                           ) {
-                            alert("Return date/time cannot be before pickup!");
+                            toast.error("Return date/time cannot be before pickup!");
                             return;
                           }
                           updateTripData({ returnDateTime: e.target.value });
