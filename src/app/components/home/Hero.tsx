@@ -205,11 +205,13 @@ export default function Hero(): JSX.Element {
               setPickupSearchValue(address);
               updateTripData({ pickupLocation: address });
               updatePickupCoordinates(coordinates);
+              console.log("pickupCoordinates", coordinates);
               setPickupValidated(true);
               setPickupError("");
             } else if (mapType === "dropoff") {
               setDropoffSearchValue(address);
               updateTripData({ dropoffLocation: address });
+              console.log("dropoffCoordinates", coordinates);
               updateDropoffCoordinates(coordinates);
               setDropoffValidated(true);
               setDropoffError("");
@@ -549,7 +551,7 @@ export default function Hero(): JSX.Element {
       return;
     }
     updateTripData({
-      tripType: activeTab === "round" ? "return" : activeTab,
+      tripType: activeTab,
     });
     router.push(ROUTES.PLAN_JOURNEY);
   };
@@ -681,7 +683,7 @@ export default function Hero(): JSX.Element {
           <h1 className="text-white font-bold text-2xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl leading-tight px-2 max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto mb-4 md:mb-6">
             Looking to save more on your rental car?
           </h1>
-          <p className="text-white text-sm sm:text-base md:text-lg max-w-xs sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto">
+          <p className="text-white text-xs sm:text-base md:text-lg max-w-xs sm:max-w-md md:max-w-xl lg:max-w-2xl xl:max-w-3xl mx-auto">
             Whether you're planning a weekend getaway, a business trip, or just
             need a reliable ride for the day, we offer a wide range of vehicles
             to suit your needs.
@@ -896,7 +898,7 @@ export default function Hero(): JSX.Element {
               {(activeTab === "single" || activeTab === "round") && (
                 <>
                   {/* Pickup with Search Dropdown */}
-                  <div className="relative min-h-[80px] flex flex-col" ref={pickupDropdownRef}>
+                  <div className="relative sm:min-h-[80px] flex flex-col" ref={pickupDropdownRef}>
                     <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
                       pickupError ? 'border-red-500' : 'border-primary-gray/50'
                     }`}>
@@ -939,15 +941,15 @@ export default function Hero(): JSX.Element {
                     </div>
                     <button
                       onClick={() => openMap("pickup")}
-                      className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark cursor-pointer"
+                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                    <div className={`h-5 mt-1 ${pickupError ? 'flex' : 'hidden'}`}>
+                    
                       {pickupError && (
                         <p className="text-red-500 text-xs ml-2">{pickupError}</p>
                       )}
-                    </div>
+                   
                     {renderLocationDropdown(
                       'pickup',
                       pickupSuggestions,
@@ -957,7 +959,7 @@ export default function Hero(): JSX.Element {
                     )}
                   </div>
                   {/* Dropoff with Search Dropdown */}
-                  <div className="relative min-h-[80px] flex flex-col" ref={dropoffDropdownRef}>
+                  <div className="relative sm:min-h-[80px] flex flex-col" ref={dropoffDropdownRef}>
                     <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
                       dropoffError ? 'border-red-500' : 'border-primary-gray/50'
                     }`}>
@@ -1000,15 +1002,15 @@ export default function Hero(): JSX.Element {
                     </div>
                     <button
                       onClick={() => openMap("dropoff")}
-                      className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark cursor-pointer"
+                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                    <div className={`h-5 mt-1 ${dropoffError ? 'flex' : 'hidden'}`}>
+                  
                       {dropoffError && (
                         <p className="text-red-500 text-xs ml-2">{dropoffError}</p>
                       )}
-                    </div>
+                    
                     {renderLocationDropdown(
                       'dropoff',
                       dropoffSuggestions,
@@ -1021,7 +1023,7 @@ export default function Hero(): JSX.Element {
               )}
               {/* Single Trip → Date & Time */}
               {activeTab === "single" && (
-                <div className="min-h-[80px] flex flex-col">
+                <div className="sm:min-h-[80px] flex flex-col">
                   <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
                     <Icon
                       icon={ICON_DATA.CALENDAR_PICKUP}
@@ -1041,13 +1043,13 @@ export default function Hero(): JSX.Element {
                       } text-xs sm:text-sm md:text-base`}
                     />
                   </div>
-                  <div className="h-5 mt-1"></div>
+                 
                 </div>
               )}
               {/* Round Trip → Pickup + Return Date */}
               {activeTab === "round" && (
                 <>
-                  <div className="min-h-[80px] flex flex-col">
+                  <div className="sm:min-h-[80px] flex flex-col">
                     <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
                       <Icon
                         icon={ICON_DATA.CALENDAR_PICKUP}
@@ -1067,7 +1069,7 @@ export default function Hero(): JSX.Element {
                         } text-xs sm:text-sm md:text-base`}
                       />
                     </div>
-                    <div className="h-5 mt-1"></div>
+                   
                   </div>
                   <div className="min-h-[80px] flex flex-col">
                     <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
@@ -1097,7 +1099,7 @@ export default function Hero(): JSX.Element {
                         } text-xs sm:text-sm md:text-base`}
                       />
                     </div>
-                    <div className="h-5 mt-1"></div>
+                   
                   </div>
                 </>
               )}

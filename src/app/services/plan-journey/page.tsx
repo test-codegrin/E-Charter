@@ -12,6 +12,7 @@ import { Icon } from "@iconify/react";
 import { ICON_DATA } from "@/app/constants/IconConstants";
 import { ROUTES } from "@/app/constants/RoutesConstant";
 import tt from "@tomtom-international/web-sdk-maps";
+import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
 
 interface Stop {
   location: string;
@@ -86,12 +87,14 @@ const PlanJourney = () => {
 
   const [pickupError, setPickupError] = useState("");
   const [dropoffError, setDropoffError] = useState("");
+  const [pickupTimeError, setPickupTimeError] = useState("");
+  const [dropoffTimeError, setDropoffTimeError] = useState("");
 
   // Current location states
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] =
     useState(false);
   const [currentLocationFor, setCurrentLocationFor] = useState<
-    "pickup" | "dropoff" | "return" | null
+    "pickup" | "dropoff" | "round" | null
   >(null);
 
   // Add flag to track if user is selecting from dropdown
@@ -235,7 +238,7 @@ const PlanJourney = () => {
   };
 
   // Get current location using Geolocation API
-  const getCurrentLocation = async (type: "pickup" | "dropoff" | "return") => {
+  const getCurrentLocation = async (type: "pickup" | "dropoff" | "round") => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by this browser.");
       return;
@@ -263,7 +266,6 @@ const PlanJourney = () => {
 
             if (response.ok) {
               const data = await response.json();
-
               if (data.addresses && data.addresses.length > 0) {
                 const address = data.addresses[0].address.freeformAddress;
                 const coordinates = { latitude, longitude };
@@ -565,7 +567,7 @@ const PlanJourney = () => {
 
   // Render location dropdown
   const renderLocationDropdown = (
-    type: "pickup" | "dropoff" | "return",
+    type: "pickup" | "dropoff" | "round",
     suggestions: LocationSuggestion[],
     isOpen: boolean,
     searchValue: string,
@@ -683,7 +685,7 @@ const PlanJourney = () => {
   };
 
   // Handle trip type change with automatic stop card addition
-  const handleTripTypeChange = (value: "single" | "return" | "multi") => {
+  const handleTripTypeChange = (value: "single" | "round" | "multi") => {
     updateTripData({ tripType: value });
 
     if (value === "multi") {
@@ -719,18 +721,59 @@ const PlanJourney = () => {
     }
   }, [shouldFocusStop, tripData.tripType, tripData.multiStops]);
 
-  // Next button handler
+  // Next button handler with enhanced validation
   const handleNext = () => {
+    let hasError = false;
+
+    // Validate pickup location and time
     if (!tripData.pickupLocation || !pickupValidated) {
       setPickupError("Please select a pickup location from the suggestions.");
-      return;
+      hasError = true;
     }
-    if (!tripData.dropoffLocation || !dropoffValidated) {
-      setDropoffError("Please select a dropoff location from the suggestions.");
-      return;
+    if (!tripData.pickupDateTime) {
+      setPickupTimeError("Please select a pickup date and time.");
+      hasError = true;
     }
 
+    // Validate dropoff location and time (for all trip types, but time only for round trip)
+    if (!tripData.dropoffLocation || !dropoffValidated) {
+      setDropoffError("Please select a dropoff location from the suggestions.");
+      hasError = true;
+    }
+    if (tripData.tripType === "round" && !tripData.returnDateTime) {
+      setDropoffTimeError("Please select a dropoff date and time for round trip.");
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    // Clear errors if validation passes
+    setPickupError("");
+    setPickupTimeError("");
+    setDropoffError("");
+    setDropoffTimeError("");
+
     router.push(ROUTES.RESERVE_CAR);
+  };
+
+  // Handle pickup time change with validation
+  const handlePickupTimeChange = (value: string) => {
+    setPickupTimeError("");
+    if (value && tripData.pickupLocation && pickupValidated) {
+      updateTripData({ pickupDateTime: value });
+    } else if (value) {
+      setPickupTimeError("Please select a valid pickup location first.");
+    }
+  };
+
+  // Handle dropoff time change with validation (for round trip)
+  const handleDropoffTimeChange = (value: string) => {
+    setDropoffTimeError("");
+    if (tripData.tripType === "round" && value && tripData.dropoffLocation && dropoffValidated) {
+      updateTripData({ returnDateTime: value });
+    } else if (value && tripData.tripType === "round") {
+      setDropoffTimeError("Please select a valid dropoff location first.");
+    }
   };
 
   // Helper function to set stop input ref
@@ -738,6 +781,49 @@ const PlanJourney = () => {
     stopInputRefs.current[index] = el;
   };
 
+  type TripType = "single" | "round" | "multi";
+  const TRIPS = [
+    {
+      id: "single" as TripType,
+      label: "Single Trip",
+      icon: IMAGES_ASSETS.SINGLE_TRIP,
+      onClick: () => {
+        handleTripTypeChange("single");
+        setIsTabDropdownOpen(false);
+      },
+    },  
+    {
+      id: "round" as TripType,
+      label: "Round Trip",
+      icon: IMAGES_ASSETS.ROUND_TRIP,
+      onClick: () => {
+        handleTripTypeChange("round");
+        setIsTabDropdownOpen(false);
+      },
+    },
+    {
+      id: "multi" as TripType,
+      label: "Multi Stop",
+      icon: IMAGES_ASSETS.MULTI_STOP_TRIP,
+      onClick: () => {
+        handleTripTypeChange("multi");
+        updateTripData({
+          tripType: "multi",
+          multiStops: [],
+        });
+        setIsTabDropdownOpen(false);
+        router.push(ROUTES.PLAN_JOURNEY);
+      },
+    },
+  ];
+
+  const [isTabDropdownOpen, setIsTabDropdownOpen] = useState(false);
+  const tabDropdownRef = useRef<HTMLDivElement>(null);
+
+  const getActiveTab = () => {
+    return TRIPS.find((tab) => tab.id === tripData.tripType);
+  };
+  
   return (
     <section className="w-full max-w-[1320px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[0px] bg-white">
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10 2xl:gap-10">
@@ -745,7 +831,7 @@ const PlanJourney = () => {
         <div className="w-full 2xl:w-[580px] xl:w-[600px] md:w-full">
           {/* Back Button */}
           <button
-            onClick={() => router.push("/")}
+            onClick={() => router.push(ROUTES.HOME)}
             className="flex items-center cursor-pointer mb-4 text-[#3DC1C4] hover:text-[#2da8ab] font-medium transition-colors duration-200"
           >
             <i className="fa-solid fa-arrow-left-long mr-2" />
@@ -767,21 +853,66 @@ const PlanJourney = () => {
                 Itinerary
               </h2>
               <div className="flex items-center gap-2 sm:gap-4">
-                {/* <div className="border-2 border-primary-border/10 rounded-full px-2">
-                  <select
-                    value={tripData.tripType}
-                    onChange={(e) =>
-                      handleTripTypeChange(
-                        e.target.value as "single" | "return" | "multi"
-                      )
-                    }
-                    className="w-35 bg-white text-sm font-medium rounded-full px-2 py-2 focus:outline-none cursor-pointer transition-all duration-100"
+                
+                {/* TRIPS Dropdown */}
+                <div className="relative w-45 lg:w-50" ref={tabDropdownRef}>
+                  <button
+                    onClick={() => setIsTabDropdownOpen(!isTabDropdownOpen)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-primary-gray/10 hover:bg-primary-gray/20 transition-colors duration-300 cursor-pointer rounded-full text-sm font-semibold text-primary-gray"
                   >
-                    <option value="single">Single Trip</option>
-                    <option value="return">Round-Trip</option>
-                    <option value="multi">Multi Stop</option>
-                  </select>
-                </div> */}
+                     <div className="flex items-center gap-3">
+                      <img
+                        src={getActiveTab()?.icon}
+                        alt={getActiveTab()?.label}
+                        className="w-6 h-6 color"
+                      />
+                      <span className="text-black font-medium">
+                        {getActiveTab()?.label}
+                      </span>
+                    </div>
+                    <Icon
+                      icon={
+                        isTabDropdownOpen
+                          ? "mdi:chevron-up"
+                          : "mdi:chevron-down"
+                      }
+                      className="w-5 h-5 text-primary"
+                    />
+                  </button>
+                  {isTabDropdownOpen && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50">
+                      {TRIPS.map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={tab.onClick}
+                          className={`w-full flex cursor-pointer items-center gap-3 px-4 py-3 text-sm font-medium hover:bg-primary-gray/20 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            tripData.tripType === tab.id
+                              ? "text-primary bg-primary/5"
+                              : "text-primary-gray"
+                          }`}
+                        >
+                          <img
+                            src={tab.icon}
+                            alt={tab.label}
+                            className="w-5 h-5"
+                          />
+                          <span>{tab.label}</span>
+                          {tripData.tripType === tab.id ? (
+                            <Icon
+                              icon={ICON_DATA.RADIO_ACTIVE}
+                              className="w-5 h-5 text-primary ml-auto"
+                            />
+                          ) : (
+                            <Icon
+                              icon={ICON_DATA.RADIO_INACTIVE}
+                              className="w-5 h-5 text-primary-gray ml-auto"
+                            />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <i className="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180" />
               </div>
             </summary>
@@ -815,7 +946,6 @@ const PlanJourney = () => {
                   )}
                 </div>
               </div>
-
               <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
                 {/* Pickup Location with Search Dropdown */}
                 <div className="flex flex-col gap-2 w-full sm:w-1/2">
@@ -830,7 +960,9 @@ const PlanJourney = () => {
                     >
                       <Icon
                         icon={ICON_DATA.LOCATION}
-                        className={`text-primary-gray w-5 h-5 flex-shrink-0 ${pickupError ? "text-red-500" : ""}`}
+                        className={`text-primary-gray w-5 h-5 flex-shrink-0 ${
+                          pickupError ? "text-red-500" : ""
+                        }`}
                       />
                       <input
                         type="text"
@@ -868,7 +1000,7 @@ const PlanJourney = () => {
                         />
                       )}
                     </label>
-                  
+
                     {renderLocationDropdown(
                       "pickup",
                       pickupSuggestions,
@@ -877,16 +1009,12 @@ const PlanJourney = () => {
                       handlePickupSelect
                     )}
                   </div>
-                  {
-                    pickupError && (
-                      <p className="text-red-500 text-xs ml-2">
-                        {pickupError}
-                      </p>
-                    )
-                  }
+                  {pickupError && (
+                    <p className="text-red-500 text-xs ml-2">{pickupError}</p>
+                  )}
                   <button
                     onClick={() => openMap("pickup")}
-                    className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark"
+                    className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
                   >
                     Open Map
                   </button>
@@ -903,12 +1031,13 @@ const PlanJourney = () => {
                       name="Stop Date & Time"
                       type="datetime-local"
                       value={tripData.pickupDateTime}
-                      onChange={(e) =>
-                        updateTripData({ pickupDateTime: e.target.value })
-                      }
+                      onChange={(e) => handlePickupTimeChange(e.target.value)}
                       className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
                     />
                   </label>
+                  {pickupTimeError && (
+                    <p className="text-red-500 text-xs ml-2">{pickupTimeError}</p>
+                  )}
                   <div className="h-5 mt-1"></div>
                 </div>
               </section>
@@ -933,7 +1062,7 @@ const PlanJourney = () => {
 
             {/* Dropoff Section */}
             {(tripData.tripType === "single" ||
-              tripData.tripType === "return" ||
+              tripData.tripType === "round" ||
               tripData.tripType === "multi") && (
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-4 sm:space-y-6">
                 <div className="flex items-center gap-3">
@@ -947,85 +1076,85 @@ const PlanJourney = () => {
                     Dropoff
                   </h3>
                 </div>
-               
-                  <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
-                {/* Pickup Location with Search Dropdown */}
-                <div className="flex flex-col gap-2 w-full sm:w-1/2">
-                  <div
-                    className="w-full relative h-[40px] sm:h-[44px] flex flex-col"
-                    ref={dropoffDropdownRef}
-                  >
-                    <label
-                      className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
-                        dropoffError ? "border-red-500" : "border-[#DBDBDB]"
-                      }`}
-                    >
-                      <Icon
-                        icon={ICON_DATA.LOCATION}
-                        className={`text-primary-gray w-5 h-5 flex-shrink-0 ${dropoffError ? "text-red-500" : ""}`}
-                      />
-                      <input
-                        type="text"
-                        value={dropoffSearchValue}
-                        onChange={(e) => handleDropoffSearch(e.target.value)}
-                        onFocus={() => {
-                          if (!isDropoffDropdownOpen) {
-                            setIsDropoffDropdownOpen(true);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          setTimeout(() => {
-                            if (
-                              !dropoffDropdownRef.current?.contains(
-                                document.activeElement
-                              )
-                            ) {
-                              if (!isSelectingFromDropdown) {
-                                handleDropoffBlur();
-                              }
-                              setIsDropoffDropdownOpen(false);
-                            }
-                          }, 150);
-                        }}
-                        placeholder="Stop Location"
-                        className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
-                          dropoffError ? "text-red-600" : ""
-                        }`}
-                        autoComplete="on"
-                      />
-                      {dropoffValidated && (
-                        <Icon
-                          icon="mdi:check-circle"
-                          className="w-4 h-4 text-green-500"
-                        />
-                      )}
-                    </label>
-                    
 
-                    {renderLocationDropdown(
-                      "dropoff",
-                      dropoffSuggestions,
-                      isDropoffDropdownOpen,
-                      dropoffSearchValue,
-                      handleDropoffSelect
+                <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
+                  {/* Pickup Location with Search Dropdown */}
+                  <div className="flex flex-col gap-2 w-full sm:w-1/2">
+                    <div
+                      className="w-full relative h-[40px] sm:h-[44px] flex flex-col"
+                      ref={dropoffDropdownRef}
+                    >
+                      <label
+                        className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
+                          dropoffError ? "border-red-500" : "border-[#DBDBDB]"
+                        }`}
+                      >
+                        <Icon
+                          icon={ICON_DATA.LOCATION}
+                          className={`text-primary-gray w-5 h-5 flex-shrink-0 ${
+                            dropoffError ? "text-red-500" : ""
+                          }`}
+                        />
+                        <input
+                          type="text"
+                          value={dropoffSearchValue}
+                          onChange={(e) => handleDropoffSearch(e.target.value)}
+                          onFocus={() => {
+                            if (!isDropoffDropdownOpen) {
+                              setIsDropoffDropdownOpen(true);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            setTimeout(() => {
+                              if (
+                                !dropoffDropdownRef.current?.contains(
+                                  document.activeElement
+                                )
+                              ) {
+                                if (!isSelectingFromDropdown) {
+                                  handleDropoffBlur();
+                                }
+                                setIsDropoffDropdownOpen(false);
+                              }
+                            }, 150);
+                          }}
+                          placeholder="Stop Location"
+                          className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
+                            dropoffError ? "text-red-600" : ""
+                          }`}
+                          autoComplete="on"
+                        />
+                        {dropoffValidated && (
+                          <Icon
+                            icon="mdi:check-circle"
+                            className="w-4 h-4 text-green-500"
+                          />
+                        )}
+                      </label>
+
+                      {renderLocationDropdown(
+                        "dropoff",
+                        dropoffSuggestions,
+                        isDropoffDropdownOpen,
+                        dropoffSearchValue,
+                        handleDropoffSelect
+                      )}
+                    </div>
+                    {dropoffError && (
+                      <p className="text-red-500 text-xs ml-2">
+                        {dropoffError}
+                      </p>
                     )}
+                    <button
+                      onClick={() => openMap("dropoff")}
+                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
+                    >
+                      Open Map
+                    </button>
                   </div>
 
-                  {dropoffError && (
-                    <p className="text-red-500 text-xs ml-2">
-                      {dropoffError}
-                    </p>
-                  )}
-                  <button
-                    onClick={() => openMap("dropoff")}
-                    className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark"
-                  >
-                    Open Map
-                  </button>
-                </div>
-
-                {/* Date & Time */}
-                {tripData.tripType === "return" && (
+                  {/* Date & Time */}
+                  {tripData.tripType === "round" && (
                     <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
                       <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-[#DBDBDB]">
                         <Icon
@@ -1036,22 +1165,22 @@ const PlanJourney = () => {
                           name="Stop Date & Time"
                           type="datetime-local"
                           value={tripData.returnDateTime}
-                          onChange={(e) =>
-                            updateTripData({ returnDateTime: e.target.value })
-                          }
+                          onChange={(e) => handleDropoffTimeChange(e.target.value)}
                           className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
                         />
                       </label>
+                      {dropoffTimeError && (
+                        <p className="text-red-500 text-xs ml-2">{dropoffTimeError}</p>
+                      )}
                       <div className="h-5 mt-1"></div>
                     </div>
-                  )
-                }
-              </section>
+                  )}
+                </section>
               </div>
             )}
 
             {/* Return Section (only in round trip) */}
-            {tripData.tripType === "return" && (
+            {tripData.tripType === "round" && (
               <div className="border bg-[#FCFCFC] border-gray-200 rounded-2xl p-4 sm:p-6 mt-6 space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-[#3DC1C4] flex justify-center items-center">
@@ -1065,54 +1194,52 @@ const PlanJourney = () => {
                   </h3>
                 </div>
                 <section className="flex flex-col max-sm:gap-y-4 sm:flex-row sm:gap-4 mt-6">
-                {/* Return To Pickup Location */}
-                <div className="flex flex-col gap-2 w-full sm:w-1/2">
-                  <div
-                    className="w-full relative h-[40px] sm:h-[44px] flex flex-col"
-                  >
-                    <label
-                      className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
-                        pickupError ? "border-red-500" : "border-[#DBDBDB]"
-                      }`}
-                    >
-                      <Icon
-                        icon={ICON_DATA.LOCATION}
-                        className="text-primary-gray w-5 h-5 flex-shrink-0"
-                      />
-                      <input
-                        type="text"
-                        value={pickupSearchValue}
-                        onChange={(e) => handlePickupSearch(e.target.value)}
-                        onFocus={() => {
-                          if (!isPickupDropdownOpen) {
-                            setIsPickupDropdownOpen(true);
-                          }
-                        }}
-                        onBlur={(e) => {
-                          setTimeout(() => {
-                            if (
-                              !pickupDropdownRef.current?.contains(
-                                document.activeElement
-                              )
-                            ) {
-                              if (!isSelectingFromDropdown) {
-                                handlePickupBlur();
-                              }
-                              setIsPickupDropdownOpen(false);
-                            }
-                          }, 150);
-                        }}
-                        placeholder="Return to Pickup Location"
-                        className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
-                          pickupError ? "text-red-600" : ""
+                  {/* Return To Pickup Location */}
+                  <div className="flex flex-col gap-2 w-full sm:w-1/2">
+                    <div className="w-full relative h-[40px] sm:h-[44px] flex flex-col">
+                      <label
+                        className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
+                          pickupError ? "border-red-500" : "border-[#DBDBDB]"
                         }`}
-                        autoComplete="on"
-                        disabled
-                      />
-                    </label>
+                      >
+                        <Icon
+                          icon={ICON_DATA.LOCATION}
+                          className="text-primary-gray w-5 h-5 flex-shrink-0"
+                        />
+                        <input
+                          type="text"
+                          value={pickupSearchValue}
+                          onChange={(e) => handlePickupSearch(e.target.value)}
+                          onFocus={() => {
+                            if (!isPickupDropdownOpen) {
+                              setIsPickupDropdownOpen(true);
+                            }
+                          }}
+                          onBlur={(e) => {
+                            setTimeout(() => {
+                              if (
+                                !pickupDropdownRef.current?.contains(
+                                  document.activeElement
+                                )
+                              ) {
+                                if (!isSelectingFromDropdown) {
+                                  handlePickupBlur();
+                                }
+                                setIsPickupDropdownOpen(false);
+                              }
+                            }, 150);
+                          }}
+                          placeholder="Return to Pickup Location"
+                          className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
+                            pickupError ? "text-red-600" : ""
+                          }`}
+                          autoComplete="on"
+                          disabled
+                        />
+                      </label>
+                    </div>
                   </div>
-                </div>
-              </section>
+                </section>
               </div>
             )}
           </details>

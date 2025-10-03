@@ -20,7 +20,7 @@ interface MapCardProps {
   pickupLocation?: string;
   dropoffLocation?: string;
   multiStops?: Stop[];
-  tripType?: "single" | "return" | "multi";
+  tripType?: "single" | "round" | "multi";
   pickupDateTime?: string;
   returnDateTime?: string;
 }
@@ -37,11 +37,10 @@ const MapCard: React.FC<MapCardProps> = ({
   const [map, setMap] = useState<any>(null);
   const [markers, setMarkers] = useState<any[]>([]);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
+  const [isRouteLoading, setIsRouteLoading] = useState(false);
 
-  // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
 
-  // Format datetime
   const formatDateTime = (dateTimeString?: string) => {
     if (!dateTimeString) return "Not set";
     try {
@@ -59,7 +58,6 @@ const MapCard: React.FC<MapCardProps> = ({
     }
   };
 
-  // Initialize TomTom Map
   useEffect(() => {
     if (!mapElement.current || map || !TOMTOM_API_KEY) {
       if (!TOMTOM_API_KEY) console.error("TomTom API key is missing!");
@@ -69,10 +67,9 @@ const MapCard: React.FC<MapCardProps> = ({
     const newMap = tt.map({
       key: TOMTOM_API_KEY,
       container: mapElement.current,
-      center: [-106.3468, 56.1304], // Default center: Canada
-      zoom: 4, // Adjust zoom for Canada-wide view
+      center: [-106.3468, 56.1304],
+      zoom: 4,
     });
-    
 
     newMap.on('load', () => {
       console.log("Map loaded successfully");
@@ -88,7 +85,6 @@ const MapCard: React.FC<MapCardProps> = ({
     };
   }, [TOMTOM_API_KEY]);
 
-  // Geocode location string to coordinates
   const geocodeLocation = async (locationString: string): Promise<[number, number] | null> => {
     if (!locationString.trim() || !TOMTOM_API_KEY) {
       console.error(`Invalid location or API key: ${locationString}`);
@@ -115,13 +111,12 @@ const MapCard: React.FC<MapCardProps> = ({
         console.warn(`No geocoding results for ${locationString}`);
       }
     } catch (error) {
-      console.error(`Geocoding error for ${locationString}:`, error);
+      // console.error(`Geocoding error for ${locationString}:`, error);
     }
 
     return null;
   };
 
-  // Clear existing markers and routes
   const clearMap = () => {
     markers.forEach(marker => marker.remove());
     setMarkers([]);
@@ -136,7 +131,6 @@ const MapCard: React.FC<MapCardProps> = ({
     }
   };
 
-  // Create custom marker element
   const createCustomMarker = (color: string, isFirst: boolean = false, isLast: boolean = false) => {
     const markerElement = document.createElement('div');
     markerElement.style.cssText = `
@@ -166,7 +160,6 @@ const MapCard: React.FC<MapCardProps> = ({
     return markerElement;
   };
 
-  // Add marker to map
   const addMarker = (coordinates: [number, number], color: string, label?: string, isFirst?: boolean, isLast?: boolean) => {
     if (!map) return;
 
@@ -190,7 +183,6 @@ const MapCard: React.FC<MapCardProps> = ({
     return marker;
   };
 
-  // Check if locations are valid
   const isLocationValid = (location?: string, dateTime?: string) => {
     return location && location.trim() !== "" && dateTime && dateTime.trim() !== "";
   };
@@ -199,7 +191,6 @@ const MapCard: React.FC<MapCardProps> = ({
     return stop.location && stop.location.trim() !== "" && stop.date && stop.date.trim() !== "";
   };
 
-  // Calculate and display route
   const displayRoute = async () => {
     if (!map || !isMapLoaded) {
       console.warn("Map not loaded yet, skipping route display");
@@ -211,17 +202,16 @@ const MapCard: React.FC<MapCardProps> = ({
       return;
     }
 
+    setIsRouteLoading(true);
     clearMap();
 
     const validLocations: string[] = [];
     const coordinates: [number, number][] = [];
 
-    // Add pickup if valid
     if (isLocationValid(pickupLocation, pickupDateTime)) {
       validLocations.push(pickupLocation!);
     }
 
-    // Add valid multi stops
     if (tripType === "multi" && multiStops.length > 0) {
       multiStops.forEach(stop => {
         if (isStopValid(stop)) {
@@ -230,17 +220,16 @@ const MapCard: React.FC<MapCardProps> = ({
       });
     }
 
-    // Add dropoff if valid
     if (dropoffLocation && dropoffLocation.trim() !== "") {
       validLocations.push(dropoffLocation);
     }
 
     if (validLocations.length < 2) {
       console.warn("Not enough valid locations to draw a route:", validLocations);
+      setIsRouteLoading(false);
       return;
     }
 
-    // Geocode all valid locations
     for (const location of validLocations) {
       const coords = await geocodeLocation(location);
       if (coords) {
@@ -250,46 +239,46 @@ const MapCard: React.FC<MapCardProps> = ({
 
     if (coordinates.length < 2) {
       console.warn("Not enough valid coordinates to draw a route:", coordinates);
+      setIsRouteLoading(false);
       return;
     }
 
-    // Add markers
+    // Add markers with explicit check for first and last (ensures dropoff is always last)
+    const lastIndex = coordinates.length - 1;
     coordinates.forEach((coord, index) => {
+      const isFirst = index === 0;
+      const isLast = index === lastIndex;
       let color: string;
       let label: string;
-      const isFirst = index === 0;
-      const isLast = index === coordinates.length - 1;
 
       if (isFirst) {
-        color = '#C0FFED'; // Pickup - Green background
+        color = '#C0FFED'; // Pickup
         label = 'Pickup';
       } else if (isLast) {
-        color = '#FFD1D1'; // Dropoff - Red background
+        color = '#FFD1D1'; // Dropoff
         label = 'Dropoff';
       } else {
-        color = '#FFF4CC'; // Stop - Yellow background
+        color = '#FFF4CC'; // Stop
         label = `Stop ${index}`;
       }
 
       addMarker(coord, color, label, isFirst, isLast);
     });
 
-    // Calculate and display route
     try {
       const locationsString = coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
       console.log("Calculating route with locations:", locationsString);
 
-      const routeResponse = await ttServices.services.calculateRoute({
-        key: TOMTOM_API_KEY,
-        locations: locationsString,
-      });
+      const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}`;
+      const response = await fetch(apiUrl);
+      const routeResponse = await response.json();
+      const routeColor = '#0040ff';
 
       console.log("Route response:", JSON.stringify(routeResponse, null, 2));
 
       if (routeResponse.routes && routeResponse.routes.length > 0) {
         const route = routeResponse.routes[0];
 
-        // Manually construct GeoJSON LineString from route geometry
         const routeGeoJson = {
           type: 'Feature',
           geometry: {
@@ -310,6 +299,7 @@ const MapCard: React.FC<MapCardProps> = ({
 
         if (routeGeoJson.geometry.coordinates.length < 2) {
           console.warn("Route GeoJSON has insufficient coordinates:", routeGeoJson);
+          setIsRouteLoading(false);
           return;
         }
 
@@ -329,7 +319,7 @@ const MapCard: React.FC<MapCardProps> = ({
                 'line-cap': 'round',
               },
               paint: {
-                'line-color': '#3DC1C4',
+                'line-color': routeColor,
                 'line-width': 4,
               },
             });
@@ -346,23 +336,23 @@ const MapCard: React.FC<MapCardProps> = ({
         console.warn("No routes returned from TomTom API");
       }
     } catch (error: any) {
-      // console.error("Route calculation error:", {
-      //   message: error.message,
-      //   stack: error.stack,
-      //   response: error.response ? JSON.stringify(error.response, null, 2) : 'No response data',
-      // });
+      console.error("Route calculation error:", {
+        message: error.message,
+        stack: error.stack,
+        response: error.response ? JSON.stringify(error.response, null, 2) : 'No response data',
+      });
     }
 
-    // Fit map to show all markers
     if (coordinates.length > 0) {
       const bounds = new tt.LngLatBounds();
       coordinates.forEach(coord => bounds.extend(coord));
       map.fitBounds(bounds, { padding: 50 });
       console.log("Map bounds adjusted to:", bounds);
     }
+
+    setIsRouteLoading(false);
   };
 
-  // Update map when locations change
   useEffect(() => {
     if (map && isMapLoaded) {
       console.log("Triggering displayRoute with:", { pickupLocation, dropoffLocation, multiStops, tripType });
@@ -370,7 +360,6 @@ const MapCard: React.FC<MapCardProps> = ({
     }
   }, [map, isMapLoaded, pickupLocation, dropoffLocation, multiStops, tripType, pickupDateTime, returnDateTime]);
 
-  // Route visualization for single/return
   const renderRouteVisualization = () => {
     return (
       <div className="flex items-center w-full mt-2 md:mt-3">
@@ -519,7 +508,7 @@ const MapCard: React.FC<MapCardProps> = ({
         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
           <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(pickupDateTime)}</p>
           <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripType === "return"
+            {tripType === "round"
               ? formatDateTime(returnDateTime)
               : "Arrival time"}
           </p>
@@ -540,6 +529,12 @@ const MapCard: React.FC<MapCardProps> = ({
         {!isMapLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100 rounded-xl">
             <div className="text-gray-500">Loading map...</div>
+          </div>
+        )}
+
+        {isRouteLoading && (
+          <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 rounded-xl">
+            <div className="text-white text-lg font-medium">Loading Route...</div>
           </div>
         )}
       </div>

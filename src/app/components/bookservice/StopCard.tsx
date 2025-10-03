@@ -57,6 +57,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
   onRemove,
   onChange,
 }, ref) => {
+  
   // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
 
@@ -151,10 +152,14 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
             const address = data.addresses[0].address.freeformAddress;
             const coordinates = { latitude: lat, longitude: lng };
             setSearchValue(address);
-            onChange(id, { location: address, date, coordinates });
             setValidated(true);
             setError("");
             setIsMapOpen(false);
+
+            // Only call onChange if both location and date are non-empty
+            if (address && date) {
+              onChange(id, { location: address, date, coordinates });
+            }
           }
         }
       } catch (error) {
@@ -204,10 +209,14 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
                 const coordinates = { latitude, longitude };
 
                 setSearchValue(address);
-                onChange(id, { location: address, date, coordinates });
                 setValidated(true);
                 setError("");
                 setIsDropdownOpen(false);
+
+                // Only call onChange if both location and date are non-empty
+                if (address && date) {
+                  onChange(id, { location: address, date, coordinates });
+                }
               }
             }
           }
@@ -280,7 +289,6 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
     setSearchValue(value);
     setValidated(false);
     setError("");
-    onChange(id, { location: value, date });
 
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
@@ -296,21 +304,38 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
         setIsDropdownOpen(false);
       }
     }, 300);
+
+    // Only call onChange if both new location and current date are non-empty
+    if (value && date) {
+      onChange(id, { location: value, date });
+    }
   };
 
   // Handle location selection
   const handleLocationSelect = (suggestion: LocationSuggestion) => {
     setIsSelectingFromDropdown(true);
     setSearchValue(suggestion.address);
-    onChange(id, { location: suggestion.address, date, coordinates: suggestion.coordinates });
     setValidated(true);
     setError("");
     setIsDropdownOpen(false);
     setSuggestions([]);
     
+    // Only call onChange if both location and date are non-empty
+    if (suggestion.address && date) {
+      onChange(id, { location: suggestion.address, date, coordinates: suggestion.coordinates });
+    }
+    
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
+  };
+
+  // Handle date change
+  const handleDateChange = (newDate: string) => {
+    // Only call onChange if both current location (searchValue) and new date are non-empty
+    if (searchValue && newDate) {
+      onChange(id, { location: searchValue, date: newDate });
+    }
   };
 
   // Handle blur validation
@@ -521,12 +546,12 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
             )}
         <button
             onClick={openMap}
-            className="text-primary text-xs mt-1 ml-2 self-start underline hover:text-primary-dark"
+            className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
           >
             Open Map
           </button>
          
-          
+         
        </div>
 
         {/* Date only */}
@@ -542,7 +567,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               name="Stop Date"
               type="date"
               value={date}
-              onChange={(e) => onChange(id, { location: searchValue, date: e.target.value })}
+              onChange={(e) => handleDateChange(e.target.value)}
               className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none"
             />
           </label>
