@@ -6,6 +6,7 @@ import React, { useRef, useEffect, useState } from "react";
 import tt from '@tomtom-international/web-sdk-maps';
 import ttServices from '@tomtom-international/web-sdk-services';
 import '@tomtom-international/web-sdk-maps/dist/maps.css';
+import { useTrip } from "@/app/context/tripContext";
 
 interface Stop {
   location: string;
@@ -16,30 +17,15 @@ interface Stop {
   };
 }
 
-interface MapCardProps {
-  pickupLocation?: string;
-  dropoffLocation?: string;
-  multiStops?: Stop[];
-  tripType?: "single" | "round" | "multi";
-  pickupDateTime?: string;
-  returnDateTime?: string;
-}
-
-const MapCard: React.FC<MapCardProps> = ({
-  pickupLocation,
-  dropoffLocation,
-  multiStops = [],
-  tripType = "single",
-  pickupDateTime,
-  returnDateTime,
-}) => {
+const MapCard: React.FC = () => {
   const mapElement = useRef<HTMLDivElement | null>(null);
-  const [map, setMap] = useState<any>(null);
-  const [markers, setMarkers] = useState<any[]>([]);
+  const [map, setMap] = useState<tt.Map | null>(null);
+  const [markers, setMarkers] = useState<tt.Marker[]>([]);
   const [isMapLoaded, setIsMapLoaded] = useState(false);
   const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
+  const { tripData } = useTrip();
 
   const formatDateTime = (dateTimeString?: string) => {
     if (!dateTimeString) return "Not set";
@@ -111,7 +97,8 @@ const MapCard: React.FC<MapCardProps> = ({
         console.warn(`No geocoding results for ${locationString}`);
       }
     } catch (error) {
-      // console.error(`Geocoding error for ${locationString}:`, error);
+      console.error(`Geocoding error for ${locationString}:`, error);
+      return null;
     }
 
     return null;
@@ -129,6 +116,7 @@ const MapCard: React.FC<MapCardProps> = ({
         map.removeSource('route');
       }
     }
+    console.log("Map cleared of markers and routes");
   };
 
   const createCustomMarker = (color: string, isFirst: boolean = false, isLast: boolean = false) => {
@@ -180,11 +168,12 @@ const MapCard: React.FC<MapCardProps> = ({
     }
 
     setMarkers(prev => [...prev, marker]);
+    console.log(`Added marker: ${label || 'Unnamed'} at [${coordinates[0]}, ${coordinates[1]}]`);
     return marker;
   };
 
   const isLocationValid = (location?: string, dateTime?: string) => {
-    return location && location.trim() !== "" && dateTime && dateTime.trim() !== "";
+    return location && location.trim() !== "" && (dateTime || tripData.tripType !== "round");
   };
 
   const isStopValid = (stop: Stop) => {
@@ -205,24 +194,25 @@ const MapCard: React.FC<MapCardProps> = ({
     setIsRouteLoading(true);
     clearMap();
 
-    const validLocations: string[] = [];
-    const coordinates: [number, number][] = [];
-
-    if (isLocationValid(pickupLocation, pickupDateTime)) {
-      validLocations.push(pickupLocation!);
+    // Build valid locations without duplicates
+    const validLocations: { location: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
+    if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
+      validLocations.push({ location: tripData.pickupLocation!, type: 'pickup' });
     }
-
-    if (tripType === "multi" && multiStops.length > 0) {
-      multiStops.forEach(stop => {
-        if (isStopValid(stop)) {
-          validLocations.push(stop.location);
+    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
+      tripData.multiStops.forEach((stop, index) => {
+        if (isStopValid(stop) && !validLocations.some(loc => loc.location === stop.location)) {
+          validLocations.push({ location: stop.location, type: 'stop' });
         }
       });
     }
-
-    if (dropoffLocation && dropoffLocation.trim() !== "") {
-      validLocations.push(dropoffLocation);
+    if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "round" ? tripData.returnDateTime : undefined)) {
+      if (!validLocations.some(loc => loc.location === tripData.dropoffLocation)) {
+        validLocations.push({ location: tripData.dropoffLocation!, type: 'dropoff' });
+      }
     }
+
+    console.log("Valid locations:", validLocations);
 
     if (validLocations.length < 2) {
       console.warn("Not enough valid locations to draw a route:", validLocations);
@@ -230,12 +220,15 @@ const MapCard: React.FC<MapCardProps> = ({
       return;
     }
 
-    for (const location of validLocations) {
-      const coords = await geocodeLocation(location);
+    const coordinates: [number, number][] = [];
+    for (const loc of validLocations) {
+      const coords = await geocodeLocation(loc.location);
       if (coords) {
         coordinates.push(coords);
       }
     }
+
+    console.log("Geocoded coordinates:", coordinates);
 
     if (coordinates.length < 2) {
       console.warn("Not enough valid coordinates to draw a route:", coordinates);
@@ -243,26 +236,13 @@ const MapCard: React.FC<MapCardProps> = ({
       return;
     }
 
-    // Add markers with explicit check for first and last (ensures dropoff is always last)
-    const lastIndex = coordinates.length - 1;
-    coordinates.forEach((coord, index) => {
-      const isFirst = index === 0;
-      const isLast = index === lastIndex;
-      let color: string;
-      let label: string;
-
-      if (isFirst) {
-        color = '#C0FFED'; // Pickup
-        label = 'Pickup';
-      } else if (isLast) {
-        color = '#FFD1D1'; // Dropoff
-        label = 'Dropoff';
-      } else {
-        color = '#FFF4CC'; // Stop
-        label = `Stop ${index}`;
-      }
-
-      addMarker(coord, color, label, isFirst, isLast);
+    // Add markers with explicit type-based checks
+    validLocations.forEach((loc, index) => {
+      const isFirst = loc.type === 'pickup';
+      const isLast = loc.type === 'dropoff';
+      const color = isFirst ? '#C0FFED' : isLast ? '#FFD1D1' : '#FFF4CC';
+      const label = isFirst ? 'Pickup' : isLast ? 'Dropoff' : `Stop ${validLocations.filter(l => l.type === 'stop').indexOf(loc) + 1}`;
+      addMarker(coordinates[index], color, label, isFirst, isLast);
     });
 
     try {
@@ -279,7 +259,7 @@ const MapCard: React.FC<MapCardProps> = ({
       if (routeResponse.routes && routeResponse.routes.length > 0) {
         const route = routeResponse.routes[0];
 
-        const routeGeoJson = {
+        const routeGeoJson: GeoJSON.Feature<GeoJSON.LineString> = {
           type: 'Feature',
           geometry: {
             type: 'LineString',
@@ -295,6 +275,7 @@ const MapCard: React.FC<MapCardProps> = ({
               return acc;
             }, []),
           },
+          properties: {}, // Added for GeoJSON compliance
         };
 
         if (routeGeoJson.geometry.coordinates.length < 2) {
@@ -355,10 +336,10 @@ const MapCard: React.FC<MapCardProps> = ({
 
   useEffect(() => {
     if (map && isMapLoaded) {
-      console.log("Triggering displayRoute with:", { pickupLocation, dropoffLocation, multiStops, tripType });
+      console.log("Triggering displayRoute with tripData:", tripData);
       displayRoute();
     }
-  }, [map, isMapLoaded, pickupLocation, dropoffLocation, multiStops, tripType, pickupDateTime, returnDateTime]);
+  }, [map, isMapLoaded, tripData]);
 
   const renderRouteVisualization = () => {
     return (
@@ -375,24 +356,33 @@ const MapCard: React.FC<MapCardProps> = ({
   };
 
   const renderLocationLabels = () => {
-    if (tripType === "multi" && multiStops.length > 0) {
-      const validStops = multiStops.filter(stop => isStopValid(stop));
+    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
+      const validStops = tripData.multiStops.filter(stop => isStopValid(stop));
       
-      const allLocations = [];
+      const allLocations: { location: string; date?: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
       
-      if (isLocationValid(pickupLocation, pickupDateTime)) {
-        allLocations.push({ location: pickupLocation || "Pickup", date: pickupDateTime });
+      if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
+        allLocations.push({ location: tripData.pickupLocation || "Pickup", date: tripData.pickupDateTime, type: 'pickup' });
       }
       
-      validStops.forEach((stop) => {
-        allLocations.push({
-          location: stop.location || "Stop",
-          date: stop.date,
-        });
+      validStops.forEach((stop, index) => {
+        if (!allLocations.some(loc => loc.location === stop.location)) {
+          allLocations.push({
+            location: stop.location || `Stop ${index + 1}`,
+            date: stop.date,
+            type: 'stop',
+          });
+        }
       });
       
-      if (dropoffLocation && dropoffLocation.trim() !== "") {
-        allLocations.push({ location: dropoffLocation || "Dropoff", date: undefined });
+      if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "multi" ? tripData.returnDateTime : undefined)) {
+        if (!allLocations.some(loc => loc.location === tripData.dropoffLocation)) {
+          allLocations.push({ 
+            location: tripData.dropoffLocation || "Dropoff", 
+            date: tripData.tripType === "multi" ? tripData.returnDateTime : undefined,
+            type: 'dropoff',
+          });
+        }
       }
       
       if (allLocations.length === 0) {
@@ -415,12 +405,12 @@ const MapCard: React.FC<MapCardProps> = ({
                 ? item.location.substring(0, 10) + "..."
                 : item.location;
   
-            const isFirst = index === 0;
-            const isLast = index === allLocations.length - 1;
+            const isFirst = item.type === 'pickup';
+            const isLast = item.type === 'dropoff';
   
             return (
               <div
-                key={index}
+                key={`${item.type}-${index}`}
                 className={`flex flex-row sm:flex-col ${
                   isFirst ? "sm:items-start" : isLast ? "sm:items-end" : "sm:items-center"
                 } text-center relative group`}
@@ -489,7 +479,7 @@ const MapCard: React.FC<MapCardProps> = ({
       );
     }
   
-    if (!isLocationValid(pickupLocation, pickupDateTime)) {
+    if (!isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
       return (
         <div className="mt-2 text-center text-gray-500 text-sm">
           Set pickup location and time to see route
@@ -500,16 +490,16 @@ const MapCard: React.FC<MapCardProps> = ({
     return (
       <div className="mt-2">
         <div className="flex justify-between text-sm font-medium md:font-semibold">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{pickupLocation || "Pickup"}</p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{tripData.pickupLocation || "Pickup"}</p>
           <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {dropoffLocation || "Dropoff"}
+            {tripData.dropoffLocation || "Dropoff"}
           </p>
         </div>
         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(pickupDateTime)}</p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(tripData.pickupDateTime)}</p>
           <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripType === "round"
-              ? formatDateTime(returnDateTime)
+            {tripData.tripType === "round"
+              ? formatDateTime(tripData.returnDateTime)
               : "Arrival time"}
           </p>
         </div>
@@ -545,7 +535,7 @@ const MapCard: React.FC<MapCardProps> = ({
           <Image src={IMAGES_ASSETS.LOCATION} alt="pin" width={20} height={20} />
         </div>
 
-        {tripType !== "multi" && isLocationValid(pickupLocation, pickupDateTime) && renderRouteVisualization()}
+        {tripData.tripType !== "multi" && isLocationValid(tripData.pickupLocation, tripData.pickupDateTime) && renderRouteVisualization()}
 
         {renderLocationLabels()}
       </div>

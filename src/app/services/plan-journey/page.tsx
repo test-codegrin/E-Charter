@@ -1343,14 +1343,7 @@ const PlanJourney = () => {
 
         {/* Right Panel */}
         <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[55%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
-          <MapCard
-            pickupLocation={tripData.pickupLocation}
-            dropoffLocation={tripData.dropoffLocation}
-            multiStops={tripData.multiStops}
-            tripType={tripData.tripType}
-            pickupDateTime={tripData.pickupDateTime}
-            returnDateTime={tripData.returnDateTime}
-          />
+          <MapCard/>
         </div>
       </div>
 
