@@ -49,6 +49,17 @@ interface LocationSuggestion {
   };
 }
 
+// Helper function to get current datetime in local format
+const getCurrentDateTime = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 // Helper function to calculate minimum return datetime
 const calculateMinReturnDateTime = (
   pickupDateTime: string,
@@ -960,11 +971,66 @@ const PlanJourney = () => {
     }
   }, [shouldFocusStop, tripData.tripType, tripData.multiStops]);
 
-  // Handle pickup time change with validation
+  // **UPDATED: Handle pickup time change with validation and round trip/multi-stop updates**
   const handlePickupTimeChange = (value: string) => {
     setPickupTimeError("");
+    
+    // Validate that pickup time is not in the past
+    const currentDateTime = getCurrentDateTime();
+    if (value && value < currentDateTime) {
+      setPickupTimeError("Pickup date and time cannot be in the past.");
+      return;
+    }
+
     if (value && tripData.pickupLocation && pickupValidated) {
+      // Store the old pickup time to calculate the difference
+      const oldPickupTime = tripData.pickupDateTime;
+      
       updateTripData({ pickupDateTime: value });
+
+      // **ROUND TRIP: Update dropoff time if it exists**
+      if (tripData.tripType === "round" && tripData.returnDateTime && oldPickupTime) {
+        const oldPickupDate = new Date(oldPickupTime);
+        const newPickupDate = new Date(value);
+        const oldDropoffDate = new Date(tripData.returnDateTime);
+        
+        // Calculate the time difference between old pickup and dropoff
+        const timeDifference = oldDropoffDate.getTime() - oldPickupDate.getTime();
+        
+        // Apply the same time difference to the new pickup time
+        const newDropoffDate = new Date(newPickupDate.getTime() + timeDifference);
+        
+        // Format the new dropoff time
+        const year = newDropoffDate.getFullYear();
+        const month = String(newDropoffDate.getMonth() + 1).padStart(2, "0");
+        const day = String(newDropoffDate.getDate()).padStart(2, "0");
+        const hours = String(newDropoffDate.getHours()).padStart(2, "0");
+        const minutes = String(newDropoffDate.getMinutes()).padStart(2, "0");
+        const newDropoffTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+        
+        updateTripData({ returnDateTime: newDropoffTime });
+      }
+
+      // **MULTI-STOP: Clear any stop dates that are before the new pickup time**
+      if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
+        const updatedStops = tripData.multiStops.map(stop => {
+          if (stop.date && stop.date < value) {
+            // Clear the stop date if it's before the new pickup time
+            return { ...stop, date: "" };
+          }
+          return stop;
+        });
+        
+        // Only update if any stops were cleared
+        const stopsChanged = updatedStops.some((stop, index) => 
+          stop.date !== tripData.multiStops[index].date
+        );
+        
+        if (stopsChanged) {
+          updateTripData({ multiStops: updatedStops });
+          toast.success("Stop dates before pickup time have been cleared.");
+        }
+      }
     } else if (value) {
       setPickupTimeError("Please select a valid pickup location first.");
     }
@@ -1025,6 +1091,13 @@ const PlanJourney = () => {
     if (!tripData.pickupDateTime) {
       setPickupTimeError("Please select a pickup date and time.");
       hasError = true;
+    } else {
+      // Validate that pickup time is not in the past
+      const currentDateTime = getCurrentDateTime();
+      if (tripData.pickupDateTime < currentDateTime) {
+        setPickupTimeError("Pickup date and time cannot be in the past.");
+        hasError = true;
+      }
     }
 
     // Validate dropoff location and time for all trip types, but time only for round trip
@@ -1315,7 +1388,7 @@ const PlanJourney = () => {
                   </button>
                 </div>
 
-                {/* Date & Time */}
+                {/* Date & Time WITH VALIDATION */}
                 <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
                   <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-primary-border/20">
                     <Icon
@@ -1326,6 +1399,7 @@ const PlanJourney = () => {
                       name="Stop Date & Time"
                       type="datetime-local"
                       placeholder="Select Date & Time"
+                      min={getCurrentDateTime()}
                       value={tripData.pickupDateTime}
                       onChange={(e) => handlePickupTimeChange(e.target.value)}
                       className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
@@ -1359,7 +1433,7 @@ const PlanJourney = () => {
                     index > 0
                       ? tripData.multiStops[index - 1].location
                       : undefined
-                  } // NEW: Pass previous stop location
+                  }
                   stopIndex={index}
                   totalStops={tripData.multiStops.length}
                   onChange={(id, data) => handleUpdateStop(id as number, data)}
