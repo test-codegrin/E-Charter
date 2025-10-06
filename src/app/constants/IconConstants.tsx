@@ -17,5 +17,8 @@ export const ICON_DATA = {
     CLOSE : "fluent:dismiss-16-regular",
     GPS : "mdi:crosshairs-gps",
     MAP_LOCATION : "mdi:location",
+    DISTANCE : "mdi:map-marker-distance",
+    CLOCK : "mdi:clock-outline",
+    ARRIVAL : "ic:outline-share-arrival-time",
     
 };

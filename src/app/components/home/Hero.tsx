@@ -53,6 +53,7 @@ export default function Hero(): JSX.Element {
   const [isTabDropdownOpen, setIsTabDropdownOpen] = useState(false);
   const [isPersonDropdownOpen, setIsPersonDropdownOpen] = useState(false);
   const [isLuggageDropdownOpen, setIsLuggageDropdownOpen] = useState(false);
+  
   // Search functionality state
   const [pickupSuggestions, setPickupSuggestions] = useState<LocationSuggestion[]>([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState<LocationSuggestion[]>([]);
@@ -60,22 +61,35 @@ export default function Hero(): JSX.Element {
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
   const [pickupSearchValue, setPickupSearchValue] = useState("");
   const [dropoffSearchValue, setDropoffSearchValue] = useState("");
+  
+  // Keyboard navigation states
+  const [pickupHighlightedIndex, setPickupHighlightedIndex] = useState(-1);
+  const [dropoffHighlightedIndex, setDropoffHighlightedIndex] = useState(-1);
+  
   // Validation states
   const [pickupValidated, setPickupValidated] = useState(false);
   const [dropoffValidated, setDropoffValidated] = useState(false);
   const [pickupError, setPickupError] = useState("");
   const [dropoffError, setDropoffError] = useState("");
+  
   // Current location states
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
   const [currentLocationFor, setCurrentLocationFor] = useState<'pickup' | 'dropoff' | null>(null);
+  
   // Map modal states
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapType, setMapType] = useState<"pickup" | "dropoff" | null>(null);
   const [isSelectingFromDropdown, setIsSelectingFromDropdown] = useState(false);
   const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
+  
+  // NEW: Map address display states
+  const [currentMapAddress, setCurrentMapAddress] = useState<string>("");
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+  
   // Local UI states
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
   const [showReturnDateDropdown, setShowReturnDateDropdown] = useState<boolean>(false);
+  
   // Refs for dropdowns, search, and map
   const tabDropdownRef = useRef<HTMLDivElement>(null);
   const personDropdownRef = useRef<HTMLDivElement>(null);
@@ -86,6 +100,8 @@ export default function Hero(): JSX.Element {
   const mapRef = useRef<tt.Map | null>(null);
   const pickupSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropoffSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const addressFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
   // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
 
@@ -128,15 +144,13 @@ export default function Hero(): JSX.Element {
   // Initialize map when modal opens
   useEffect(() => {
     if (isMapOpen && mapContainerRef.current && TOMTOM_API_KEY) {
-      // Initialize TomTom map
       mapRef.current = tt.map({
         key: TOMTOM_API_KEY,
         container: mapContainerRef.current,
-        center: [0, 0], // Default center
+        center: [0, 0],
         zoom: 15,
       });
 
-      // Check for existing coordinates
       let initialCoordinates: { lat: number; lng: number } | null = null;
       if (mapType === "pickup" && tripData.pickupCoordinates) {
         initialCoordinates = {
@@ -151,27 +165,66 @@ export default function Hero(): JSX.Element {
       }
 
       if (initialCoordinates) {
-        // Use existing coordinates from tripData
         mapRef.current.setCenter([initialCoordinates.lng, initialCoordinates.lat]);
         setSelectedCoordinates(initialCoordinates);
       } else {
-        // Fallback to default location (Toronto, Canada)
         mapRef.current.setCenter([-79.3832, 43.6532]);
         setSelectedCoordinates({ lat: 43.6532, lng: -79.3832 });
       }
 
-      // Resize map after centering
       setTimeout(() => {
         if (mapRef.current) {
           mapRef.current.resize();
         }
       }, 200);
 
-      // Update selected coordinates on map move or zoom
+      // NEW: Function to fetch and update address
+      const fetchAddressForCoordinates = async (lat: number, lng: number) => {
+        if (!TOMTOM_API_KEY) return;
+        
+        setIsLoadingAddress(true);
+        
+        try {
+          const response = await fetch(
+            `https://api.tomtom.com/search/2/reverseGeocode/${lat},${lng}.json?key=${TOMTOM_API_KEY}`
+          );
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (data.addresses && data.addresses.length > 0) {
+              const address = data.addresses[0].address.freeformAddress;
+              setCurrentMapAddress(address);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching address:", error);
+        } finally {
+          setIsLoadingAddress(false);
+        }
+      };
+
+      // Fetch initial address
+      if (initialCoordinates) {
+        fetchAddressForCoordinates(initialCoordinates.lat, initialCoordinates.lng);
+      } else {
+        fetchAddressForCoordinates(43.6532, -79.3832);
+      }
+
+      // UPDATED: Function to update coordinates with debounced address fetch
       const updateCoordinates = () => {
         if (mapRef.current) {
           const center = mapRef.current.getCenter();
           setSelectedCoordinates({ lat: center.lat, lng: center.lng });
+          
+          // Clear previous timeout
+          if (addressFetchTimeoutRef.current) {
+            clearTimeout(addressFetchTimeoutRef.current);
+          }
+          
+          // Debounce address fetching to avoid too many API calls
+          addressFetchTimeoutRef.current = setTimeout(() => {
+            fetchAddressForCoordinates(center.lat, center.lng);
+          }, 500); // Wait 500ms after user stops moving
         }
       };
 
@@ -185,11 +238,14 @@ export default function Hero(): JSX.Element {
           mapRef.current.remove();
           mapRef.current = null;
         }
+        // Clear timeout on cleanup
+        if (addressFetchTimeoutRef.current) {
+          clearTimeout(addressFetchTimeoutRef.current);
+        }
       };
     }
   }, [isMapOpen, TOMTOM_API_KEY, mapType, tripData.pickupCoordinates, tripData.dropoffCoordinates]);
 
-  // Handle Done button click
   const handleDoneClick = async () => {
     if (selectedCoordinates && TOMTOM_API_KEY) {
       try {
@@ -203,7 +259,6 @@ export default function Hero(): JSX.Element {
             const address = data.addresses[0].address.freeformAddress;
             const country = data.addresses[0].address.country;
             if (country !== "Canada") {
-              // alert("Selected location must be in Canada.");
               toast.error("Selected location must be in Canada.");
               return;
             }
@@ -212,13 +267,11 @@ export default function Hero(): JSX.Element {
               setPickupSearchValue(address);
               updateTripData({ pickupLocation: address });
               updatePickupCoordinates(coordinates);
-              console.log("pickupCoordinates", coordinates);
               setPickupValidated(true);
               setPickupError("");
             } else if (mapType === "dropoff") {
               setDropoffSearchValue(address);
               updateTripData({ dropoffLocation: address });
-              console.log("dropoffCoordinates", coordinates);
               updateDropoffCoordinates(coordinates);
               setDropoffValidated(true);
               setDropoffError("");
@@ -233,13 +286,12 @@ export default function Hero(): JSX.Element {
     }
   };
 
-  // Handle Close button click
   const handleCloseClick = () => {
     setIsMapOpen(false);
     setSelectedCoordinates(null);
+    setCurrentMapAddress("");
   };
 
-  // Get current location using Geolocation API
   const getCurrentLocation = async (type: 'pickup' | 'dropoff') => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by this browser.");
@@ -335,7 +387,6 @@ export default function Hero(): JSX.Element {
     );
   };
 
-  // Search TomTom API for locations
   const searchTomTomLocations = async (query: string): Promise<LocationSuggestion[]> => {
     if (!query || query.length < 3 || !TOMTOM_API_KEY) return [];
     try {
@@ -361,12 +412,12 @@ export default function Hero(): JSX.Element {
     }
   };
 
-  // Handle pickup search with validation
   const handlePickupSearch = (value: string) => {
     setPickupSearchValue(value);
     setPickupValidated(false);
     setPickupError("");
-    updateTripData({ pickupLocation: value });
+    setPickupHighlightedIndex(-1);
+    
     if (pickupSearchTimeoutRef.current) {
       clearTimeout(pickupSearchTimeoutRef.current);
     }
@@ -382,12 +433,12 @@ export default function Hero(): JSX.Element {
     }, 300);
   };
 
-  // Handle dropoff search with validation
   const handleDropoffSearch = (value: string) => {
     setDropoffSearchValue(value);
     setDropoffValidated(false);
     setDropoffError("");
-    updateTripData({ dropoffLocation: value });
+    setDropoffHighlightedIndex(-1);
+    
     if (dropoffSearchTimeoutRef.current) {
       clearTimeout(dropoffSearchTimeoutRef.current);
     }
@@ -403,7 +454,78 @@ export default function Hero(): JSX.Element {
     }, 300);
   };
 
-  // Handle pickup location selection
+  const handlePickupKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isPickupDropdownOpen) return;
+
+    const totalOptions = pickupSuggestions.length + 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setPickupHighlightedIndex((prev) =>
+          prev < totalOptions - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setPickupHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : totalOptions - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (pickupHighlightedIndex === 0) {
+          getCurrentLocation("pickup");
+        } else if (pickupHighlightedIndex > 0) {
+          const suggestion = pickupSuggestions[pickupHighlightedIndex - 1];
+          if (suggestion) {
+            handlePickupSelect(suggestion);
+          }
+        }
+        break;
+      case "Escape":
+        setIsPickupDropdownOpen(false);
+        setPickupHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  const handleDropoffKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isDropoffDropdownOpen) return;
+
+    const totalOptions = dropoffSuggestions.length + 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setDropoffHighlightedIndex((prev) =>
+          prev < totalOptions - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setDropoffHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : totalOptions - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (dropoffHighlightedIndex === 0) {
+          getCurrentLocation("dropoff");
+        } else if (dropoffHighlightedIndex > 0) {
+          const suggestion = dropoffSuggestions[dropoffHighlightedIndex - 1];
+          if (suggestion) {
+            handleDropoffSelect(suggestion);
+          }
+        }
+        break;
+      case "Escape":
+        setIsDropoffDropdownOpen(false);
+        setDropoffHighlightedIndex(-1);
+        break;
+    }
+  };
+
   const handlePickupSelect = (suggestion: LocationSuggestion) => {
     setIsSelectingFromDropdown(true);
     setPickupSearchValue(suggestion.address);
@@ -413,12 +535,13 @@ export default function Hero(): JSX.Element {
     setPickupError("");
     setIsPickupDropdownOpen(false);
     setPickupSuggestions([]);
+    setPickupHighlightedIndex(-1);
+    
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
   };
 
-  // Handle dropoff location selection
   const handleDropoffSelect = (suggestion: LocationSuggestion) => {
     setIsSelectingFromDropdown(true);
     setDropoffSearchValue(suggestion.address);
@@ -428,12 +551,13 @@ export default function Hero(): JSX.Element {
     setDropoffError("");
     setIsDropoffDropdownOpen(false);
     setDropoffSuggestions([]);
+    setDropoffHighlightedIndex(-1);
+    
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
   };
 
-  // Validate input on blur
   const handlePickupBlur = () => {
     if (pickupSearchValue && !pickupValidated && !isSelectingFromDropdown) {
       setPickupError("Please select a location from the dropdown suggestions.");
@@ -446,7 +570,6 @@ export default function Hero(): JSX.Element {
     }
   };
 
-  // Initialize search values from context
   useEffect(() => {
     if (tripData.pickupLocation && !pickupSearchValue) {
       setPickupSearchValue(tripData.pickupLocation || "");
@@ -458,7 +581,6 @@ export default function Hero(): JSX.Element {
     }
   }, [tripData.pickupLocation, tripData.dropoffLocation]);
 
-  // Check screen size on mount and resize
   useEffect(() => {
     const checkScreenSize = () => {
       setIsMobile(window.innerWidth < 621);
@@ -468,7 +590,6 @@ export default function Hero(): JSX.Element {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // Close dropdowns and map when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -533,7 +654,6 @@ export default function Hero(): JSX.Element {
     dropoffValidated,
   ]);
 
-  // Cleanup timeouts
   useEffect(() => {
     return () => {
       if (pickupSearchTimeoutRef.current) {
@@ -541,6 +661,9 @@ export default function Hero(): JSX.Element {
       }
       if (dropoffSearchTimeoutRef.current) {
         clearTimeout(dropoffSearchTimeoutRef.current);
+      }
+      if (addressFetchTimeoutRef.current) {
+        clearTimeout(addressFetchTimeoutRef.current);
       }
     };
   }, []);
@@ -583,30 +706,36 @@ export default function Hero(): JSX.Element {
     updateTripData({ luggageCount: newCount });
   };
 
-  // Open map for pickup or dropoff
   const openMap = (type: "pickup" | "dropoff") => {
     setMapType(type);
     setIsMapOpen(true);
   };
 
-  // Render location dropdown
   const renderLocationDropdown = (
     type: 'pickup' | 'dropoff',
     suggestions: LocationSuggestion[],
     isOpen: boolean,
     searchValue: string,
-    onSelect: (suggestion: LocationSuggestion) => void
+    onSelect: (suggestion: LocationSuggestion) => void,
+    highlightedIndex: number
   ) => {
     if (!isOpen) return null;
 
     return (
       <div className="absolute top-[80px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
-        {/* Current Location Option */}
         <button
           onMouseDown={() => setIsSelectingFromDropdown(true)}
           onClick={() => getCurrentLocation(type)}
+          onMouseEnter={() => {
+            if (type === 'pickup') setPickupHighlightedIndex(0);
+            if (type === 'dropoff') setDropoffHighlightedIndex(0);
+          }}
           disabled={isGettingCurrentLocation && currentLocationFor === type}
-          className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors border-b border-gray-100 disabled:opacity-50"
+          className={`w-full text-left px-4 py-3 transition-colors border-b border-gray-100 disabled:opacity-50 ${
+            highlightedIndex === 0
+              ? "bg-primary/10"
+              : "hover:bg-primary-gray/10"
+          }`}
         >
           <div className="flex items-center gap-3">
             {isGettingCurrentLocation && currentLocationFor === type ? (
@@ -631,15 +760,22 @@ export default function Hero(): JSX.Element {
           </div>
         </button>
 
-        {/* Search Results */}
         {suggestions.length > 0 && (
           <>
-            {suggestions.map((suggestion) => (
+            {suggestions.map((suggestion, index) => (
               <button
                 key={suggestion.id}
                 onMouseDown={() => setIsSelectingFromDropdown(true)}
                 onClick={() => onSelect(suggestion)}
-                className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors"
+                onMouseEnter={() => {
+                  if (type === 'pickup') setPickupHighlightedIndex(index + 1);
+                  if (type === 'dropoff') setDropoffHighlightedIndex(index + 1);
+                }}
+                className={`w-full text-left px-4 py-3 transition-colors ${
+                  highlightedIndex === index + 1
+                    ? "bg-primary/10"
+                    : "hover:bg-primary-gray/10"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
@@ -660,14 +796,12 @@ export default function Hero(): JSX.Element {
           </>
         )}
 
-        {/* No results message */}
         {searchValue.length >= 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
             No locations found in Canada. Try a different search term.
           </div>
         )}
 
-        {/* Initial message */}
         {searchValue.length < 3 && suggestions.length === 0 && (
           <div className="px-4 py-3 text-sm text-gray-500 text-center">
             Type at least 3 characters to search for locations in Canada
@@ -679,7 +813,6 @@ export default function Hero(): JSX.Element {
 
   return (
     <div className="relative w-full min-h-screen flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-8 xl:px-0 2xl:px-0">
-      {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-black/40 z-10"></div>
         <img
@@ -688,9 +821,7 @@ export default function Hero(): JSX.Element {
           className="w-full h-full object-cover bg-black"
         />
       </div>
-      {/* Content */}
       <div className="relative z-20 w-full max-w-screen-2xl mx-auto mt-16 md:mt-20">
-        {/* Text Section */}
         <div className="flex flex-col items-center text-center px-4 sm:px-6 md:px-8 mb-8 md:mb-12 lg:mb-16">
           <p className="text-primary text-sm md:text-base lg:text-lg font-medium mb-2 md:mb-3">
             ∗ Welcome To e CHARTER
@@ -704,13 +835,10 @@ export default function Hero(): JSX.Element {
             to suit your needs.
           </p>
         </div>
-        {/* Booking Box */}
         <div className="w-full max-w-4xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 mt-8 md:mt-12 lg:mt-0">
           <div className="bg-white w-full h-auto rounded-xl md:rounded-2xl lg:rounded-3xl shadow-lg px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6">
-            {/* TRIPS + Counters + Button */}
             <div className="flex flex-col lg:flex-row items-center pb-4 justify-between border-b border-primary-gray/50">
               <div className="flex flex-col md:flex-row gap-5 items-center sm:items-start">
-                {/* TRIPS Dropdown */}
                 <div className="relative w-45 lg:w-50" ref={tabDropdownRef}>
                   <button
                     onClick={() => setIsTabDropdownOpen(!isTabDropdownOpen)}
@@ -770,7 +898,6 @@ export default function Hero(): JSX.Element {
                   )}
                 </div>
                 <div className="flex items-center gap-3">
-                  {/* Person Dropdown */}
                   <div
                     className="relative w-30 md:w-40 lg:w-50"
                     ref={personDropdownRef}
@@ -834,7 +961,6 @@ export default function Hero(): JSX.Element {
                       </div>
                     )}
                   </div>
-                  {/* Luggage Dropdown */}
                   <div
                     className="relative w-30 md:w-40 lg:w-50"
                     ref={luggageDropdownRef}
@@ -908,11 +1034,9 @@ export default function Hero(): JSX.Element {
                 size="sm"
               />
             </div>
-            {/* Form Inputs */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 py-3 md:py-4 items-start">
               {(activeTab === "single" || activeTab === "round") && (
                 <>
-                  {/* Pickup with Search Dropdown */}
                   <div className="relative sm:min-h-[80px] flex flex-col" ref={pickupDropdownRef}>
                     <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
                       pickupError ? 'border-red-500' : 'border-primary-gray/50'
@@ -927,6 +1051,7 @@ export default function Hero(): JSX.Element {
                         placeholder="Pickup Location"
                         value={pickupSearchValue}
                         onChange={(e) => handlePickupSearch(e.target.value)}
+                        onKeyDown={handlePickupKeyDown}
                         onFocus={() => {
                           if (!isPickupDropdownOpen) {
                             setIsPickupDropdownOpen(true);
@@ -970,10 +1095,10 @@ export default function Hero(): JSX.Element {
                       pickupSuggestions,
                       isPickupDropdownOpen,
                       pickupSearchValue,
-                      handlePickupSelect
+                      handlePickupSelect,
+                      pickupHighlightedIndex
                     )}
                   </div>
-                  {/* Dropoff with Search Dropdown */}
                   <div className="relative sm:min-h-[80px] flex flex-col" ref={dropoffDropdownRef}>
                     <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
                       dropoffError ? 'border-red-500' : 'border-primary-gray/50'
@@ -988,6 +1113,7 @@ export default function Hero(): JSX.Element {
                         placeholder="Drop Off Location"
                         value={dropoffSearchValue}
                         onChange={(e) => handleDropoffSearch(e.target.value)}
+                        onKeyDown={handleDropoffKeyDown}
                         onFocus={() => {
                           if (!isDropoffDropdownOpen) {
                             setIsDropoffDropdownOpen(true);
@@ -1031,12 +1157,12 @@ export default function Hero(): JSX.Element {
                       dropoffSuggestions,
                       isDropoffDropdownOpen,
                       dropoffSearchValue,
-                      handleDropoffSelect
+                      handleDropoffSelect,
+                      dropoffHighlightedIndex
                     )}
                   </div>
                 </>
               )}
-              {/* Single Trip → Date & Time */}
               {activeTab === "single" && (
                 <div className="sm:min-h-[80px] flex flex-col">
                   <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
@@ -1057,11 +1183,11 @@ export default function Hero(): JSX.Element {
                           : "text-primary-gray"
                       } text-xs sm:text-sm md:text-base`}
                     />
+                    
                   </div>
                  
                 </div>
               )}
-              {/* Round Trip → Pickup + Return Date */}
               {activeTab === "round" && (
                 <>
                   <div className="sm:min-h-[80px] flex flex-col">
@@ -1119,7 +1245,6 @@ export default function Hero(): JSX.Element {
                 </>
               )}
             </div>
-            {/* Multi Stop Button */}
             <div className="flex items-center justify-between">
               <Button
                 label="Add Stop"
@@ -1147,17 +1272,40 @@ export default function Hero(): JSX.Element {
           </div>
         </div>
       </div>
-      {/* Map Modal */}
+
+      {/* Map Modal with Real-time Address Display */}
       {isMapOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-[90vw] sm:max-w-3xl min-h-[60vh] max-h-[90vh] flex flex-col">
-        
-           <div className="flex flex-row justify-between">
-           <h3 className="text-lg sm:text-xl font-semibold mb-2">
-              Select {mapType === "pickup" ? "Pickup" : "Dropoff"} Location
-            </h3>
-              <Icon onClick={handleCloseClick} icon="mdi:close" className="w-6 h-6 cursor-pointer" />
-           </div>
+            <div className="flex flex-row justify-between items-start mb-2">
+              <div className="flex-1">
+                <h3 className="text-lg sm:text-xl font-semibold">
+                  Select {mapType === "pickup" ? "Pickup" : "Dropoff"} Location
+                </h3>
+                {/* Real-time Address Display */}
+                <div className="mt-2 flex items-center gap-2">
+                  {isLoadingAddress ? (
+                    <>
+                      <Icon icon="mdi:loading" className="w-4 h-4 text-primary animate-spin" />
+                      <p className="text-sm text-gray-500">Loading address...</p>
+                    </>
+                  ) : (
+                    <>
+                      <Icon icon={ICON_DATA.LOCATION} className="w-4 h-4 text-primary flex-shrink-0" />
+                      <p className="text-sm text-gray-700 font-medium truncate">
+                        {currentMapAddress || "Move the map to select a location"}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              <Icon 
+                onClick={handleCloseClick} 
+                icon="mdi:close" 
+                className="w-6 h-6 cursor-pointer hover:bg-gray-100 rounded-full p-1 flex-shrink-0" 
+              />
+            </div>
+
             <div
               id="map"
               ref={mapContainerRef}
@@ -1165,9 +1313,17 @@ export default function Hero(): JSX.Element {
             >
               <Icon
                 icon={ICON_DATA.MAP_LOCATION}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10 pointer-events-none"
               />
             </div>
+
+            {/* Coordinates Display */}
+            {/* {selectedCoordinates && (
+              <div className="mt-2 text-xs text-gray-500 text-center">
+                Lat: {selectedCoordinates.lat.toFixed(6)}, Lng: {selectedCoordinates.lng.toFixed(6)}
+              </div>
+            )} */}
+
             <div className="flex mt-2 justify-end">
               <Button
                 label="Done"

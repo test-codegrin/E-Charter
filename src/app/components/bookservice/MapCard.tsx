@@ -2,7 +2,7 @@
 
 import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
 import Image from "next/image";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import tt from '@tomtom-international/web-sdk-maps';
 import ttServices from '@tomtom-international/web-sdk-services';
 import '@tomtom-international/web-sdk-maps/dist/maps.css';
@@ -25,7 +25,24 @@ const MapCard: React.FC = () => {
   const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
-  const { tripData } = useTrip();
+  const { tripData, updateRouteSummary } = useTrip();
+
+  // Memoize only route-relevant data to prevent unnecessary re-renders
+  const routeRelevantData = useMemo(() => ({
+    pickupLocation: tripData.pickupLocation,
+    pickupDateTime: tripData.pickupDateTime,
+    dropoffLocation: tripData.dropoffLocation,
+    returnDateTime: tripData.returnDateTime,
+    tripType: tripData.tripType,
+    multiStops: tripData.multiStops,
+  }), [
+    tripData.pickupLocation,
+    tripData.pickupDateTime,
+    tripData.dropoffLocation,
+    tripData.returnDateTime,
+    tripData.tripType,
+    JSON.stringify(tripData.multiStops),
+  ]);
 
   const formatDateTime = (dateTimeString?: string) => {
     if (!dateTimeString) return "Not set";
@@ -97,7 +114,6 @@ const MapCard: React.FC = () => {
         console.warn(`No geocoding results for ${locationString}`);
       }
     } catch (error) {
-      console.error(`Geocoding error for ${locationString}:`, error);
       return null;
     }
 
@@ -143,7 +159,6 @@ const MapCard: React.FC = () => {
       transform: translate(-50%, -50%);
     `;
     
-
     markerElement.appendChild(innerDot);
     return markerElement;
   };
@@ -173,7 +188,7 @@ const MapCard: React.FC = () => {
   };
 
   const isLocationValid = (location?: string, dateTime?: string) => {
-    return location && location.trim() !== "" && (dateTime || tripData.tripType !== "round");
+    return location && location.trim() !== "" && (dateTime || routeRelevantData.tripType !== "round");
   };
 
   const isStopValid = (stop: Stop) => {
@@ -195,21 +210,31 @@ const MapCard: React.FC = () => {
     clearMap();
 
     // Build valid locations without duplicates
-    const validLocations: { location: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
-    if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
-      validLocations.push({ location: tripData.pickupLocation!, type: 'pickup' });
+    const validLocations: { location: string; type: 'pickup' | 'stop' | 'dropoff' | 'return' }[] = [];
+    
+    if (isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
+      validLocations.push({ location: routeRelevantData.pickupLocation!, type: 'pickup' });
     }
-    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
-      tripData.multiStops.forEach((stop, index) => {
+
+    if (routeRelevantData.tripType === "multi" && routeRelevantData.multiStops.length > 0) {
+      routeRelevantData.multiStops.forEach((stop, index) => {
         if (isStopValid(stop) && !validLocations.some(loc => loc.location === stop.location)) {
           validLocations.push({ location: stop.location, type: 'stop' });
         }
       });
     }
-    if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "round" ? tripData.returnDateTime : undefined)) {
-      if (!validLocations.some(loc => loc.location === tripData.dropoffLocation)) {
-        validLocations.push({ location: tripData.dropoffLocation!, type: 'dropoff' });
+
+    if (isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.tripType === "round" ? routeRelevantData.returnDateTime : undefined)) {
+      if (!validLocations.some(loc => loc.location === routeRelevantData.dropoffLocation)) {
+        validLocations.push({ location: routeRelevantData.dropoffLocation!, type: 'dropoff' });
       }
+    }
+
+    // FOR ROUND TRIPS: Add pickup location again as the final destination
+    if (routeRelevantData.tripType === "round" && 
+        isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime) &&
+        isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.returnDateTime)) {
+      validLocations.push({ location: routeRelevantData.pickupLocation!, type: 'return' });
     }
 
     console.log("Valid locations:", validLocations);
@@ -239,9 +264,18 @@ const MapCard: React.FC = () => {
     // Add markers with explicit type-based checks
     validLocations.forEach((loc, index) => {
       const isFirst = loc.type === 'pickup';
-      const isLast = loc.type === 'dropoff';
+      const isLast = loc.type === 'dropoff' || loc.type === 'return';
+      const isReturn = loc.type === 'return';
+      
+      // For round trips, don't show return marker (it's same as pickup)
+      if (routeRelevantData.tripType === "round" && isReturn) {
+        return;
+      }
+      
       const color = isFirst ? '#C0FFED' : isLast ? '#FFD1D1' : '#FFF4CC';
-      const label = isFirst ? 'Pickup' : isLast ? 'Dropoff' : `Stop ${validLocations.filter(l => l.type === 'stop').indexOf(loc) + 1}`;
+      const label = isFirst ? 'Pickup' : 
+                    loc.type === 'dropoff' ? 'Dropoff' : 
+                    `Stop ${validLocations.filter(l => l.type === 'stop').indexOf(loc) + 1}`;
       addMarker(coordinates[index], color, label, isFirst, isLast);
     });
 
@@ -249,7 +283,7 @@ const MapCard: React.FC = () => {
       const locationsString = coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
       console.log("Calculating route with locations:", locationsString);
 
-      const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}`;
+      const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}&avoid=borderCrossings`;
       const response = await fetch(apiUrl);
       const routeResponse = await response.json();
       const routeColor = '#0040ff';
@@ -258,6 +292,19 @@ const MapCard: React.FC = () => {
 
       if (routeResponse.routes && routeResponse.routes.length > 0) {
         const route = routeResponse.routes[0];
+
+        // EXTRACT AND STORE ROUTE SUMMARY IN CONTEXT
+        if (route.summary) {
+          const routeSummary = {
+            lengthInMeters: route.summary.lengthInMeters,
+            travelTimeInSeconds: route.summary.travelTimeInSeconds,
+          };
+          
+          // Update context with route summary
+          updateRouteSummary(routeSummary);
+          
+          console.log("Route summary stored in context:", routeSummary);
+        }
 
         const routeGeoJson: GeoJSON.Feature<GeoJSON.LineString> = {
           type: 'Feature',
@@ -275,7 +322,7 @@ const MapCard: React.FC = () => {
               return acc;
             }, []),
           },
-          properties: {}, // Added for GeoJSON compliance
+          properties: {},
         };
 
         if (routeGeoJson.geometry.coordinates.length < 2) {
@@ -334,12 +381,13 @@ const MapCard: React.FC = () => {
     setIsRouteLoading(false);
   };
 
+  // Updated useEffect - only triggers when route-relevant data changes
   useEffect(() => {
     if (map && isMapLoaded) {
-      console.log("Triggering displayRoute with tripData:", tripData);
+      console.log("Triggering displayRoute with routeRelevantData:", routeRelevantData);
       displayRoute();
     }
-  }, [map, isMapLoaded, tripData]);
+  }, [map, isMapLoaded, routeRelevantData]);
 
   const renderRouteVisualization = () => {
     return (
@@ -355,14 +403,47 @@ const MapCard: React.FC = () => {
     );
   };
 
+  const renderRouteSummary = () => {
+    const { routeSummary } = tripData;
+    
+    if (!routeSummary || !routeSummary.lengthInMeters || !routeSummary.travelTimeInSeconds) {
+      return null;
+    }
+
+    const distanceKm = (routeSummary.lengthInMeters / 1000).toFixed(1);
+    const hours = Math.floor(routeSummary.travelTimeInSeconds / 3600);
+    const minutes = Math.floor((routeSummary.travelTimeInSeconds % 3600) / 60);
+    
+    const timeString = hours > 0 
+      ? `${hours}h ${minutes}m` 
+      : `${minutes}m`;
+
+    return (
+      <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-200">
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          </svg>
+          <span className="text-sm font-semibold">{distanceKm} km</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="text-sm font-semibold">{timeString}</span>
+        </div>
+      </div>
+    );
+  };
+
   const renderLocationLabels = () => {
-    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
-      const validStops = tripData.multiStops.filter(stop => isStopValid(stop));
+    if (routeRelevantData.tripType === "multi" && routeRelevantData.multiStops.length > 0) {
+      const validStops = routeRelevantData.multiStops.filter(stop => isStopValid(stop));
       
       const allLocations: { location: string; date?: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
       
-      if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
-        allLocations.push({ location: tripData.pickupLocation || "Pickup", date: tripData.pickupDateTime, type: 'pickup' });
+      if (isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
+        allLocations.push({ location: routeRelevantData.pickupLocation || "Pickup", date: routeRelevantData.pickupDateTime, type: 'pickup' });
       }
       
       validStops.forEach((stop, index) => {
@@ -375,11 +456,11 @@ const MapCard: React.FC = () => {
         }
       });
       
-      if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "multi" ? tripData.returnDateTime : undefined)) {
-        if (!allLocations.some(loc => loc.location === tripData.dropoffLocation)) {
+      if (isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.tripType === "multi" ? routeRelevantData.returnDateTime : undefined)) {
+        if (!allLocations.some(loc => loc.location === routeRelevantData.dropoffLocation)) {
           allLocations.push({ 
-            location: tripData.dropoffLocation || "Dropoff", 
-            date: tripData.tripType === "multi" ? tripData.returnDateTime : undefined,
+            location: routeRelevantData.dropoffLocation || "Dropoff", 
+            date: routeRelevantData.tripType === "multi" ? routeRelevantData.returnDateTime : undefined,
             type: 'dropoff',
           });
         }
@@ -479,7 +560,7 @@ const MapCard: React.FC = () => {
       );
     }
   
-    if (!isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
+    if (!isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
       return (
         <div className="mt-2 text-center text-gray-500 text-sm">
           Set pickup location and time to see route
@@ -487,21 +568,44 @@ const MapCard: React.FC = () => {
       );
     }
 
+    // ROUND TRIP DISPLAY
+    if (routeRelevantData.tripType === "round") {
+      return (
+        <div className="mt-2">
+          <div className="flex justify-between items-center text-sm font-medium md:font-semibold">
+            <div className="flex flex-col max-w-[40%]">
+              <p className="truncate whitespace-nowrap">{routeRelevantData.pickupLocation || "Pickup"}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(routeRelevantData.pickupDateTime)}</p>
+            </div>
+            
+            <div className="flex flex-col items-center px-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <p className="text-xs text-gray-500 mt-1">Round Trip</p>
+            </div>
+            
+            <div className="flex flex-col max-w-[40%] text-right">
+              <p className="truncate whitespace-nowrap">{routeRelevantData.dropoffLocation || "Dropoff"}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(routeRelevantData.returnDateTime)}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ONE-WAY TRIP DISPLAY
     return (
       <div className="mt-2">
         <div className="flex justify-between text-sm font-medium md:font-semibold">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{tripData.pickupLocation || "Pickup"}</p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{routeRelevantData.pickupLocation || "Pickup"}</p>
           <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripData.dropoffLocation || "Dropoff"}
+            {routeRelevantData.dropoffLocation || "Dropoff"}
           </p>
         </div>
         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(tripData.pickupDateTime)}</p>
-          <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripData.tripType === "round"
-              ? formatDateTime(tripData.returnDateTime)
-              : "Arrival time"}
-          </p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(routeRelevantData.pickupDateTime)}</p>
+          <p className="truncate max-w-[40%] text-right whitespace-nowrap">Arrival time</p>
         </div>
       </div>
     );
@@ -516,7 +620,6 @@ const MapCard: React.FC = () => {
           style={{ minHeight: '400px' }}
         />
         
-
         {!isMapLoaded || isRouteLoading && (
           <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 rounded-xl">
             <div className="text-white text-lg font-medium">Loading Route...</div>
@@ -530,7 +633,9 @@ const MapCard: React.FC = () => {
           <Image src={IMAGES_ASSETS.LOCATION} alt="pin" width={20} height={20} />
         </div>
 
-        {tripData.tripType !== "multi" && isLocationValid(tripData.pickupLocation, tripData.pickupDateTime) && renderRouteVisualization()}
+       
+
+        {routeRelevantData.tripType !== "multi" && isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime) && routeRelevantData.tripType !== "round" && renderRouteVisualization()}
 
         {renderLocationLabels()}
       </div>

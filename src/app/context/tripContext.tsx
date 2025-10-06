@@ -15,6 +15,11 @@ interface Stop {
   coordinates?: Coordinates;
 }
 
+interface RouteSummary {
+  lengthInMeters: number;
+  travelTimeInSeconds: number;
+}
+
 interface TripData {
   tripType: "single" | "round" | "multi";
   persons: number;
@@ -36,6 +41,7 @@ interface TripData {
   accessibleVehicle: boolean;
   eventType: string;
   tripName: string;
+  routeSummary?: RouteSummary;
 }
 
 interface TripContextType {
@@ -47,6 +53,7 @@ interface TripContextType {
   updateDropoffCoordinates: (coordinates: Coordinates) => void;
   updateReturnCoordinates: (coordinates: Coordinates) => void;
   updateStopCoordinates: (index: number, coordinates: Coordinates) => void;
+  updateRouteSummary: (summary: RouteSummary) => void;
   getAllLocationsWithCoordinates: () => Array<{
     location: string;
     coordinates?: Coordinates;
@@ -75,7 +82,8 @@ const defaultTripData: TripData = {
   },
   accessibleVehicle: false,
   eventType: "",
-  tripName: ""
+  tripName: "",
+  routeSummary: undefined
 };
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -130,6 +138,14 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         multiStops: updatedStops
       };
     });
+  };
+
+  // Helper method to update route summary
+  const updateRouteSummary = (summary: RouteSummary) => {
+    setTripData(prev => ({
+      ...prev,
+      routeSummary: summary
+    }));
   };
 
   // Helper method to get all locations with their coordinates for map display
@@ -194,6 +210,7 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateDropoffCoordinates,
       updateReturnCoordinates,
       updateStopCoordinates,
+      updateRouteSummary,
       getAllLocationsWithCoordinates
     }}>
       {children}
@@ -210,4 +227,4 @@ export const useTrip = (): TripContextType => {
 };
 
 // Export types for use in other components
-export type { Coordinates, Stop, TripData };
+export type { Coordinates, Stop, TripData, RouteSummary };
