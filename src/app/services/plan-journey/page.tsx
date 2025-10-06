@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 interface Stop {
   location: string;
   date: string;
+  id?: string;
 }
 
 // TomTom Search Result Interface
@@ -54,18 +55,18 @@ const calculateMinReturnDateTime = (
   travelTimeInSeconds: number
 ): string => {
   if (!pickupDateTime || !travelTimeInSeconds) return "";
-  
+
   const pickupDate = new Date(pickupDateTime);
   // Add travel time in seconds
-  pickupDate.setSeconds(pickupDate.getSeconds() + (travelTimeInSeconds/2));
-  
+  pickupDate.setSeconds(pickupDate.getSeconds() + travelTimeInSeconds);
+
   // Convert to datetime-local format (YYYY-MM-DDTHH:mm)
   const year = pickupDate.getFullYear();
-  const month = String(pickupDate.getMonth() + 1).padStart(2, '0');
-  const day = String(pickupDate.getDate()).padStart(2, '0');
-  const hours = String(pickupDate.getHours()).padStart(2, '0');
-  const minutes = String(pickupDate.getMinutes()).padStart(2, '0');
-  
+  const month = String(pickupDate.getMonth() + 1).padStart(2, "0");
+  const day = String(pickupDate.getDate()).padStart(2, "0");
+  const hours = String(pickupDate.getHours()).padStart(2, "0");
+  const minutes = String(pickupDate.getMinutes()).padStart(2, "0");
+
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
@@ -969,10 +970,10 @@ const PlanJourney = () => {
     }
   };
 
-  // Handle dropoff time change with validation (for round trip)
+  // Handle dropoff time change with validation for round trip
   const handleDropoffTimeChange = (value: string) => {
     setDropoffTimeError("");
-    
+
     if (
       tripData.tripType === "round" &&
       value &&
@@ -980,26 +981,31 @@ const PlanJourney = () => {
       dropoffValidated
     ) {
       // Validate that return time is after pickup + travel time
-      if (tripData.pickupDateTime && tripData.routeSummary?.travelTimeInSeconds) {
+      if (
+        tripData.pickupDateTime &&
+        tripData.routeSummary?.roundTripDropTravelTimeInSeconds
+      ) {
         const minReturnDateTime = calculateMinReturnDateTime(
           tripData.pickupDateTime,
-          tripData.routeSummary.travelTimeInSeconds
+          tripData.routeSummary.roundTripDropTravelTimeInSeconds
         );
-        
+
         if (value < minReturnDateTime) {
           setDropoffTimeError(
-            `Return time must be after estimated arrival time (${new Date(minReturnDateTime).toLocaleString('en-US', {
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit',
-              hour12: true
+            `Return time must be after estimated arrival time (${new Date(
+              minReturnDateTime
+            ).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
             })})`
           );
           return;
         }
       }
-      
+
       updateTripData({ returnDateTime: value });
     } else if (value && tripData.tripType === "round") {
       setDropoffTimeError("Please select a valid dropoff location first.");
@@ -1015,12 +1021,13 @@ const PlanJourney = () => {
       setPickupError("Please select a pickup location from the suggestions.");
       hasError = true;
     }
+
     if (!tripData.pickupDateTime) {
       setPickupTimeError("Please select a pickup date and time.");
       hasError = true;
     }
 
-    // Validate dropoff location and time (for all trip types, but time only for round trip)
+    // Validate dropoff location and time for all trip types, but time only for round trip
     if (!tripData.dropoffLocation || !dropoffValidated) {
       setDropoffError("Please select a dropoff location from the suggestions.");
       hasError = true;
@@ -1032,12 +1039,15 @@ const PlanJourney = () => {
           "Please select a dropoff date and time for round trip."
         );
         hasError = true;
-      } else if (tripData.pickupDateTime && tripData.routeSummary?.travelTimeInSeconds) {
+      } else if (
+        tripData.pickupDateTime &&
+        tripData.routeSummary?.roundTripDropTravelTimeInSeconds
+      ) {
         const minReturnDateTime = calculateMinReturnDateTime(
           tripData.pickupDateTime,
-          tripData.routeSummary.travelTimeInSeconds
+          tripData.routeSummary.roundTripDropTravelTimeInSeconds
         );
-        
+
         if (tripData.returnDateTime < minReturnDateTime) {
           setDropoffTimeError(
             "Return time must be after the estimated arrival time at the dropoff location."
@@ -1336,11 +1346,21 @@ const PlanJourney = () => {
               tripData.multiStops.length > 0 &&
               tripData.multiStops.map((s, index) => (
                 <StopCard
-                  key={`stop-${index}`}
+                  key={`stop-${index}-${s.location}-${s.date}`}
                   id={index}
                   location={s.location}
                   date={s.date}
                   pickupCoordinates={tripData.pickupCoordinates}
+                  pickupDateTime={tripData.pickupDateTime}
+                  previousStopDate={
+                    index > 0 ? tripData.multiStops[index - 1].date : undefined
+                  }
+                  previousStopLocation={
+                    index > 0
+                      ? tripData.multiStops[index - 1].location
+                      : undefined
+                  } // NEW: Pass previous stop location
+                  stopIndex={index}
                   totalStops={tripData.multiStops.length}
                   onChange={(id, data) => handleUpdateStop(id as number, data)}
                   onRemove={(id) => handleRemoveStop(id as number)}
@@ -1449,7 +1469,7 @@ const PlanJourney = () => {
                   {/* Date & Time WITH VALIDATION */}
                   {tripData.tripType === "round" && (
                     <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
-                      <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-primary-border/20">
+                      <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-[#DBDBDB]">
                         <Icon
                           icon={ICON_DATA.CALENDAR_PICKUP}
                           className="w-6 h-6 text-primary-gray flex-shrink-0"
@@ -1458,10 +1478,13 @@ const PlanJourney = () => {
                           name="Return Date & Time"
                           type="datetime-local"
                           min={
-                            tripData.pickupDateTime && tripData.routeSummary?.travelTimeInSeconds
+                            tripData.pickupDateTime &&
+                            tripData.routeSummary
+                              ?.roundTripDropTravelTimeInSeconds
                               ? calculateMinReturnDateTime(
                                   tripData.pickupDateTime,
-                                  (tripData.routeSummary.travelTimeInSeconds)
+                                  tripData.routeSummary
+                                    .roundTripDropTravelTimeInSeconds
                                 )
                               : tripData.pickupDateTime || undefined
                           }
@@ -1483,7 +1506,7 @@ const PlanJourney = () => {
                 </section>
 
                 {/* Route Summary Display */}
-                {tripData.tripType !== "round" && tripData.routeSummary && tripData.pickupDateTime && (
+                {tripData.routeSummary && tripData.pickupDateTime && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-around gap-4 flex-wrap">
                       {/* Distance */}
@@ -1495,8 +1518,10 @@ const PlanJourney = () => {
                         <div>
                           <p className="text-xs text-gray-500">Distance</p>
                           <p className="text-sm font-semibold text-gray-800">
-                            {(
-                              tripData.routeSummary.lengthInMeters / 1000
+                            {(tripData.tripType === "round"
+                              ? tripData.routeSummary
+                                  .roundTripDropLengthInMeters / 1000
+                              : tripData.routeSummary.lengthInMeters / 1000
                             ).toFixed(1)}{" "}
                             km
                           </p>
@@ -1514,12 +1539,18 @@ const PlanJourney = () => {
                           <p className="text-sm font-semibold text-gray-800">
                             {(() => {
                               const hours = Math.floor(
-                                tripData.routeSummary.travelTimeInSeconds / 3600
+                                tripData.tripType === "round"
+                                  ? tripData.routeSummary
+                                      .roundTripDropTravelTimeInSeconds / 3600
+                                  : tripData.routeSummary.travelTimeInSeconds /
+                                      3600
                               );
                               const minutes = Math.floor(
-                                (tripData.routeSummary.travelTimeInSeconds %
-                                  3600) /
-                                  60
+                                (tripData.tripType === "round"
+                                  ? tripData.routeSummary
+                                      .roundTripDropTravelTimeInSeconds % 3600
+                                  : tripData.routeSummary.travelTimeInSeconds %
+                                    3600) / 60
                               );
                               return hours > 0
                                 ? `${hours}h ${minutes}m`
@@ -1547,8 +1578,12 @@ const PlanJourney = () => {
                                 );
                                 const arrivalDate = new Date(
                                   pickupDate.getTime() +
-                                    tripData.routeSummary.travelTimeInSeconds *
-                                      1000
+                                    (tripData.tripType === "round"
+                                      ? tripData.routeSummary
+                                          .roundTripDropTravelTimeInSeconds *
+                                        1000
+                                      : tripData.routeSummary
+                                          .travelTimeInSeconds * 1000)
                                 );
                                 return arrivalDate.toLocaleString("en-US", {
                                   month: "short",
@@ -1631,9 +1666,9 @@ const PlanJourney = () => {
                     </div>
                   </div>
                 </section>
-                
-              {/* Route Summary Display */}
-              {tripData.routeSummary && tripData.pickupDateTime && (
+
+                {/* Route Summary Display */}
+                {tripData.routeSummary && tripData.pickupDateTime && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                       {/* Distance */}
@@ -1646,7 +1681,7 @@ const PlanJourney = () => {
                           <p className="text-xs text-gray-500">Distance</p>
                           <p className="text-sm font-semibold text-gray-800">
                             {(
-                              (tripData.routeSummary.lengthInMeters) / 1000
+                              tripData.routeSummary.lengthInMeters / 1000
                             ).toFixed(1)}{" "}
                             km
                           </p>
@@ -1664,7 +1699,7 @@ const PlanJourney = () => {
                           <p className="text-sm font-semibold text-gray-800">
                             {(() => {
                               const hours = Math.floor(
-                                (tripData.routeSummary.travelTimeInSeconds) / 3600
+                                tripData.routeSummary.travelTimeInSeconds / 3600
                               );
                               const minutes = Math.floor(
                                 (tripData.routeSummary.travelTimeInSeconds %
@@ -1680,38 +1715,35 @@ const PlanJourney = () => {
                       </div>
 
                       {/* Estimated Arrival */}
-                    
-                        <div className="flex items-center gap-2">
-                          <Icon
-                            icon={ICON_DATA.ARRIVAL}
-                            className="w-5 h-5 text-primary"
-                          />
-                          <div>
-                            <p className="text-xs text-gray-500">
-                              Est. Arrival
-                            </p>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {(() => {
-                                const pickupDate = new Date(
-                                  tripData.returnDateTime
-                                );
-                                const arrivalDate = new Date(
-                                  pickupDate.getTime() +
-                                    tripData.routeSummary.travelTimeInSeconds *
-                                      1000
-                                );
-                                return arrivalDate.toLocaleString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: true,
-                                });
-                              })()}
-                            </p>
-                          </div>
+
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.ARRIVAL}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Est. Arrival</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(() => {
+                              const pickupDate = new Date(
+                                tripData.returnDateTime
+                              );
+                              const arrivalDate = new Date(
+                                pickupDate.getTime() +
+                                  tripData.routeSummary.travelTimeInSeconds *
+                                    1000
+                              );
+                              return arrivalDate.toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              });
+                            })()}
+                          </p>
                         </div>
-                     
+                      </div>
                     </div>
                   </div>
                 )}

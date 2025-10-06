@@ -16,6 +16,8 @@ interface Stop {
 }
 
 interface RouteSummary {
+  roundTripDropLengthInMeters: number;
+  roundTripDropTravelTimeInSeconds: number;
   lengthInMeters: number;
   travelTimeInSeconds: number;
 }
