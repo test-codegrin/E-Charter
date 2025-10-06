@@ -974,7 +974,7 @@ const PlanJourney = () => {
   // **UPDATED: Handle pickup time change with validation and round trip/multi-stop updates**
   const handlePickupTimeChange = (value: string) => {
     setPickupTimeError("");
-    
+
     // Validate that pickup time is not in the past
     const currentDateTime = getCurrentDateTime();
     if (value && value < currentDateTime) {
@@ -985,21 +985,28 @@ const PlanJourney = () => {
     if (value && tripData.pickupLocation && pickupValidated) {
       // Store the old pickup time to calculate the difference
       const oldPickupTime = tripData.pickupDateTime;
-      
+
       updateTripData({ pickupDateTime: value });
 
       // **ROUND TRIP: Update dropoff time if it exists**
-      if (tripData.tripType === "round" && tripData.returnDateTime && oldPickupTime) {
+      if (
+        tripData.tripType === "round" &&
+        tripData.returnDateTime &&
+        oldPickupTime
+      ) {
         const oldPickupDate = new Date(oldPickupTime);
         const newPickupDate = new Date(value);
         const oldDropoffDate = new Date(tripData.returnDateTime);
-        
+
         // Calculate the time difference between old pickup and dropoff
-        const timeDifference = oldDropoffDate.getTime() - oldPickupDate.getTime();
-        
+        const timeDifference =
+          oldDropoffDate.getTime() - oldPickupDate.getTime();
+
         // Apply the same time difference to the new pickup time
-        const newDropoffDate = new Date(newPickupDate.getTime() + timeDifference);
-        
+        const newDropoffDate = new Date(
+          newPickupDate.getTime() + timeDifference
+        );
+
         // Format the new dropoff time
         const year = newDropoffDate.getFullYear();
         const month = String(newDropoffDate.getMonth() + 1).padStart(2, "0");
@@ -1007,25 +1014,25 @@ const PlanJourney = () => {
         const hours = String(newDropoffDate.getHours()).padStart(2, "0");
         const minutes = String(newDropoffDate.getMinutes()).padStart(2, "0");
         const newDropoffTime = `${year}-${month}-${day}T${hours}:${minutes}`;
-        
+
         updateTripData({ returnDateTime: newDropoffTime });
       }
 
       // **MULTI-STOP: Clear any stop dates that are before the new pickup time**
       if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
-        const updatedStops = tripData.multiStops.map(stop => {
+        const updatedStops = tripData.multiStops.map((stop) => {
           if (stop.date && stop.date < value) {
             // Clear the stop date if it's before the new pickup time
             return { ...stop, date: "" };
           }
           return stop;
         });
-        
+
         // Only update if any stops were cleared
-        const stopsChanged = updatedStops.some((stop, index) => 
-          stop.date !== tripData.multiStops[index].date
+        const stopsChanged = updatedStops.some(
+          (stop, index) => stop.date !== tripData.multiStops[index].date
         );
-        
+
         if (stopsChanged) {
           updateTripData({ multiStops: updatedStops });
           toast.success("Stop dates before pickup time have been cleared.");
@@ -1828,87 +1835,143 @@ const PlanJourney = () => {
           <div className="border-t border-gray-200 my-6 md:my-8" />
 
           {/* Trip Details Accordion */}
-          <details className="group md:w-[580px] w-full overflow-hidden" open>
+          <details className="group w-full overflow-hidden" open>
             <summary className="flex items-center justify-between gap-4 py-4 cursor-pointer select-none list-none">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Trip Details
               </h2>
               <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="border border-primary-border/20 bg-[#FCFCFC] mt-4 rounded-2xl p-5 space-y-6">
+            <div className="border border-primary-border/20 bg-[#FCFCFC] mt-4 rounded-2xl p-4 sm:p-6 space-y-5">
+              {/* Trip Name */}
               <div>
-                <p className="font-medium text-lg text-[#040401]">Trip Name</p>
-                <Inputs
-                  type="text"
-                  value={tripData.tripName || ""}
-                  onChange={(e) => updateTripData({ tripName: e.target.value })}
-                  placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
-                  name="Trip Name"
-                />
-                <div className="border-b border-primary-border/20 mt-4"></div>
-              </div>
-
-              <div className="flex flex-col md:flex-row md:gap-4 gap-6">
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">Luggage</p>
-                  <Inputs
-                    type="number"
-                    value={tripData.luggageCount.toString() || ""}
-                    onChange={(e) =>
-                      updateTripData({
-                        luggageCount: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
-                    name="Luggage"
-                  />
-                  <div className="border-b border-primary-border/20 mt-4"></div>
-                </div>
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">
-                    Event Types
-                  </p>
-                  <select
-                    value={tripData.eventType || ""}
-                    onChange={(e) =>
-                      updateTripData({ eventType: e.target.value })
-                    }
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full bg-transparent cursor-pointer"
-                  >
-                    <option value="">Select event type</option>
-                    <option value="personal">Personal</option>
-                    <option value="business">Business</option>
-                    <option value="airport">Airport Transfer</option>
-                    <option value="wedding">Wedding</option>
-                    <option value="corporate">Corporate</option>
-                  </select>
-                  <div className="border-b border-primary-border/20 mt-4"></div>
-                </div>
-              </div>
-
-              <div>
-                <p className="font-medium text-lg text-[#040401] mb-3">
-                  Accessible Vehicle
-                </p>
-                <div className="flex items-center gap-3">
+                <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                  Trip Name
+                </label>
+                <div className="relative">
                   <input
-                    type="checkbox"
-                    checked={tripData.accessibleVehicle || false}
+                    type="text"
+                    value={tripData.tripName || ""}
                     onChange={(e) =>
-                      updateTripData({ accessibleVehicle: e.target.checked })
+                      updateTripData({ tripName: e.target.value })
                     }
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
-                  />
-                  <p className="text-sm lg:w-[350px]">
-                    ADA standards Compliant
-                  </p>
-                  <img
-                    src="/images/wheel-chair.png"
-                    alt="wheelchair"
-                    className="w-[39px] h-[39px] lg:ml-auto"
-                  />
+                    placeholder="Enter trip name (e.g., Round trip)"
+                    className="text-sm text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
+                    name="Trip Name"
+                  />    
+                </div>
+              </div>
+
+              {/* Luggage and Event Types Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                {/* Luggage */}
+                <div>
+                  <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                    Luggage
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      icon="mdi:bag-suitcase"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      value={tripData.luggageCount.toString() || ""}
+                      onChange={(e) =>
+                        updateTripData({
+                          luggageCount: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      placeholder="0"
+                      className="text-sm text-gray-700 pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
+                      name="Luggage"
+                    />
+                  </div>
+                </div>
+
+                {/* Event Types */}
+                <div>
+                  <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                    Event Type
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      icon="mdi:calendar-star"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    />
+                    <select
+                      value={tripData.eventType || ""}
+                      onChange={(e) =>
+                        updateTripData({ eventType: e.target.value })
+                      }
+                      className="text-sm text-gray-700 pl-11 pr-10 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white cursor-pointer appearance-none transition-all"
+                    >
+                      <option value="" disabled>
+                        Select event type
+                      </option>
+                      <option value="personal">Personal</option>
+                      <option value="business">Business</option>
+                      <option value="airport">Airport Transfer</option>
+                      <option value="wedding">Wedding</option>
+                      <option value="corporate">Corporate</option>
+                    </select>
+                    <Icon
+                      icon="mdi:chevron-down"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Accessible Vehicle */}
+              <div className="pt-2">
+                <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-3">
+                  Accessible Vehicle
+                </label>
+                <div className="flex items-center justify-between p-4 bg-white border border-gray-300 rounded-lg hover:border-primary transition-colors">
+                  <div className="flex items-center gap-4 flex-1">
+                    {/* Custom Checkbox */}
+                    <label className="relative flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={tripData.accessibleVehicle || false}
+                        onChange={(e) =>
+                          updateTripData({
+                            accessibleVehicle: e.target.checked,
+                          })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-6 h-6 border-2 border-gray-300 rounded-md peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
+                        {tripData.accessibleVehicle && (
+                          <Icon
+                            icon="mdi:check"
+                            className="w-4 h-4 text-white"
+                          />
+                        )}
+                      </div>
+                    </label>
+
+                    {/* Label Text */}
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-medium text-gray-800">
+                        ADA Standards Compliant
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        Vehicle with accessibility features
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Wheelchair Icon */}
+                  <div className="flex-shrink-0 ml-3">
+                    <img
+                      src="/images/wheel-chair.png"
+                      alt="wheelchair accessibility"
+                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
