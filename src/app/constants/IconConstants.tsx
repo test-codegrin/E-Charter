@@ -20,5 +20,7 @@ export const ICON_DATA = {
     DISTANCE : "mdi:map-marker-distance",
     CLOCK : "mdi:clock-outline",
     ARRIVAL : "ic:outline-share-arrival-time",
+    WHEELCHAIR : "mdi:wheelchair",
+    BAG_SUITCASE : "mdi:bag-suitcase",
     
 };
