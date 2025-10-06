@@ -18,6 +18,7 @@ import toast from "react-hot-toast";
 interface Stop {
   location: string;
   date: string;
+  id?: string;
 }
 
 // TomTom Search Result Interface
@@ -47,6 +48,38 @@ interface LocationSuggestion {
     longitude: number;
   };
 }
+
+// Helper function to get current datetime in local format
+const getCurrentDateTime = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Helper function to calculate minimum return datetime
+const calculateMinReturnDateTime = (
+  pickupDateTime: string,
+  travelTimeInSeconds: number
+): string => {
+  if (!pickupDateTime || !travelTimeInSeconds) return "";
+
+  const pickupDate = new Date(pickupDateTime);
+  // Add travel time in seconds
+  pickupDate.setSeconds(pickupDate.getSeconds() + travelTimeInSeconds);
+
+  // Convert to datetime-local format (YYYY-MM-DDTHH:mm)
+  const year = pickupDate.getFullYear();
+  const month = String(pickupDate.getMonth() + 1).padStart(2, "0");
+  const day = String(pickupDate.getDate()).padStart(2, "0");
+  const hours = String(pickupDate.getHours()).padStart(2, "0");
+  const minutes = String(pickupDate.getMinutes()).padStart(2, "0");
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
 
 const PlanJourney = () => {
   const router = useRouter();
@@ -82,6 +115,11 @@ const PlanJourney = () => {
   const [dropoffSearchValue, setDropoffSearchValue] = useState("");
   const [returnSearchValue, setReturnSearchValue] = useState("");
 
+  // Keyboard navigation states
+  const [pickupHighlightedIndex, setPickupHighlightedIndex] = useState(-1);
+  const [dropoffHighlightedIndex, setDropoffHighlightedIndex] = useState(-1);
+  const [returnHighlightedIndex, setReturnHighlightedIndex] = useState(-1);
+
   // Validation states
   const [pickupValidated, setPickupValidated] = useState(false);
   const [dropoffValidated, setDropoffValidated] = useState(false);
@@ -111,6 +149,10 @@ const PlanJourney = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<tt.Map | null>(null);
 
+  // NEW: Map address display states
+  const [currentMapAddress, setCurrentMapAddress] = useState<string>("");
+  const [isLoadingAddress, setIsLoadingAddress] = useState(false);
+
   // Refs for dropdowns
   const pickupDropdownRef = useRef<HTMLDivElement>(null);
   const dropoffDropdownRef = useRef<HTMLDivElement>(null);
@@ -119,6 +161,7 @@ const PlanJourney = () => {
   const pickupSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropoffSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const returnSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const addressFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Check if we should focus on stop input from URL params
   const shouldFocusStop = searchParams.get("focusStop") === "true";
@@ -131,7 +174,7 @@ const PlanJourney = () => {
         key: TOMTOM_API_KEY,
         container: mapContainerRef.current,
         center: [0, 0], // Default center
-        zoom: 12,
+        zoom: 16,
       });
 
       // Check for existing coordinates
@@ -168,11 +211,56 @@ const PlanJourney = () => {
         }
       }, 200);
 
-      // Update selected coordinates on map move or zoom
+      // NEW: Function to fetch and update address
+      const fetchAddressForCoordinates = async (lat: number, lng: number) => {
+        if (!TOMTOM_API_KEY) return;
+
+        setIsLoadingAddress(true);
+
+        try {
+          const response = await fetch(
+            `https://api.tomtom.com/search/2/reverseGeocode/${lat},${lng}.json?key=${TOMTOM_API_KEY}`
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            if (data.addresses && data.addresses.length > 0) {
+              const address = data.addresses[0].address.freeformAddress;
+              setCurrentMapAddress(address);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching address:", error);
+        } finally {
+          setIsLoadingAddress(false);
+        }
+      };
+
+      // Fetch initial address
+      if (initialCoordinates) {
+        fetchAddressForCoordinates(
+          initialCoordinates.lat,
+          initialCoordinates.lng
+        );
+      } else {
+        fetchAddressForCoordinates(43.6532, -79.3832);
+      }
+
+      // UPDATED: Function to update coordinates with debounced address fetch
       const updateCoordinates = () => {
         if (mapRef.current) {
           const center = mapRef.current.getCenter();
           setSelectedCoordinates({ lat: center.lat, lng: center.lng });
+
+          // Clear previous timeout
+          if (addressFetchTimeoutRef.current) {
+            clearTimeout(addressFetchTimeoutRef.current);
+          }
+
+          // Debounce address fetching to avoid too many API calls
+          addressFetchTimeoutRef.current = setTimeout(() => {
+            fetchAddressForCoordinates(center.lat, center.lng);
+          }, 500); // Wait 500ms after user stops moving
         }
       };
 
@@ -185,6 +273,10 @@ const PlanJourney = () => {
           mapRef.current.off("zoomend", updateCoordinates);
           mapRef.current.remove();
           mapRef.current = null;
+        }
+        // Clear timeout on cleanup
+        if (addressFetchTimeoutRef.current) {
+          clearTimeout(addressFetchTimeoutRef.current);
         }
       };
     }
@@ -210,7 +302,6 @@ const PlanJourney = () => {
             const address = data.addresses[0].address.freeformAddress;
             const country = data.addresses[0].address.country;
             if (country !== "Canada") {
-              // alert("Selected location must be in Canada.");
               toast.error("Selected location must be in Canada.");
               return;
             }
@@ -233,7 +324,6 @@ const PlanJourney = () => {
         }
       } catch (error) {
         console.error("Reverse geocoding error:", error);
-        // alert("Could not get address for the selected location.");
         toast.error("Could not get address for the selected location.");
       }
     }
@@ -243,12 +333,12 @@ const PlanJourney = () => {
   const handleCloseClick = () => {
     setIsMapOpen(false);
     setSelectedCoordinates(null);
+    setCurrentMapAddress("");
   };
 
   // Get current location using Geolocation API
   const getCurrentLocation = async (type: "pickup" | "dropoff" | "round") => {
     if (!navigator.geolocation) {
-      // alert("Geolocation is not supported by this browser.");
       toast.error("Geolocation is not supported by this browser.");
       return;
     }
@@ -279,7 +369,6 @@ const PlanJourney = () => {
                 const address = data.addresses[0].address.freeformAddress;
                 const country = data.addresses[0].address.country;
                 if (country !== "Canada") {
-                  // alert("Current location must be in Canada.");
                   toast.error("Current location must be in Canada.");
                   setIsGettingCurrentLocation(false);
                   setCurrentLocationFor(null);
@@ -313,7 +402,9 @@ const PlanJourney = () => {
           }
         } catch (error) {
           console.error("Reverse geocoding error:", error);
-          toast.error("Could not get address for your location. Please try again.");
+          toast.error(
+            "Could not get address for your location. Please try again."
+          );
         } finally {
           setIsGettingCurrentLocation(false);
           setCurrentLocationFor(null);
@@ -386,7 +477,7 @@ const PlanJourney = () => {
     setPickupSearchValue(value);
     setPickupValidated(false);
     setPickupError("");
-    updateTripData({ pickupLocation: value });
+    setPickupHighlightedIndex(-1);
 
     if (pickupSearchTimeoutRef.current) {
       clearTimeout(pickupSearchTimeoutRef.current);
@@ -409,7 +500,7 @@ const PlanJourney = () => {
     setDropoffSearchValue(value);
     setDropoffValidated(false);
     setDropoffError("");
-    updateTripData({ dropoffLocation: value });
+    setDropoffHighlightedIndex(-1);
 
     if (dropoffSearchTimeoutRef.current) {
       clearTimeout(dropoffSearchTimeoutRef.current);
@@ -430,7 +521,7 @@ const PlanJourney = () => {
   // Handle return search with validation
   const handleReturnSearch = (value: string) => {
     setReturnSearchValue(value);
-    updateTripData({ returnLocation: value });
+    setReturnHighlightedIndex(-1);
 
     if (returnSearchTimeoutRef.current) {
       clearTimeout(returnSearchTimeoutRef.current);
@@ -458,6 +549,7 @@ const PlanJourney = () => {
     setPickupError("");
     setIsPickupDropdownOpen(false);
     setPickupSuggestions([]);
+    setPickupHighlightedIndex(-1);
 
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
@@ -474,6 +566,7 @@ const PlanJourney = () => {
     setDropoffError("");
     setIsDropoffDropdownOpen(false);
     setDropoffSuggestions([]);
+    setDropoffHighlightedIndex(-1);
 
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
@@ -488,10 +581,122 @@ const PlanJourney = () => {
     updateReturnCoordinates(suggestion.coordinates);
     setIsReturnDropdownOpen(false);
     setReturnSuggestions([]);
+    setReturnHighlightedIndex(-1);
 
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
+  };
+
+  // Handle keyboard navigation for pickup
+  const handlePickupKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isPickupDropdownOpen) return;
+
+    const totalOptions = pickupSuggestions.length + 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setPickupHighlightedIndex((prev) =>
+          prev < totalOptions - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setPickupHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : totalOptions - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (pickupHighlightedIndex === 0) {
+          getCurrentLocation("pickup");
+        } else if (pickupHighlightedIndex > 0) {
+          const suggestion = pickupSuggestions[pickupHighlightedIndex - 1];
+          if (suggestion) {
+            handlePickupSelect(suggestion);
+          }
+        }
+        break;
+      case "Escape":
+        setIsPickupDropdownOpen(false);
+        setPickupHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // Handle keyboard navigation for dropoff
+  const handleDropoffKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isDropoffDropdownOpen) return;
+
+    const totalOptions = dropoffSuggestions.length + 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setDropoffHighlightedIndex((prev) =>
+          prev < totalOptions - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setDropoffHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : totalOptions - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (dropoffHighlightedIndex === 0) {
+          getCurrentLocation("dropoff");
+        } else if (dropoffHighlightedIndex > 0) {
+          const suggestion = dropoffSuggestions[dropoffHighlightedIndex - 1];
+          if (suggestion) {
+            handleDropoffSelect(suggestion);
+          }
+        }
+        break;
+      case "Escape":
+        setIsDropoffDropdownOpen(false);
+        setDropoffHighlightedIndex(-1);
+        break;
+    }
+  };
+
+  // Handle keyboard navigation for return
+  const handleReturnKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!isReturnDropdownOpen) return;
+
+    const totalOptions = returnSuggestions.length + 1;
+
+    switch (e.key) {
+      case "ArrowDown":
+        e.preventDefault();
+        setReturnHighlightedIndex((prev) =>
+          prev < totalOptions - 1 ? prev + 1 : 0
+        );
+        break;
+      case "ArrowUp":
+        e.preventDefault();
+        setReturnHighlightedIndex((prev) =>
+          prev > 0 ? prev - 1 : totalOptions - 1
+        );
+        break;
+      case "Enter":
+        e.preventDefault();
+        if (returnHighlightedIndex === 0) {
+          getCurrentLocation("round");
+        } else if (returnHighlightedIndex > 0) {
+          const suggestion = returnSuggestions[returnHighlightedIndex - 1];
+          if (suggestion) {
+            handleReturnSelect(suggestion);
+          }
+        }
+        break;
+      case "Escape":
+        setIsReturnDropdownOpen(false);
+        setReturnHighlightedIndex(-1);
+        break;
+    }
   };
 
   // Validation on blur
@@ -585,6 +790,9 @@ const PlanJourney = () => {
       if (returnSearchTimeoutRef.current) {
         clearTimeout(returnSearchTimeoutRef.current);
       }
+      if (addressFetchTimeoutRef.current) {
+        clearTimeout(addressFetchTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -594,7 +802,8 @@ const PlanJourney = () => {
     suggestions: LocationSuggestion[],
     isOpen: boolean,
     searchValue: string,
-    onSelect: (suggestion: LocationSuggestion) => void
+    onSelect: (suggestion: LocationSuggestion) => void,
+    highlightedIndex: number
   ) => {
     if (!isOpen) return null;
 
@@ -603,8 +812,17 @@ const PlanJourney = () => {
         <button
           onMouseDown={() => setIsSelectingFromDropdown(true)}
           onClick={() => getCurrentLocation(type)}
+          onMouseEnter={() => {
+            if (type === "pickup") setPickupHighlightedIndex(0);
+            if (type === "dropoff") setDropoffHighlightedIndex(0);
+            if (type === "round") setReturnHighlightedIndex(0);
+          }}
           disabled={isGettingCurrentLocation && currentLocationFor === type}
-          className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors border-b border-gray-100 disabled:opacity-50"
+          className={`w-full text-left px-4 py-3 transition-colors border-b border-gray-100 disabled:opacity-50 ${
+            highlightedIndex === 0
+              ? "bg-primary/10"
+              : "hover:bg-primary-gray/10"
+          }`}
         >
           <div className="flex items-center gap-3">
             {isGettingCurrentLocation && currentLocationFor === type ? (
@@ -633,12 +851,21 @@ const PlanJourney = () => {
 
         {suggestions.length > 0 && (
           <>
-            {suggestions.map((suggestion) => (
+            {suggestions.map((suggestion, index) => (
               <button
                 key={suggestion.id}
                 onMouseDown={() => setIsSelectingFromDropdown(true)}
                 onClick={() => onSelect(suggestion)}
-                className="w-full text-left px-4 py-3 hover:bg-primary-gray/10 transition-colors"
+                onMouseEnter={() => {
+                  if (type === "pickup") setPickupHighlightedIndex(index + 1);
+                  if (type === "dropoff") setDropoffHighlightedIndex(index + 1);
+                  if (type === "round") setReturnHighlightedIndex(index + 1);
+                }}
+                className={`w-full text-left px-4 py-3 transition-colors ${
+                  highlightedIndex === index + 1
+                    ? "bg-primary/10"
+                    : "hover:bg-primary-gray/10"
+                }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
@@ -744,6 +971,120 @@ const PlanJourney = () => {
     }
   }, [shouldFocusStop, tripData.tripType, tripData.multiStops]);
 
+  // **UPDATED: Handle pickup time change with validation and round trip/multi-stop updates**
+  const handlePickupTimeChange = (value: string) => {
+    setPickupTimeError("");
+
+    // Validate that pickup time is not in the past
+    const currentDateTime = getCurrentDateTime();
+    if (value && value < currentDateTime) {
+      setPickupTimeError("Pickup date and time cannot be in the past.");
+      return;
+    }
+
+    if (value && tripData.pickupLocation && pickupValidated) {
+      // Store the old pickup time to calculate the difference
+      const oldPickupTime = tripData.pickupDateTime;
+
+      updateTripData({ pickupDateTime: value });
+
+      // **ROUND TRIP: Update dropoff time if it exists**
+      if (
+        tripData.tripType === "round" &&
+        tripData.returnDateTime &&
+        oldPickupTime
+      ) {
+        const oldPickupDate = new Date(oldPickupTime);
+        const newPickupDate = new Date(value);
+        const oldDropoffDate = new Date(tripData.returnDateTime);
+
+        // Calculate the time difference between old pickup and dropoff
+        const timeDifference =
+          oldDropoffDate.getTime() - oldPickupDate.getTime();
+
+        // Apply the same time difference to the new pickup time
+        const newDropoffDate = new Date(
+          newPickupDate.getTime() + timeDifference
+        );
+
+        // Format the new dropoff time
+        const year = newDropoffDate.getFullYear();
+        const month = String(newDropoffDate.getMonth() + 1).padStart(2, "0");
+        const day = String(newDropoffDate.getDate()).padStart(2, "0");
+        const hours = String(newDropoffDate.getHours()).padStart(2, "0");
+        const minutes = String(newDropoffDate.getMinutes()).padStart(2, "0");
+        const newDropoffTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+        updateTripData({ returnDateTime: newDropoffTime });
+      }
+
+      // **MULTI-STOP: Clear any stop dates that are before the new pickup time**
+      if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
+        const updatedStops = tripData.multiStops.map((stop) => {
+          if (stop.date && stop.date < value) {
+            // Clear the stop date if it's before the new pickup time
+            return { ...stop, date: "" };
+          }
+          return stop;
+        });
+
+        // Only update if any stops were cleared
+        const stopsChanged = updatedStops.some(
+          (stop, index) => stop.date !== tripData.multiStops[index].date
+        );
+
+        if (stopsChanged) {
+          updateTripData({ multiStops: updatedStops });
+          toast.success("Stop dates before pickup time have been cleared.");
+        }
+      }
+    } else if (value) {
+      setPickupTimeError("Please select a valid pickup location first.");
+    }
+  };
+
+  // Handle dropoff time change with validation for round trip
+  const handleDropoffTimeChange = (value: string) => {
+    setDropoffTimeError("");
+
+    if (
+      tripData.tripType === "round" &&
+      value &&
+      tripData.dropoffLocation &&
+      dropoffValidated
+    ) {
+      // Validate that return time is after pickup + travel time
+      if (
+        tripData.pickupDateTime &&
+        tripData.routeSummary?.roundTripDropTravelTimeInSeconds
+      ) {
+        const minReturnDateTime = calculateMinReturnDateTime(
+          tripData.pickupDateTime,
+          tripData.routeSummary.roundTripDropTravelTimeInSeconds
+        );
+
+        if (value < minReturnDateTime) {
+          setDropoffTimeError(
+            `Return time must be after estimated arrival time (${new Date(
+              minReturnDateTime
+            ).toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })})`
+          );
+          return;
+        }
+      }
+
+      updateTripData({ returnDateTime: value });
+    } else if (value && tripData.tripType === "round") {
+      setDropoffTimeError("Please select a valid dropoff location first.");
+    }
+  };
+
   // Next button handler with enhanced validation
   const handleNext = () => {
     let hasError = false;
@@ -753,19 +1094,47 @@ const PlanJourney = () => {
       setPickupError("Please select a pickup location from the suggestions.");
       hasError = true;
     }
+
     if (!tripData.pickupDateTime) {
       setPickupTimeError("Please select a pickup date and time.");
       hasError = true;
+    } else {
+      // Validate that pickup time is not in the past
+      const currentDateTime = getCurrentDateTime();
+      if (tripData.pickupDateTime < currentDateTime) {
+        setPickupTimeError("Pickup date and time cannot be in the past.");
+        hasError = true;
+      }
     }
 
-    // Validate dropoff location and time (for all trip types, but time only for round trip)
+    // Validate dropoff location and time for all trip types, but time only for round trip
     if (!tripData.dropoffLocation || !dropoffValidated) {
       setDropoffError("Please select a dropoff location from the suggestions.");
       hasError = true;
     }
-    if (tripData.tripType === "round" && !tripData.returnDateTime) {
-      setDropoffTimeError("Please select a dropoff date and time for round trip.");
-      hasError = true;
+
+    if (tripData.tripType === "round") {
+      if (!tripData.returnDateTime) {
+        setDropoffTimeError(
+          "Please select a dropoff date and time for round trip."
+        );
+        hasError = true;
+      } else if (
+        tripData.pickupDateTime &&
+        tripData.routeSummary?.roundTripDropTravelTimeInSeconds
+      ) {
+        const minReturnDateTime = calculateMinReturnDateTime(
+          tripData.pickupDateTime,
+          tripData.routeSummary.roundTripDropTravelTimeInSeconds
+        );
+
+        if (tripData.returnDateTime < minReturnDateTime) {
+          setDropoffTimeError(
+            "Return time must be after the estimated arrival time at the dropoff location."
+          );
+          hasError = true;
+        }
+      }
     }
 
     if (hasError) return;
@@ -777,26 +1146,6 @@ const PlanJourney = () => {
     setDropoffTimeError("");
 
     router.push(ROUTES.RESERVE_CAR);
-  };
-
-  // Handle pickup time change with validation
-  const handlePickupTimeChange = (value: string) => {
-    setPickupTimeError("");
-    if (value && tripData.pickupLocation && pickupValidated) {
-      updateTripData({ pickupDateTime: value });
-    } else if (value) {
-      setPickupTimeError("Please select a valid pickup location first.");
-    }
-  };
-
-  // Handle dropoff time change with validation (for round trip)
-  const handleDropoffTimeChange = (value: string) => {
-    setDropoffTimeError("");
-    if (tripData.tripType === "round" && value && tripData.dropoffLocation && dropoffValidated) {
-      updateTripData({ returnDateTime: value });
-    } else if (value && tripData.tripType === "round") {
-      setDropoffTimeError("Please select a valid dropoff location first.");
-    }
   };
 
   // Helper function to set stop input ref
@@ -814,7 +1163,7 @@ const PlanJourney = () => {
         handleTripTypeChange("single");
         setIsTabDropdownOpen(false);
       },
-    },  
+    },
     {
       id: "round" as TripType,
       label: "Round Trip",
@@ -846,7 +1195,7 @@ const PlanJourney = () => {
   const getActiveTab = () => {
     return TRIPS.find((tab) => tab.id === tripData.tripType);
   };
-  
+
   return (
     <section className="w-full max-w-[1320px] mx-auto mt-[75px] px-4 sm:px-6 md:px-4 2xl:px-[0px] bg-white">
       <div className="flex flex-col xl:flex-row lg:flex-col max-w-screen-3xl mx-auto sm:px-0 md:px-0 py-6 md:py-10 lg:py-10 lg:gap-8 xl:gap-10 2xl:gap-10">
@@ -876,14 +1225,13 @@ const PlanJourney = () => {
                 Itinerary
               </h2>
               <div className="flex items-center gap-2 sm:gap-4">
-                
                 {/* TRIPS Dropdown */}
                 <div className="relative w-45 lg:w-50" ref={tabDropdownRef}>
                   <button
                     onClick={() => setIsTabDropdownOpen(!isTabDropdownOpen)}
                     className="w-full flex items-center justify-between px-4 py-3 bg-primary-gray/10 hover:bg-primary-gray/20 transition-colors duration-300 cursor-pointer rounded-full text-sm font-semibold text-primary-gray"
                   >
-                     <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <img
                         src={getActiveTab()?.icon}
                         alt={getActiveTab()?.label}
@@ -978,7 +1326,9 @@ const PlanJourney = () => {
                   >
                     <label
                       className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
-                        pickupError ? "border-red-500" : "border-[#DBDBDB]"
+                        pickupError
+                          ? "border-red-500"
+                          : "border-primary-border/20"
                       }`}
                     >
                       <Icon
@@ -991,6 +1341,7 @@ const PlanJourney = () => {
                         type="text"
                         value={pickupSearchValue}
                         onChange={(e) => handlePickupSearch(e.target.value)}
+                        onKeyDown={handlePickupKeyDown}
                         onFocus={() => {
                           if (!isPickupDropdownOpen) {
                             setIsPickupDropdownOpen(true);
@@ -1010,11 +1361,11 @@ const PlanJourney = () => {
                             }
                           }, 150);
                         }}
-                        placeholder="Stop Location"
+                        placeholder="Pickup Location"
                         className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
                           pickupError ? "text-red-600" : ""
                         }`}
-                        autoComplete="on"
+                        autoComplete="off"
                       />
                       {pickupValidated && (
                         <Icon
@@ -1029,7 +1380,8 @@ const PlanJourney = () => {
                       pickupSuggestions,
                       isPickupDropdownOpen,
                       pickupSearchValue,
-                      handlePickupSelect
+                      handlePickupSelect,
+                      pickupHighlightedIndex
                     )}
                   </div>
                   {pickupError && (
@@ -1037,15 +1389,15 @@ const PlanJourney = () => {
                   )}
                   <button
                     onClick={() => openMap("pickup")}
-                    className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark"
+                    className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark cursor-pointer"
                   >
                     Open Map
                   </button>
                 </div>
 
-                {/* Date & Time */}
+                {/* Date & Time WITH VALIDATION */}
                 <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
-                  <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-[#DBDBDB]">
+                  <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-primary-border/20">
                     <Icon
                       icon={ICON_DATA.CALENDAR_PICKUP}
                       className="w-6 h-6 text-primary-gray flex-shrink-0"
@@ -1053,13 +1405,17 @@ const PlanJourney = () => {
                     <Inputs
                       name="Stop Date & Time"
                       type="datetime-local"
+                      placeholder="Select Date & Time"
+                      min={getCurrentDateTime()}
                       value={tripData.pickupDateTime}
                       onChange={(e) => handlePickupTimeChange(e.target.value)}
                       className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
                     />
                   </label>
                   {pickupTimeError && (
-                    <p className="text-red-500 text-xs ml-2">{pickupTimeError}</p>
+                    <p className="text-red-500 text-xs ml-2">
+                      {pickupTimeError}
+                    </p>
                   )}
                   <div className="h-5 mt-1"></div>
                 </div>
@@ -1071,10 +1427,21 @@ const PlanJourney = () => {
               tripData.multiStops.length > 0 &&
               tripData.multiStops.map((s, index) => (
                 <StopCard
-                  key={`stop-${index}`}
+                  key={`stop-${index}-${s.location}-${s.date}`}
                   id={index}
                   location={s.location}
                   date={s.date}
+                  pickupCoordinates={tripData.pickupCoordinates}
+                  pickupDateTime={tripData.pickupDateTime}
+                  previousStopDate={
+                    index > 0 ? tripData.multiStops[index - 1].date : undefined
+                  }
+                  previousStopLocation={
+                    index > 0
+                      ? tripData.multiStops[index - 1].location
+                      : undefined
+                  }
+                  stopIndex={index}
                   totalStops={tripData.multiStops.length}
                   onChange={(id, data) => handleUpdateStop(id as number, data)}
                   onRemove={(id) => handleRemoveStop(id as number)}
@@ -1109,7 +1476,9 @@ const PlanJourney = () => {
                     >
                       <label
                         className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
-                          dropoffError ? "border-red-500" : "border-[#DBDBDB]"
+                          dropoffError
+                            ? "border-red-500"
+                            : "border-primary-border/20"
                         }`}
                       >
                         <Icon
@@ -1122,6 +1491,7 @@ const PlanJourney = () => {
                           type="text"
                           value={dropoffSearchValue}
                           onChange={(e) => handleDropoffSearch(e.target.value)}
+                          onKeyDown={handleDropoffKeyDown}
                           onFocus={() => {
                             if (!isDropoffDropdownOpen) {
                               setIsDropoffDropdownOpen(true);
@@ -1141,11 +1511,11 @@ const PlanJourney = () => {
                               }
                             }, 150);
                           }}
-                          placeholder="Stop Location"
+                          placeholder="Dropoff Location"
                           className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
                             dropoffError ? "text-red-600" : ""
                           }`}
-                          autoComplete="on"
+                          autoComplete="off"
                         />
                         {dropoffValidated && (
                           <Icon
@@ -1160,7 +1530,8 @@ const PlanJourney = () => {
                         dropoffSuggestions,
                         isDropoffDropdownOpen,
                         dropoffSearchValue,
-                        handleDropoffSelect
+                        handleDropoffSelect,
+                        dropoffHighlightedIndex
                       )}
                     </div>
                     {dropoffError && (
@@ -1170,13 +1541,13 @@ const PlanJourney = () => {
                     )}
                     <button
                       onClick={() => openMap("dropoff")}
-                      className="text-primary text-xs mt-1 ml-2 self-start hover:text-primary-dark"
+                      className="text-primary text-xs mt-1 ml-2 self-start hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
                   </div>
 
-                  {/* Date & Time */}
+                  {/* Date & Time WITH VALIDATION */}
                   {tripData.tripType === "round" && (
                     <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
                       <label className="flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 border-[#DBDBDB]">
@@ -1185,20 +1556,131 @@ const PlanJourney = () => {
                           className="w-6 h-6 text-primary-gray flex-shrink-0"
                         />
                         <Inputs
-                          name="Stop Date & Time"
+                          name="Return Date & Time"
                           type="datetime-local"
+                          min={
+                            tripData.pickupDateTime &&
+                            tripData.routeSummary
+                              ?.roundTripDropTravelTimeInSeconds
+                              ? calculateMinReturnDateTime(
+                                  tripData.pickupDateTime,
+                                  tripData.routeSummary
+                                    .roundTripDropTravelTimeInSeconds
+                                )
+                              : tripData.pickupDateTime || undefined
+                          }
                           value={tripData.returnDateTime}
-                          onChange={(e) => handleDropoffTimeChange(e.target.value)}
+                          onChange={(e) =>
+                            handleDropoffTimeChange(e.target.value)
+                          }
                           className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
                         />
                       </label>
                       {dropoffTimeError && (
-                        <p className="text-red-500 text-xs ml-2">{dropoffTimeError}</p>
+                        <p className="text-red-500 text-xs ml-2">
+                          {dropoffTimeError}
+                        </p>
                       )}
                       <div className="h-5 mt-1"></div>
                     </div>
                   )}
                 </section>
+
+                {/* Route Summary Display */}
+                {tripData.routeSummary && tripData.pickupDateTime && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-around gap-4 flex-wrap">
+                      {/* Distance */}
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.DISTANCE}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Distance</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(tripData.tripType === "round"
+                              ? tripData.routeSummary
+                                  .roundTripDropLengthInMeters / 1000
+                              : tripData.routeSummary.lengthInMeters / 1000
+                            ).toFixed(1)}{" "}
+                            km
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Travel Time */}
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.CLOCK}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Travel Time</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(() => {
+                              const hours = Math.floor(
+                                tripData.tripType === "round"
+                                  ? tripData.routeSummary
+                                      .roundTripDropTravelTimeInSeconds / 3600
+                                  : tripData.routeSummary.travelTimeInSeconds /
+                                      3600
+                              );
+                              const minutes = Math.floor(
+                                (tripData.tripType === "round"
+                                  ? tripData.routeSummary
+                                      .roundTripDropTravelTimeInSeconds % 3600
+                                  : tripData.routeSummary.travelTimeInSeconds %
+                                    3600) / 60
+                              );
+                              return hours > 0
+                                ? `${hours}h ${minutes}m`
+                                : `${minutes} min`;
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Estimated Arrival */}
+                      {tripData.tripType !== "multi" && (
+                        <div className="flex items-center gap-2">
+                          <Icon
+                            icon={ICON_DATA.ARRIVAL}
+                            className="w-5 h-5 text-primary"
+                          />
+                          <div>
+                            <p className="text-xs text-gray-500">
+                              Est. Arrival
+                            </p>
+                            <p className="text-sm font-semibold text-gray-800">
+                              {(() => {
+                                const pickupDate = new Date(
+                                  tripData.pickupDateTime
+                                );
+                                const arrivalDate = new Date(
+                                  pickupDate.getTime() +
+                                    (tripData.tripType === "round"
+                                      ? tripData.routeSummary
+                                          .roundTripDropTravelTimeInSeconds *
+                                        1000
+                                      : tripData.routeSummary
+                                          .travelTimeInSeconds * 1000)
+                                );
+                                return arrivalDate.toLocaleString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                });
+                              })()}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1222,7 +1704,9 @@ const PlanJourney = () => {
                     <div className="w-full relative h-[40px] sm:h-[44px] flex flex-col">
                       <label
                         className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${
-                          pickupError ? "border-red-500" : "border-[#DBDBDB]"
+                          pickupError
+                            ? "border-red-500"
+                            : "border-primary-border/20"
                         }`}
                       >
                         <Icon
@@ -1256,13 +1740,94 @@ const PlanJourney = () => {
                           className={`flex-1 bg-transparent text-sm placeholder-[#9C9C9C] focus:outline-none ${
                             pickupError ? "text-red-600" : ""
                           }`}
-                          autoComplete="on"
+                          autoComplete="off"
                           disabled
                         />
                       </label>
                     </div>
                   </div>
                 </section>
+
+                {/* Route Summary Display */}
+                {tripData.routeSummary && tripData.pickupDateTime && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                      {/* Distance */}
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.DISTANCE}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Distance</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(
+                              tripData.routeSummary.lengthInMeters / 1000
+                            ).toFixed(1)}{" "}
+                            km
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Travel Time */}
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.CLOCK}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Travel Time</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(() => {
+                              const hours = Math.floor(
+                                tripData.routeSummary.travelTimeInSeconds / 3600
+                              );
+                              const minutes = Math.floor(
+                                (tripData.routeSummary.travelTimeInSeconds %
+                                  3600) /
+                                  60
+                              );
+                              return hours > 0
+                                ? `${hours}h ${minutes}m`
+                                : `${minutes} min`;
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Estimated Arrival */}
+
+                      <div className="flex items-center gap-2">
+                        <Icon
+                          icon={ICON_DATA.ARRIVAL}
+                          className="w-5 h-5 text-primary"
+                        />
+                        <div>
+                          <p className="text-xs text-gray-500">Est. Arrival</p>
+                          <p className="text-sm font-semibold text-gray-800">
+                            {(() => {
+                              const pickupDate = new Date(
+                                tripData.returnDateTime
+                              );
+                              const arrivalDate = new Date(
+                                pickupDate.getTime() +
+                                  tripData.routeSummary.travelTimeInSeconds *
+                                    1000
+                              );
+                              return arrivalDate.toLocaleString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: true,
+                              });
+                            })()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </details>
@@ -1270,87 +1835,143 @@ const PlanJourney = () => {
           <div className="border-t border-gray-200 my-6 md:my-8" />
 
           {/* Trip Details Accordion */}
-          <details className="group md:w-[580px] w-full overflow-hidden" open>
+          <details className="group w-full overflow-hidden" open>
             <summary className="flex items-center justify-between gap-4 py-4 cursor-pointer select-none list-none">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 Trip Details
               </h2>
               <i className="fa-solid fa-chevron-down w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 group-open:rotate-180" />
             </summary>
-            <div className="border border-[#DBDBDB] bg-[#FCFCFC] mt-4 rounded-2xl p-5 space-y-6">
+            <div className="border border-primary-border/20 bg-[#FCFCFC] mt-4 rounded-2xl p-4 sm:p-6 space-y-5">
+              {/* Trip Name */}
               <div>
-                <p className="font-medium text-lg text-[#040401]">Trip Name</p>
-                <Inputs
-                  type="text"
-                  value={tripData.tripName || ""}
-                  onChange={(e) => updateTripData({ tripName: e.target.value })}
-                  placeholder="Round trip"
-                  className="text-sm text-[#333] mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
-                  name="Trip Name"
-                />
-                <div className="border-b border-[#DBDBDB] mt-4"></div>
-              </div>
-
-              <div className="flex flex-col md:flex-row md:gap-4 gap-6">
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">Luggage</p>
-                  <Inputs
-                    type="number"
-                    value={tripData.luggageCount.toString() || ""}
-                    onChange={(e) =>
-                      updateTripData({
-                        luggageCount: parseInt(e.target.value) || 0,
-                      })
-                    }
-                    placeholder="2"
-                    className="text-sm mt-2 focus:border-[#3DC1C4] focus:outline-none w-full bg-transparent"
-                    name="Luggage"
-                  />
-                  <div className="border-b border-[#DBDBDB] mt-4"></div>
-                </div>
-                <div className="w-full md:w-1/2">
-                  <p className="font-medium text-lg text-[#040401]">
-                    Event Types
-                  </p>
-                  <select
-                    value={tripData.eventType || ""}
-                    onChange={(e) =>
-                      updateTripData({ eventType: e.target.value })
-                    }
-                    className="text-sm text-[#333] focus:border-[#3DC1C4] focus:outline-none mt-2 w-full bg-transparent cursor-pointer"
-                  >
-                    <option value="">Select event type</option>
-                    <option value="personal">Personal</option>
-                    <option value="business">Business</option>
-                    <option value="airport">Airport Transfer</option>
-                    <option value="wedding">Wedding</option>
-                    <option value="corporate">Corporate</option>
-                  </select>
-                  <div className="border-b border-[#DBDBDB] mt-4"></div>
-                </div>
-              </div>
-
-              <div>
-                <p className="font-medium text-lg text-[#040401] mb-3">
-                  Accessible Vehicle
-                </p>
-                <div className="flex items-center gap-3">
+                <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                  Trip Name
+                </label>
+                <div className="relative">
                   <input
-                    type="checkbox"
-                    checked={tripData.accessibleVehicle || false}
+                    type="text"
+                    value={tripData.tripName || ""}
                     onChange={(e) =>
-                      updateTripData({ accessibleVehicle: e.target.checked })
+                      updateTripData({ tripName: e.target.value })
                     }
-                    className="w-6 h-6 border border-[#D9D9D9] rounded-sm accent-[#3DC1C4]"
-                  />
-                  <p className="text-sm lg:w-[350px]">
-                    ADA standards Compliant
-                  </p>
-                  <img
-                    src="/images/wheel-chair.png"
-                    alt="wheelchair"
-                    className="w-[39px] h-[39px] lg:ml-auto"
-                  />
+                    placeholder="Enter trip name (e.g., Round trip)"
+                    className="text-sm text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
+                    name="Trip Name"
+                  />    
+                </div>
+              </div>
+
+              {/* Luggage and Event Types Row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                {/* Luggage */}
+                <div>
+                  <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                    Luggage
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      icon="mdi:bag-suitcase"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      value={tripData.luggageCount.toString() || ""}
+                      onChange={(e) =>
+                        updateTripData({
+                          luggageCount: parseInt(e.target.value) || 0,
+                        })
+                      }
+                      placeholder="0"
+                      className="text-sm text-gray-700 pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
+                      name="Luggage"
+                    />
+                  </div>
+                </div>
+
+                {/* Event Types */}
+                <div>
+                  <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-2">
+                    Event Type
+                  </label>
+                  <div className="relative">
+                    <Icon
+                      icon="mdi:calendar-star"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    />
+                    <select
+                      value={tripData.eventType || ""}
+                      onChange={(e) =>
+                        updateTripData({ eventType: e.target.value })
+                      }
+                      className="text-sm text-gray-700 pl-11 pr-10 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white cursor-pointer appearance-none transition-all"
+                    >
+                      <option value="" disabled>
+                        Select event type
+                      </option>
+                      <option value="personal">Personal</option>
+                      <option value="business">Business</option>
+                      <option value="airport">Airport Transfer</option>
+                      <option value="wedding">Wedding</option>
+                      <option value="corporate">Corporate</option>
+                    </select>
+                    <Icon
+                      icon="mdi:chevron-down"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Accessible Vehicle */}
+              <div className="pt-2">
+                <label className="block font-semibold text-base sm:text-lg text-gray-800 mb-3">
+                  Accessible Vehicle
+                </label>
+                <div className="flex items-center justify-between p-4 bg-white border border-gray-300 rounded-lg hover:border-primary transition-colors">
+                  <div className="flex items-center gap-4 flex-1">
+                    {/* Custom Checkbox */}
+                    <label className="relative flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={tripData.accessibleVehicle || false}
+                        onChange={(e) =>
+                          updateTripData({
+                            accessibleVehicle: e.target.checked,
+                          })
+                        }
+                        className="sr-only peer"
+                      />
+                      <div className="w-6 h-6 border-2 border-gray-300 rounded-md peer-checked:bg-primary peer-checked:border-primary transition-all flex items-center justify-center">
+                        {tripData.accessibleVehicle && (
+                          <Icon
+                            icon="mdi:check"
+                            className="w-4 h-4 text-white"
+                          />
+                        )}
+                      </div>
+                    </label>
+
+                    {/* Label Text */}
+                    <div className="flex-1">
+                      <p className="text-sm sm:text-base font-medium text-gray-800">
+                        ADA Standards Compliant
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                        Vehicle with accessibility features
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Wheelchair Icon */}
+                  <div className="flex-shrink-0 ml-3">
+                    <img
+                      src="/images/wheel-chair.png"
+                      alt="wheelchair accessibility"
+                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1366,23 +1987,50 @@ const PlanJourney = () => {
 
         {/* Right Panel */}
         <div className="w-full lg:mx-auto lg:w-[100%] xl:w-[60%] 2xl:w-[55%] h-[400px] sm:h-[500px] md:h-[600px] lg:h-[calc(100vh-80px)] lg:sticky lg:top-20 rounded-xl overflow-hidden">
-          <MapCard/>
+          <MapCard />
         </div>
       </div>
 
-      {/* Map Modal */}
+      {/* Map Modal with Real-time Address Display */}
       {isMapOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-[90vw] sm:max-w-3xl min-h-[60vh] max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg sm:text-xl font-semibold mb-2">
-                Select {mapType === "pickup" ? "Pickup" : "Dropoff"} Location
-              </h3>
+            <div className="flex flex-row justify-between items-start mb-2">
+              <div className="flex-1">
+                <h3 className="text-lg sm:text-xl font-semibold">
+                  Select {mapType === "pickup" ? "Pickup" : "Dropoff"} Location
+                </h3>
+                {/* Real-time Address Display */}
+                <div className="mt-2 flex items-center gap-2">
+                  {isLoadingAddress ? (
+                    <>
+                      <Icon
+                        icon="mdi:loading"
+                        className="w-4 h-4 text-primary animate-spin"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Loading address...
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Icon
+                        icon={ICON_DATA.LOCATION}
+                        className="w-4 h-4 text-primary flex-shrink-0"
+                      />
+                      <p className="text-sm text-gray-700 font-medium truncate">
+                        {currentMapAddress ||
+                          "Move the map to select a location"}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
 
               <Icon
                 icon={ICON_DATA.CLOSE}
                 onClick={handleCloseClick}
-                className="w-8 h-8 cursor-pointer hover:bg-primary-gray/20 rounded-full p-2"
+                className="w-8 h-8 cursor-pointer hover:bg-primary-gray/20 rounded-full p-2 flex-shrink-0"
               />
             </div>
 
@@ -1393,9 +2041,10 @@ const PlanJourney = () => {
             >
               <Icon
                 icon={ICON_DATA.MAP_LOCATION}
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-10 h-10 text-red-600 z-10 pointer-events-none"
               />
             </div>
+
             <div className="flex justify-end mt-4">
               <Button
                 label="Done"

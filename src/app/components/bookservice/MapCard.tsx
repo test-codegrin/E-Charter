@@ -2,7 +2,7 @@
 
 import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
 import Image from "next/image";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import tt from '@tomtom-international/web-sdk-maps';
 import ttServices from '@tomtom-international/web-sdk-services';
 import '@tomtom-international/web-sdk-maps/dist/maps.css';
@@ -25,8 +25,26 @@ const MapCard: React.FC = () => {
   const [isRouteLoading, setIsRouteLoading] = useState(false);
 
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
-  const { tripData } = useTrip();
+  const { tripData, updateRouteSummary } = useTrip();
 
+  // Memoize only route-relevant data to prevent unnecessary re-renders
+  const routeRelevantData = useMemo(() => ({
+    pickupLocation: tripData.pickupLocation,
+    pickupDateTime: tripData.pickupDateTime,
+    dropoffLocation: tripData.dropoffLocation,
+    returnDateTime: tripData.returnDateTime,
+    tripType: tripData.tripType,
+    multiStops: tripData.multiStops,
+  }), [
+    tripData.pickupLocation,
+    tripData.pickupDateTime,
+    tripData.dropoffLocation,
+    tripData.returnDateTime,
+    tripData.tripType,
+    JSON.stringify(tripData.multiStops),
+  ]);
+
+  // Format datetime with time (for pickup and return)
   const formatDateTime = (dateTimeString?: string) => {
     if (!dateTimeString) return "Not set";
     try {
@@ -37,6 +55,22 @@ const MapCard: React.FC = () => {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
+      };
+      return date.toLocaleDateString("en-US", options);
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  // NEW: Format date only (for stops)
+  const formatDateOnly = (dateString?: string) => {
+    if (!dateString) return "Not set";
+    try {
+      const date = new Date(dateString);
+      const options: Intl.DateTimeFormatOptions = {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
       };
       return date.toLocaleDateString("en-US", options);
     } catch {
@@ -97,7 +131,6 @@ const MapCard: React.FC = () => {
         console.warn(`No geocoding results for ${locationString}`);
       }
     } catch (error) {
-      console.error(`Geocoding error for ${locationString}:`, error);
       return null;
     }
 
@@ -143,7 +176,6 @@ const MapCard: React.FC = () => {
       transform: translate(-50%, -50%);
     `;
     
-
     markerElement.appendChild(innerDot);
     return markerElement;
   };
@@ -173,7 +205,7 @@ const MapCard: React.FC = () => {
   };
 
   const isLocationValid = (location?: string, dateTime?: string) => {
-    return location && location.trim() !== "" && (dateTime || tripData.tripType !== "round");
+    return location && location.trim() !== "" && (dateTime || routeRelevantData.tripType !== "round");
   };
 
   const isStopValid = (stop: Stop) => {
@@ -185,41 +217,50 @@ const MapCard: React.FC = () => {
       console.warn("Map not loaded yet, skipping route display");
       return;
     }
-
+  
     if (!TOMTOM_API_KEY) {
       console.error("Cannot calculate route: TomTom API key is missing");
       return;
     }
-
+  
     setIsRouteLoading(true);
     clearMap();
-
-    // Build valid locations without duplicates
-    const validLocations: { location: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
-    if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
-      validLocations.push({ location: tripData.pickupLocation!, type: 'pickup' });
+  
+    // Build valid locations - REMOVED ALL duplicate filtering
+    const validLocations: { location: string; type: 'pickup' | 'stop' | 'dropoff' | 'return' }[] = [];
+    
+    if (isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
+      validLocations.push({ location: routeRelevantData.pickupLocation!, type: 'pickup' });
     }
-    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
-      tripData.multiStops.forEach((stop, index) => {
-        if (isStopValid(stop) && !validLocations.some(loc => loc.location === stop.location)) {
+  
+    if (routeRelevantData.tripType === "multi" && routeRelevantData.multiStops.length > 0) {
+      // Include ALL stops, even duplicates
+      routeRelevantData.multiStops.forEach((stop, index) => {
+        if (isStopValid(stop)) {
           validLocations.push({ location: stop.location, type: 'stop' });
         }
       });
     }
-    if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "round" ? tripData.returnDateTime : undefined)) {
-      if (!validLocations.some(loc => loc.location === tripData.dropoffLocation)) {
-        validLocations.push({ location: tripData.dropoffLocation!, type: 'dropoff' });
-      }
+  
+    if (isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.tripType === "round" ? routeRelevantData.returnDateTime : undefined)) {
+      validLocations.push({ location: routeRelevantData.dropoffLocation!, type: 'dropoff' });
     }
-
+  
+    // FOR ROUND TRIPS: Add pickup location again as the final destination
+    if (routeRelevantData.tripType === "round" && 
+        isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime) &&
+        isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.returnDateTime)) {
+      validLocations.push({ location: routeRelevantData.pickupLocation!, type: 'return' });
+    }
+  
     console.log("Valid locations:", validLocations);
-
+  
     if (validLocations.length < 2) {
       console.warn("Not enough valid locations to draw a route:", validLocations);
       setIsRouteLoading(false);
       return;
     }
-
+  
     const coordinates: [number, number][] = [];
     for (const loc of validLocations) {
       const coords = await geocodeLocation(loc.location);
@@ -227,94 +268,240 @@ const MapCard: React.FC = () => {
         coordinates.push(coords);
       }
     }
-
+  
     console.log("Geocoded coordinates:", coordinates);
-
+  
     if (coordinates.length < 2) {
       console.warn("Not enough valid coordinates to draw a route:", coordinates);
       setIsRouteLoading(false);
       return;
     }
-
-    // Add markers with explicit type-based checks
+  
+    // Add markers with proper numbering
+    let stopCounter = 1;
     validLocations.forEach((loc, index) => {
       const isFirst = loc.type === 'pickup';
-      const isLast = loc.type === 'dropoff';
+      const isLast = loc.type === 'dropoff' || loc.type === 'return';
+      const isReturn = loc.type === 'return';
+      
+      // For round trips, don't show return marker (it's same as pickup)
+      if (routeRelevantData.tripType === "round" && isReturn) {
+        return;
+      }
+      
       const color = isFirst ? '#C0FFED' : isLast ? '#FFD1D1' : '#FFF4CC';
-      const label = isFirst ? 'Pickup' : isLast ? 'Dropoff' : `Stop ${validLocations.filter(l => l.type === 'stop').indexOf(loc) + 1}`;
+      let label = '';
+      if (isFirst) {
+        label = 'Pickup';
+      } else if (loc.type === 'dropoff') {
+        label = 'Dropoff';
+      } else {
+        label = `Stop ${stopCounter}`;
+        stopCounter++;
+      }
+      
       addMarker(coordinates[index], color, label, isFirst, isLast);
     });
-
+  
     try {
-      const locationsString = coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
-      console.log("Calculating route with locations:", locationsString);
-
-      const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}`;
-      const response = await fetch(apiUrl);
-      const routeResponse = await response.json();
-      const routeColor = '#0040ff';
-
-      console.log("Route response:", JSON.stringify(routeResponse, null, 2));
-
-      if (routeResponse.routes && routeResponse.routes.length > 0) {
-        const route = routeResponse.routes[0];
-
-        const routeGeoJson: GeoJSON.Feature<GeoJSON.LineString> = {
-          type: 'Feature',
-          geometry: {
-            type: 'LineString',
-            coordinates: route.legs.reduce((acc: [number, number][], leg: any) => {
-              if (leg.points) {
-                return acc.concat(
-                  leg.points.map((point: { longitude: number; latitude: number }) => [
-                    point.longitude,
-                    point.latitude,
-                  ])
-                );
-              }
-              return acc;
-            }, []),
-          },
-          properties: {}, // Added for GeoJSON compliance
-        };
-
-        if (routeGeoJson.geometry.coordinates.length < 2) {
-          console.warn("Route GeoJSON has insufficient coordinates:", routeGeoJson);
-          setIsRouteLoading(false);
-          return;
-        }
-
-        const addRouteToMap = () => {
-          if (!map.getSource('route')) {
-            map.addSource('route', {
-              type: 'geojson',
-              data: routeGeoJson,
-            });
-
-            map.addLayer({
-              id: 'route',
-              type: 'line',
-              source: 'route',
-              layout: {
-                'line-join': 'round',
-                'line-cap': 'round',
-              },
-              paint: {
-                'line-color': routeColor,
-                'line-width': 4,
-              },
-            });
-            console.log("Route added to map");
+      // NEW: For round trips, make 2 API calls
+      if (routeRelevantData.tripType === "round") {
+        // FIRST CALL: Pickup to Dropoff only (one-way)
+        const oneWayCoordinates = coordinates.slice(0, 2); // pickup and dropoff only
+        const oneWayLocationsString = oneWayCoordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
+        console.log("Calculating one-way route (pickup to dropoff):", oneWayLocationsString);
+  
+        const oneWayApiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${oneWayLocationsString}/json?key=${TOMTOM_API_KEY}&avoid=borderCrossings`;
+        const oneWayResponse = await fetch(oneWayApiUrl);
+        const oneWayRouteResponse = await oneWayResponse.json();
+  
+        console.log("One-way route response:", JSON.stringify(oneWayRouteResponse, null, 2));
+  
+        let oneWayDistance = 0;
+        let oneWayTime = 0;
+  
+        if (oneWayRouteResponse.routes && oneWayRouteResponse.routes.length > 0) {
+          const oneWayRoute = oneWayRouteResponse.routes[0];
+          if (oneWayRoute.summary) {
+            oneWayDistance = oneWayRoute.summary.lengthInMeters;
+            oneWayTime = oneWayRoute.summary.travelTimeInSeconds;
+            console.log("One-way route summary:", { distance: oneWayDistance, time: oneWayTime });
           }
-        };
-
-        if (map.loaded()) {
-          addRouteToMap();
+        }
+  
+        // SECOND CALL: Full round trip (pickup → dropoff → pickup)
+        const locationsString = coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
+        console.log("Calculating full round trip route:", locationsString);
+  
+        const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}&avoid=borderCrossings`;
+        const response = await fetch(apiUrl);
+        const routeResponse = await response.json();
+        const routeColor = '#0040ff';
+  
+        console.log("Full round trip route response:", JSON.stringify(routeResponse, null, 2));
+  
+        if (routeResponse.routes && routeResponse.routes.length > 0) {
+          const route = routeResponse.routes[0];
+  
+          // STORE BOTH route summaries in context
+          if (route.summary) {
+            const routeSummary = {
+              roundTripDropLengthInMeters: oneWayDistance, // One-way distance
+              roundTripDropTravelTimeInSeconds: oneWayTime, // One-way time
+              lengthInMeters: route.summary.lengthInMeters, // Full round trip distance
+              travelTimeInSeconds: route.summary.travelTimeInSeconds, // Full round trip time
+            };
+            
+            // Update context with route summary
+            updateRouteSummary(routeSummary);
+            
+            console.log("Route summary stored in context:", routeSummary);
+          }
+  
+          const routeGeoJson: GeoJSON.Feature<GeoJSON.LineString> = {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: route.legs.reduce((acc: [number, number][], leg: any) => {
+                if (leg.points) {
+                  return acc.concat(
+                    leg.points.map((point: { longitude: number; latitude: number }) => [
+                      point.longitude,
+                      point.latitude,
+                    ])
+                  );
+                }
+                return acc;
+              }, []),
+            },
+            properties: {},
+          };
+  
+          if (routeGeoJson.geometry.coordinates.length < 2) {
+            console.warn("Route GeoJSON has insufficient coordinates:", routeGeoJson);
+            setIsRouteLoading(false);
+            return;
+          }
+  
+          const addRouteToMap = () => {
+            if (!map.getSource('route')) {
+              map.addSource('route', {
+                type: 'geojson',
+                data: routeGeoJson,
+              });
+  
+              map.addLayer({
+                id: 'route',
+                type: 'line',
+                source: 'route',
+                layout: {
+                  'line-join': 'round',
+                  'line-cap': 'round',
+                },
+                paint: {
+                  'line-color': routeColor,
+                  'line-width': 4,
+                },
+              });
+              console.log("Route added to map");
+            }
+          };
+  
+          if (map.loaded()) {
+            addRouteToMap();
+          } else {
+            map.on('load', addRouteToMap);
+          }
         } else {
-          map.on('load', addRouteToMap);
+          console.warn("No routes returned from TomTom API for round trip");
         }
       } else {
-        console.warn("No routes returned from TomTom API");
+        // ORIGINAL LOGIC for single and multi trips
+        const locationsString = coordinates.map(coord => `${coord[1]},${coord[0]}`).join(':');
+        console.log("Calculating route with locations:", locationsString);
+  
+        const apiUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locationsString}/json?key=${TOMTOM_API_KEY}&avoid=borderCrossings`;
+        const response = await fetch(apiUrl);
+        const routeResponse = await response.json();
+        const routeColor = '#0040ff';
+  
+        console.log("Route response:", JSON.stringify(routeResponse, null, 2));
+  
+        if (routeResponse.routes && routeResponse.routes.length > 0) {
+          const route = routeResponse.routes[0];
+  
+          // EXTRACT AND STORE ROUTE SUMMARY IN CONTEXT
+          if (route.summary) {
+            const routeSummary = {
+              roundTripDropLengthInMeters: 0, // Not applicable for non-round trips
+              roundTripDropTravelTimeInSeconds: 0, // Not applicable for non-round trips
+              lengthInMeters: route.summary.lengthInMeters,
+              travelTimeInSeconds: route.summary.travelTimeInSeconds,
+            };
+            
+            // Update context with route summary
+            updateRouteSummary(routeSummary);
+            
+            console.log("Route summary stored in context:", routeSummary);
+          }
+  
+          const routeGeoJson: GeoJSON.Feature<GeoJSON.LineString> = {
+            type: 'Feature',
+            geometry: {
+              type: 'LineString',
+              coordinates: route.legs.reduce((acc: [number, number][], leg: any) => {
+                if (leg.points) {
+                  return acc.concat(
+                    leg.points.map((point: { longitude: number; latitude: number }) => [
+                      point.longitude,
+                      point.latitude,
+                    ])
+                  );
+                }
+                return acc;
+              }, []),
+            },
+            properties: {},
+          };
+  
+          if (routeGeoJson.geometry.coordinates.length < 2) {
+            console.warn("Route GeoJSON has insufficient coordinates:", routeGeoJson);
+            setIsRouteLoading(false);
+            return;
+          }
+  
+          const addRouteToMap = () => {
+            if (!map.getSource('route')) {
+              map.addSource('route', {
+                type: 'geojson',
+                data: routeGeoJson,
+              });
+  
+              map.addLayer({
+                id: 'route',
+                type: 'line',
+                source: 'route',
+                layout: {
+                  'line-join': 'round',
+                  'line-cap': 'round',
+                },
+                paint: {
+                  'line-color': routeColor,
+                  'line-width': 4,
+                },
+              });
+              console.log("Route added to map");
+            }
+          };
+  
+          if (map.loaded()) {
+            addRouteToMap();
+          } else {
+            map.on('load', addRouteToMap);
+          }
+        } else {
+          console.warn("No routes returned from TomTom API");
+        }
       }
     } catch (error: any) {
       console.error("Route calculation error:", {
@@ -323,23 +510,25 @@ const MapCard: React.FC = () => {
         response: error.response ? JSON.stringify(error.response, null, 2) : 'No response data',
       });
     }
-
+  
     if (coordinates.length > 0) {
       const bounds = new tt.LngLatBounds();
       coordinates.forEach(coord => bounds.extend(coord));
       map.fitBounds(bounds, { padding: 50 });
       console.log("Map bounds adjusted to:", bounds);
     }
-
+  
     setIsRouteLoading(false);
   };
+  
 
+  // Updated useEffect - only triggers when route-relevant data changes
   useEffect(() => {
     if (map && isMapLoaded) {
-      console.log("Triggering displayRoute with tripData:", tripData);
+      console.log("Triggering displayRoute with routeRelevantData:", routeRelevantData);
       displayRoute();
     }
-  }, [map, isMapLoaded, tripData]);
+  }, [map, isMapLoaded, routeRelevantData]);
 
   const renderRouteVisualization = () => {
     return (
@@ -355,34 +544,32 @@ const MapCard: React.FC = () => {
     );
   };
 
+
   const renderLocationLabels = () => {
-    if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
-      const validStops = tripData.multiStops.filter(stop => isStopValid(stop));
+    if (routeRelevantData.tripType === "multi" && routeRelevantData.multiStops.length > 0) {
+      const validStops = routeRelevantData.multiStops.filter(stop => isStopValid(stop));
       
       const allLocations: { location: string; date?: string; type: 'pickup' | 'stop' | 'dropoff' }[] = [];
       
-      if (isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
-        allLocations.push({ location: tripData.pickupLocation || "Pickup", date: tripData.pickupDateTime, type: 'pickup' });
+      if (isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
+        allLocations.push({ location: routeRelevantData.pickupLocation || "Pickup", date: routeRelevantData.pickupDateTime, type: 'pickup' });
       }
       
+      // REMOVED duplicate filtering - show ALL stops including duplicates
       validStops.forEach((stop, index) => {
-        if (!allLocations.some(loc => loc.location === stop.location)) {
-          allLocations.push({
-            location: stop.location || `Stop ${index + 1}`,
-            date: stop.date,
-            type: 'stop',
-          });
-        }
+        allLocations.push({
+          location: stop.location || `Stop ${index + 1}`,
+          date: stop.date,
+          type: 'stop',
+        });
       });
       
-      if (isLocationValid(tripData.dropoffLocation, tripData.tripType === "multi" ? tripData.returnDateTime : undefined)) {
-        if (!allLocations.some(loc => loc.location === tripData.dropoffLocation)) {
-          allLocations.push({ 
-            location: tripData.dropoffLocation || "Dropoff", 
-            date: tripData.tripType === "multi" ? tripData.returnDateTime : undefined,
-            type: 'dropoff',
-          });
-        }
+      if (isLocationValid(routeRelevantData.dropoffLocation, routeRelevantData.tripType === "multi" ? routeRelevantData.returnDateTime : undefined)) {
+        allLocations.push({ 
+          location: routeRelevantData.dropoffLocation || "Dropoff", 
+          date: routeRelevantData.tripType === "multi" ? routeRelevantData.returnDateTime : undefined,
+          type: 'dropoff',
+        });
       }
       
       if (allLocations.length === 0) {
@@ -407,10 +594,11 @@ const MapCard: React.FC = () => {
   
             const isFirst = item.type === 'pickup';
             const isLast = item.type === 'dropoff';
+            const isStop = item.type === 'stop';
   
             return (
               <div
-                key={`${item.type}-${index}`}
+                key={`location-${index}`}
                 className={`flex flex-row sm:flex-col ${
                   isFirst ? "sm:items-start" : isLast ? "sm:items-end" : "sm:items-center"
                 } text-center relative group`}
@@ -443,7 +631,7 @@ const MapCard: React.FC = () => {
                       <div className="hidden group-hover:block absolute top-8 left-1/2 -translate-x-1/2 bg-white shadow-lg border border-gray-200 rounded-md p-2 w-40 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <p className="text-xs font-medium">{item.location}</p>
                         <p className="text-[10px] text-gray-500">
-                          {formatDateTime(item.date)}
+                          {formatDateOnly(item.date)}
                         </p>
                       </div>
                     </div>
@@ -455,7 +643,7 @@ const MapCard: React.FC = () => {
                         {item.location}
                       </p>
                       <p className="text-xs text-gray-500 mt-0.5 whitespace-nowrap">
-                        {isLast ? "Arrival time" : formatDateTime(item.date)}
+                        {formatDateOnly(item.date)}
                       </p>
                     </div>
                   </>
@@ -468,7 +656,7 @@ const MapCard: React.FC = () => {
                       {truncatedLocation}
                     </p>
                     <p className="text-xs ml-2 text-gray-500 mt-0.5 whitespace-nowrap">
-                      {isLast ? "Arrival time" : formatDateTime(item.date)}
+                      {isLast ? "Arrival time" : isStop ? formatDateOnly(item.date) : formatDateTime(item.date)}
                     </p>
                   </>
                 )}
@@ -479,7 +667,7 @@ const MapCard: React.FC = () => {
       );
     }
   
-    if (!isLocationValid(tripData.pickupLocation, tripData.pickupDateTime)) {
+    if (!isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime)) {
       return (
         <div className="mt-2 text-center text-gray-500 text-sm">
           Set pickup location and time to see route
@@ -487,21 +675,44 @@ const MapCard: React.FC = () => {
       );
     }
 
+    // ROUND TRIP DISPLAY
+    if (routeRelevantData.tripType === "round") {
+      return (
+        <div className="mt-2">
+          <div className="flex justify-between items-center text-sm font-medium md:font-semibold">
+            <div className="flex flex-col max-w-[40%]">
+              <p className="truncate whitespace-nowrap">{routeRelevantData.pickupLocation || "Pickup"}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(routeRelevantData.pickupDateTime)}</p>
+            </div>
+            
+            <div className="flex flex-col items-center px-2">
+              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+              </svg>
+              <p className="text-xs text-gray-500 mt-1">Round Trip</p>
+            </div>
+            
+            <div className="flex flex-col max-w-[40%] text-right">
+              <p className="truncate whitespace-nowrap">{routeRelevantData.dropoffLocation || "Dropoff"}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{formatDateTime(routeRelevantData.returnDateTime)}</p>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ONE-WAY TRIP DISPLAY
     return (
       <div className="mt-2">
         <div className="flex justify-between text-sm font-medium md:font-semibold">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{tripData.pickupLocation || "Pickup"}</p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{routeRelevantData.pickupLocation || "Pickup"}</p>
           <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripData.dropoffLocation || "Dropoff"}
+            {routeRelevantData.dropoffLocation || "Dropoff"}
           </p>
         </div>
         <div className="flex justify-between text-xs text-gray-500 mt-0.5">
-          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(tripData.pickupDateTime)}</p>
-          <p className="truncate max-w-[40%] text-right whitespace-nowrap">
-            {tripData.tripType === "round"
-              ? formatDateTime(tripData.returnDateTime)
-              : "Arrival time"}
-          </p>
+          <p className="truncate max-w-[40%] whitespace-nowrap">{formatDateTime(routeRelevantData.pickupDateTime)}</p>
+          <p className="truncate max-w-[40%] text-right whitespace-nowrap">Arrival time</p>
         </div>
       </div>
     );
@@ -516,7 +727,6 @@ const MapCard: React.FC = () => {
           style={{ minHeight: '400px' }}
         />
         
-
         {!isMapLoaded || isRouteLoading && (
           <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 rounded-xl">
             <div className="text-white text-lg font-medium">Loading Route...</div>
@@ -529,8 +739,7 @@ const MapCard: React.FC = () => {
           <Image src={IMAGES_ASSETS.CAR} alt="car" width={40} height={24} />
           <Image src={IMAGES_ASSETS.LOCATION} alt="pin" width={20} height={20} />
         </div>
-
-        {tripData.tripType !== "multi" && isLocationValid(tripData.pickupLocation, tripData.pickupDateTime) && renderRouteVisualization()}
+        {routeRelevantData.tripType !== "multi" && isLocationValid(routeRelevantData.pickupLocation, routeRelevantData.pickupDateTime) && routeRelevantData.tripType !== "round" && renderRouteVisualization()}
 
         {renderLocationLabels()}
       </div>
