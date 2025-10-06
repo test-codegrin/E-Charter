@@ -1858,7 +1858,7 @@ const PlanJourney = () => {
                     placeholder="Enter trip name (e.g., Round trip)"
                     className="text-sm text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
                     name="Trip Name"
-                  />    
+                  />
                 </div>
               </div>
 
@@ -1871,23 +1871,48 @@ const PlanJourney = () => {
                   </label>
                   <div className="relative">
                     <Icon
-                      icon="mdi:bag-suitcase"
+                      icon={ICON_DATA.BAG_SUITCASE}
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
                     />
                     <input
                       type="number"
                       min="0"
+                      max="10"
                       value={tripData.luggageCount.toString() || ""}
-                      onChange={(e) =>
-                        updateTripData({
-                          luggageCount: parseInt(e.target.value) || 0,
-                        })
-                      }
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value);
+                        // Only update if value is between 0 and 10, or if field is empty
+                        if (
+                          e.target.value === "" ||
+                          (value >= 0 && value <= 10)
+                        ) {
+                          updateTripData({
+                            luggageCount: isNaN(value) ? 0 : value,
+                          });
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        // Prevent typing 'e', '+', '-', '.'
+                        if (["e", "E", "+", "-", "."].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        // Prevent pasting non-numeric values
+                        const pastedText = e.clipboardData.getData("text");
+                        const value = parseInt(pastedText);
+                        if (isNaN(value) || value < 0 || value > 10) {
+                          e.preventDefault();
+                        }
+                      }}
                       placeholder="0"
                       className="text-sm text-gray-700 pl-11 pr-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
                       name="Luggage"
                     />
                   </div>
+                  <p className="text-xs text-gray-500 mt-1 ml-1">
+                    Maximum 10 luggage
+                  </p>
                 </div>
 
                 {/* Event Types */}
@@ -1966,10 +1991,9 @@ const PlanJourney = () => {
 
                   {/* Wheelchair Icon */}
                   <div className="flex-shrink-0 ml-3">
-                    <img
-                      src="/images/wheel-chair.png"
-                      alt="wheelchair accessibility"
-                      className="w-10 h-10 sm:w-12 sm:h-12 object-contain"
+                    <Icon
+                      icon={ICON_DATA.WHEELCHAIR}
+                      className="w-10 h-10 text-primary"
                     />
                   </div>
                 </div>

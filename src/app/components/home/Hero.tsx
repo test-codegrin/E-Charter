@@ -102,6 +102,17 @@ export default function Hero(): JSX.Element {
   const dropoffSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Helper function to get current datetime in local format
+const getCurrentDateTime = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
   // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
 
@@ -995,13 +1006,13 @@ export default function Hero(): JSX.Element {
                             <button
                               onClick={(e) =>
                                 handleLuggageChange(
-                                  Math.max(1, tripData.luggageCount - 1),
+                                  Math.max(0, tripData.luggageCount - 1),
                                   e
                                 )
                               }
-                              disabled={tripData.luggageCount === 1}
+                              disabled={tripData.luggageCount === 0}
                               className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center ${
-                                tripData.luggageCount === 1
+                                tripData.luggageCount === 0
                                   ? "bg-primary-gray"
                                   : "bg-primary"
                               } text-white rounded-full cursor-pointer`}
@@ -1012,15 +1023,17 @@ export default function Hero(): JSX.Element {
                               {tripData.luggageCount}
                             </span>
                             <button
+                            disabled={tripData.luggageCount === 10}
                               onClick={(e) =>
-                                handleLuggageChange(tripData.luggageCount + 1, e)
+                                handleLuggageChange(Math.min(10, tripData.luggageCount + 1), e)
                               }
-                              className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center bg-primary text-white rounded-full"
+                              className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-white rounded-full ${tripData.luggageCount === 10 ? "bg-primary-gray" : "bg-primary"}`}
                             >
                               <i className="fa-solid fa-plus text-xs cursor-pointer" />
                             </button>
                           </div>
                         </div>
+                     
                       </div>
                     )}
                   </div>
@@ -1173,6 +1186,7 @@ export default function Hero(): JSX.Element {
                     <Inputs
                       name="pickupDate"
                       type="datetime-local"
+                      min={getCurrentDateTime()}
                       value={tripData.pickupDateTime}
                       onChange={(e) =>
                         updateTripData({ pickupDateTime: e.target.value })
@@ -1199,6 +1213,7 @@ export default function Hero(): JSX.Element {
                       <Inputs
                         name="pickupDate"
                         type="datetime-local"
+                        min={getCurrentDateTime()}
                         value={tripData.pickupDateTime}
                         onChange={(e) =>
                           updateTripData({ pickupDateTime: e.target.value })
