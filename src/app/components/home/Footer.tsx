@@ -9,10 +9,15 @@ import {
   Phone,
   MapPin,
 } from "lucide-react";
+import { COMPANY_INFO } from "@/app/constants/DataConstant";
 
 interface LinkSection {
   title: string;
-  items: string[];
+  items: PageLink[];
+}
+interface PageLink {
+  name: string;
+  link: string;
 }
 
 interface InfoBlock {
@@ -25,40 +30,74 @@ export default function Footer(): JSX.Element {
   const linkSections: LinkSection[] = [
     {
       title: "Useful Links",
-      items: ["About us", "Contact us", "Gallery", "Blog", "F.A.Q"],
+      items: [
+        { name: "About us", link: "/about" },
+        { name: "Contact us", link: "/contact" },
+        { name: "Gallery", link: "/contact" },
+        { name: "Blog", link: "/contact" },
+        { name: "F.A.Q", link: "/contact" }
+      ],
     },
     {
       title: "Vehicles",
-      items: ["Sedan", "Cabriolet", "Pickup", "Minivan", "SUV"],
+      items:[
+        { name: "Sedan", link: "/" },
+        { name: "Cabriolet", link: "/" },
+        { name: "Pickup", link: "/" },
+        { name: "Minivan", link: "/" },
+        { name: "SUV", link: "/" },
+      ]
     },
     {
       title: "Services",
-      items: ["Rental", "Chauffeur", "Insurance", "Leasing", "Fleet"],
+      items:[
+        { name: "Rental", link: "/" },
+        { name: "Chauffeur", link: "/" },
+        { name: "Insurance", link: "/" },
+        { name: "Leasing", link: "/" },
+        { name: "Fleet", link: "/" }
+      ]
     },
   ];
 
-  const socialIcons: { icon: JSX.Element; label: string }[] = [
-    { icon: <Facebook size={20} />, label: "Facebook" },
-    { icon: <Instagram size={20} />, label: "Instagram" },
-    { icon: <Twitter size={20} />, label: "Twitter" },
-    { icon: <Youtube size={20} />, label: "YouTube" },
+  const socialIcons: { icon: JSX.Element; label: string; link: string }[] = [
+    {
+      icon: <Facebook size={20} />,
+      label: "Facebook",
+      link: COMPANY_INFO.SOCIAL_LINKS.FACEBOOK,
+    },
+    {
+      icon: <Instagram size={20} />,
+      label: "Instagram",
+      link: COMPANY_INFO.SOCIAL_LINKS.INSTAGRAM,
+    },
+    {
+      icon: <Twitter size={20} />,
+      label: "Twitter",
+      link: COMPANY_INFO.SOCIAL_LINKS.TWITTER,
+    },
+    {
+      icon: <Youtube size={20} />,
+      label: "YouTube",
+      link: COMPANY_INFO.SOCIAL_LINKS.YOUTUBE,
+    },
   ];
 
   const infoBlocks: InfoBlock[] = [
     {
       icon: <MapPin size={20} />,
       label: "Address",
-      value: "Oxford Ave. Cary, NC 27511",
+      value: COMPANY_INFO.ADDRESS,
     },
     {
       icon: <Mail size={20} />,
       label: "Email",
-      value: "nwiger@yahoo.com",
+      value: COMPANY_INFO.EMAIL,
     },
     {
       icon: <Phone size={20} />,
       label: "Phone",
-      value: "+537 547-6401",
+      value: COMPANY_INFO.PHONE,
     },
   ];
 
@@ -92,10 +131,10 @@ export default function Footer(): JSX.Element {
                   <ul className="space-y-2">
                     {linkSections[0].items.map((item) => (
                       <li
-                        key={item}
+                        key={item.name}
                         className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
                       >
-                        {item}
+                        {item.name}
                       </li>
                     ))}
                   </ul>
@@ -108,10 +147,10 @@ export default function Footer(): JSX.Element {
                   <ul className="space-y-2">
                     {linkSections[1].items.map((item) => (
                       <li
-                        key={item}
+                        key={item.name}
                         className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
                       >
-                        {item}
+                        {item.name}
                       </li>
                     ))}
                   </ul>
@@ -125,10 +164,10 @@ export default function Footer(): JSX.Element {
                 <ul className="space-y-2">
                   {linkSections[2].items.map((item) => (
                     <li
-                      key={item}
+                      key={item.name}
                       className="text-base text-[#000000] hover:text-[#1E1E1E] transition cursor-pointer"
                     >
-                      {item}
+                      {item.name}
                     </li>
                   ))}
                 </ul>
@@ -147,6 +186,7 @@ export default function Footer(): JSX.Element {
             {socialIcons.map((social, idx) => (
               <div
                 key={idx}
+                onClick={() => window.open(social.link, "_blank")}
                 title={social.label}
                 className="h-[40px] w-[40px] bg-[#8D8D8D] transition duration-200 rounded-full text-white flex items-center justify-center hover:scale-105 cursor-pointer"
               >
