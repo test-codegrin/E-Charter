@@ -724,7 +724,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
          
          
        </div>
-
+       
         {/* Date only with validation */}
         <div className="w-full sm:w-1/2 relative h-[40px] sm:h-[44px] flex flex-col">
           <label className={`flex items-center gap-3 w-full h-full border rounded-xl px-2 py-1 ${dateError ? 'border-red-500' : 'border-[#DBDBDB]'}`}>
@@ -740,7 +740,7 @@ const StopCard = forwardRef<HTMLInputElement, StopCardProps>(({
               min={getMinimumDate()}
               value={dateValue}
               onChange={(e) => handleDateChange(e.target.value)}
-              className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
+              className="flex-1 bg-transparent text-sm focus:outline-none cursor-text"
             />
           </label>
           {dateError && (

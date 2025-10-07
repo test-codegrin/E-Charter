@@ -22,5 +22,8 @@ export const ICON_DATA = {
     ARRIVAL : "ic:outline-share-arrival-time",
     WHEELCHAIR : "mdi:wheelchair",
     BAG_SUITCASE : "mdi:bag-suitcase",
+    TRIP_NAME : "mdi:map-marker-radius",
+    EVENT_TYPE : "mdi:calendar-blank-outline",
+    CALENDAR : "mdi:calendar-blank-outline",
     
 };
