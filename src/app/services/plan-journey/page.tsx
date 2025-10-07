@@ -129,6 +129,9 @@ const PlanJourney = () => {
   const [pickupTimeError, setPickupTimeError] = useState("");
   const [dropoffTimeError, setDropoffTimeError] = useState("");
 
+  const [tripNameError, setTripNameError] = useState("");
+  const [eventTypeError, setEventTypeError] = useState("");
+
   // Current location states
   const [isGettingCurrentLocation, setIsGettingCurrentLocation] =
     useState(false);
@@ -1089,10 +1092,28 @@ const PlanJourney = () => {
   const handleNext = () => {
     let hasError = false;
 
+    // Validate Trip Name
+    if (!tripData.tripName || tripData.tripName.trim() === "") {
+      setTripNameError("Please enter a trip name.");
+      hasError = true;
+    } else {
+      setTripNameError("");
+    }
+
+    // Validate Event Type
+    if (!tripData.eventType || tripData.eventType === "") {
+      setEventTypeError("Please select an event type.");
+      hasError = true;
+    } else {
+      setEventTypeError("");
+    }
+
     // Validate pickup location and time
     if (!tripData.pickupLocation || !pickupValidated) {
       setPickupError("Please select a pickup location from the suggestions.");
       hasError = true;
+    } else {
+      setPickupError("");
     }
 
     if (!tripData.pickupDateTime) {
@@ -1104,13 +1125,17 @@ const PlanJourney = () => {
       if (tripData.pickupDateTime < currentDateTime) {
         setPickupTimeError("Pickup date and time cannot be in the past.");
         hasError = true;
+      } else {
+        setPickupTimeError("");
       }
     }
 
-    // Validate dropoff location and time for all trip types, but time only for round trip
+    // Validate dropoff location and time for all trip types
     if (!tripData.dropoffLocation || !dropoffValidated) {
       setDropoffError("Please select a dropoff location from the suggestions.");
       hasError = true;
+    } else {
+      setDropoffError("");
     }
 
     if (tripData.tripType === "round") {
@@ -1133,17 +1158,15 @@ const PlanJourney = () => {
             "Return time must be after the estimated arrival time at the dropoff location."
           );
           hasError = true;
+        } else {
+          setDropoffTimeError("");
         }
+      } else {
+        setDropoffTimeError("");
       }
     }
 
     if (hasError) return;
-
-    // Clear errors if validation passes
-    setPickupError("");
-    setPickupTimeError("");
-    setDropoffError("");
-    setDropoffTimeError("");
 
     router.push(ROUTES.RESERVE_CAR);
   };
@@ -1409,7 +1432,7 @@ const PlanJourney = () => {
                       min={getCurrentDateTime()}
                       value={tripData.pickupDateTime}
                       onChange={(e) => handlePickupTimeChange(e.target.value)}
-                      className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
+                      className="flex-1 bg-transparent text-sm focus:outline-none cursor-text"
                     />
                   </label>
                   {pickupTimeError && (
@@ -1573,7 +1596,7 @@ const PlanJourney = () => {
                           onChange={(e) =>
                             handleDropoffTimeChange(e.target.value)
                           }
-                          className="flex-1 bg-transparent text-sm text-[#9C9C9C] focus:outline-none cursor-text"
+                          className="flex-1 bg-transparent text-sm  focus:outline-none cursor-text"
                         />
                       </label>
                       {dropoffTimeError && (
@@ -1852,14 +1875,22 @@ const PlanJourney = () => {
                   <input
                     type="text"
                     value={tripData.tripName || ""}
-                    onChange={(e) =>
-                      updateTripData({ tripName: e.target.value })
-                    }
+                    onChange={(e) => {
+                      updateTripData({ tripName: e.target.value });
+                      if (tripNameError) setTripNameError(""); // Clear error on change
+                    }}
                     placeholder="Enter trip name (e.g., Round trip)"
-                    className="text-sm text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all"
+                    className={`text-sm text-gray-700 px-4 py-3 border ${
+                      tripNameError ? "border-red-500" : "border-gray-300"
+                    } rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white transition-all`}
                     name="Trip Name"
                   />
                 </div>
+                {tripNameError && (
+                  <p className="text-xs text-red-500 mt-1 ml-1">
+                    {tripNameError}
+                  </p>
+                )}
               </div>
 
               {/* Luggage and Event Types Row */}
@@ -1927,10 +1958,13 @@ const PlanJourney = () => {
                     />
                     <select
                       value={tripData.eventType || ""}
-                      onChange={(e) =>
-                        updateTripData({ eventType: e.target.value })
-                      }
-                      className="text-sm text-gray-700 pl-11 pr-10 py-3 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white cursor-pointer appearance-none transition-all"
+                      onChange={(e) => {
+                        updateTripData({ eventType: e.target.value });
+                        if (eventTypeError) setEventTypeError(""); // Clear error on change
+                      }}
+                      className={`text-sm text-gray-700 pl-11 pr-10 py-3 border ${
+                        eventTypeError ? "border-red-500" : "border-gray-300"
+                      } rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none w-full bg-white cursor-pointer appearance-none transition-all`}
                     >
                       <option value="" disabled>
                         Select event type
@@ -1946,6 +1980,11 @@ const PlanJourney = () => {
                       className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
                     />
                   </div>
+                  {eventTypeError && (
+                    <p className="text-xs text-red-500 mt-1 ml-1">
+                      {eventTypeError}
+                    </p>
+                  )}
                 </div>
               </div>
 
