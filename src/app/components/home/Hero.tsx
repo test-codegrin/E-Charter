@@ -733,7 +733,7 @@ const getCurrentDateTime = (): string => {
     if (!isOpen) return null;
 
     return (
-      <div className="absolute top-[80px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
+      <div className="absolute top-[30px] sm:top-[55px] left-0 right-0 mt-1 bg-white border border-primary-gray/30 rounded-xl drop-shadow-2xl z-50 max-h-60 overflow-y-auto">
         <button
           onMouseDown={() => setIsSelectingFromDropdown(true)}
           onClick={() => getCurrentLocation(type)}
