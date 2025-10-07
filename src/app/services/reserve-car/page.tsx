@@ -1,7 +1,7 @@
 // pages/page4.tsx
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@iconify/react";
 import PickupDropForm from "../../components/bookservice/PickupDropForm";
@@ -10,10 +10,30 @@ import CarCard from "../../components/bookservice/CarCard";
 import { useTrip } from "../../context/tripContext";
 import { ICON_DATA } from "@/app/constants/IconConstants";
 import { ROUTES } from "@/app/constants/RoutesConstant";
+import { IMAGES_ASSETS } from "@/app/constants/ImageConstant";
+import toast from "react-hot-toast";
+import { API } from "@/app/constants/APIConstants";
+
+interface Car {
+  car_id: number;
+  carName: string;
+  carSize: string;
+  carType: string;
+  car_image: string;
+  passenger_capacity: number;
+  fuelType: string;
+  cancellation_charge: string;
+  driver_name: string;
+  driver_address: string;
+  price: number;
+}
 
 const ReserveCar = () => {
   const router = useRouter();
-  const { tripData } = useTrip();
+  // Import updateSelectedCar from context
+  const { tripData, updateSelectedCar } = useTrip();
+  const [cars, setCars] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Format date and time helper
   const formatDateTime = (dateTimeString: string) => {
@@ -43,9 +63,185 @@ const ReserveCar = () => {
     }
   };
 
+  // Calculate distance from route summary
+  const calculateDistance = () => {
+    if (!tripData.routeSummary) return 0;
+
+    const distanceInKm =
+      tripData.tripType === "round"
+        ? tripData.routeSummary.roundTripDropLengthInMeters / 1000
+        : tripData.routeSummary.lengthInMeters / 1000;
+
+    return Math.ceil(distanceInKm);
+  };
+
+  // Calculate number of days - counts calendar days involved in the trip
+  const calculateNumberOfDays = () => {
+    if (!tripData.pickupDateTime) return 1;
+
+    const pickupDate = new Date(tripData.pickupDateTime);
+    let endDate: Date;
+
+    if (tripData.tripType === "round" && tripData.returnDateTime && tripData.routeSummary) {
+      // For round trip: Calculate return arrival time
+      // Use the RETURN journey travel time (from destination back to origin)
+      const returnPickupDate = new Date(tripData.returnDateTime);
+      
+      // For round trips, use travelTimeInSeconds (return journey time)
+      // NOT roundTripDropTravelTimeInSeconds (outbound journey time)
+      const returnTravelTime = tripData.routeSummary.travelTimeInSeconds || 
+                               tripData.routeSummary.roundTripDropTravelTimeInSeconds || 
+                               0;
+      
+      const returnArrivalDate = new Date(
+        returnPickupDate.getTime() + returnTravelTime * 1000
+      );
+      endDate = returnArrivalDate;
+      
+      // Debug logging
+      console.log("=== Round Trip Day Calculation ===");
+      console.log("Pickup DateTime:", pickupDate.toLocaleString());
+      console.log("Return Pickup DateTime:", returnPickupDate.toLocaleString());
+      console.log("Travel Time (seconds):", returnTravelTime);
+      console.log("Return Arrival DateTime:", returnArrivalDate.toLocaleString());
+      
+    } else if (tripData.tripType === "single" && tripData.routeSummary) {
+      // For single trip: Calculate from pickup to dropoff arrival
+      const dropoffArrivalDate = new Date(
+        pickupDate.getTime() +
+          tripData.routeSummary.travelTimeInSeconds * 1000
+      );
+      endDate = dropoffArrivalDate;
+      
+    } else if (tripData.tripType === "multi" && tripData.multiStops.length > 0) {
+      // For multi-stop: Use the last stop's date if available
+      const lastStop = tripData.multiStops[tripData.multiStops.length - 1];
+      if (lastStop.date) {
+        endDate = new Date(lastStop.date);
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+
+    // Calculate calendar days involved
+    const startDay = new Date(
+      pickupDate.getFullYear(), 
+      pickupDate.getMonth(), 
+      pickupDate.getDate()
+    );
+    const endDay = new Date(
+      endDate.getFullYear(), 
+      endDate.getMonth(), 
+      endDate.getDate()
+    );
+    
+    console.log("Start Day (midnight):", startDay.toLocaleString());
+    console.log("End Day (midnight):", endDay.toLocaleString());
+    
+    const diffTime = endDay.getTime() - startDay.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)) + 1;
+    
+    console.log("Difference in milliseconds:", diffTime);
+    console.log("Difference in days:", Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+    console.log("Final day count (+1 for inclusive):", diffDays);
+    console.log("=================================");
+
+    return diffDays > 0 ? diffDays : 1;
+  };
+
+  // Handler to save selected car to context
+  const handleCarReservation = (car: Car) => {
+    try {
+      // Save car data to context
+      updateSelectedCar({
+        car_id: car.car_id,
+        carName: car.carName,
+        carSize: car.carSize,
+        carType: car.carType,
+        car_image: car.car_image,
+        passenger_capacity: car.passenger_capacity,
+        fuelType: car.fuelType,
+        cancellation_charge: car.cancellation_charge,
+        driver_name: car.driver_name,
+        driver_address: car.driver_address,
+        price: car.price,
+      });
+
+      // Show success message
+      toast.success(`${car.carName} has been reserved!`);
+      
+      // Log for debugging
+      console.log("Car saved to context:", car);
+      console.log("Trip data:", tripData);
+    } catch (error) {
+      console.error("Error saving car data:", error);
+      toast.error("Failed to reserve car. Please try again.");
+    }
+  };
+
+  // Fetch cars from API
+  const fetchCars = async () => {
+    try {
+      setLoading(true);
+
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        toast.error("Please login to continue");
+        router.push(ROUTES.HOME);
+        return;
+      }
+
+      const requestBody = {
+        distance: calculateDistance(),
+        passengers: tripData.persons,
+        luggages: tripData.luggageCount,
+        number_of_stops:
+          tripData.tripType === "multi" ? tripData.multiStops.length : 0,
+        number_of_days: calculateNumberOfDays(),
+      };
+
+      console.log("API Request Body:", requestBody);
+
+      const response = await fetch(API.CARS_FOR_RESERVE, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch cars");
+      }
+
+      const data = await response.json();
+
+      if (data.success && data.cars) {
+        setCars(data.cars);
+      } else {
+        toast.error("No cars available for your trip");
+        setCars([]);
+      }
+    } catch (error) {
+      console.error("Error fetching cars:", error);
+      toast.error("Failed to load available cars. Please try again.");
+      setCars([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch cars on component mount
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
   return (
     <div className="w-full px-4 sm:px-6 md:px-4 2xl:px-2 max-w-[1320px] mx-auto mt-[70px] bg-white">
-      <div className="bg-white sm:w-[500px] md:w-[600px] lg:w-full text-black min-h-screen w-full p-4 sm:p-6 lg:p-8 xl:p-12.5 2xl:px-0 mx-auto">
+      <div className="bg-white lg:w-full text-black min-h-screen w-full p-4 sm:p-6 lg:p-8 xl:p-12.5 2xl:px-0 mx-auto">
         {/* Back Button */}
         <button
           onClick={() => router.push(ROUTES.PLAN_JOURNEY)}
@@ -74,7 +270,7 @@ const ReserveCar = () => {
           </div>
 
           {/* Trip Overview Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {/* Trip Type */}
             <div className="bg-white rounded-lg p-4 border border-gray-200">
               <div className="flex items-center gap-3">
@@ -125,6 +321,25 @@ const ReserveCar = () => {
                   <p className="text-sm font-bold text-gray-900">
                     {tripData.luggageCount}{" "}
                     {tripData.luggageCount === 1 ? "Bag" : "Bags"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Days */}
+            <div className="bg-white rounded-lg p-4 border border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Icon
+                    icon="mdi:calendar-range"
+                    className="text-primary w-5 h-5"
+                  />
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-medium">Duration</p>
+                  <p className="text-sm font-bold text-gray-900">
+                    {calculateNumberOfDays()}{" "}
+                    {calculateNumberOfDays() === 1 ? "Day" : "Days"}
                   </p>
                 </div>
               </div>
@@ -237,7 +452,9 @@ const ReserveCar = () => {
               <div className="flex flex-wrap gap-3">
                 {tripData.tripName && (
                   <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-full border border-gray-200">
-                    <p className="text-xs font-medium text-gray-700">Trip Name</p>
+                    <p className="text-xs font-medium text-gray-700">
+                      Trip Name:
+                    </p>
                     <p className="text-xs font-medium text-gray-700">
                       {tripData.tripName}
                     </p>
@@ -273,6 +490,7 @@ const ReserveCar = () => {
           {tripData.routeSummary && (
             <div className="mt-4 bg-white rounded-lg p-4 border border-gray-200">
               <div className="flex items-center justify-around gap-4 flex-wrap">
+                {/* Distance */}
                 <div className="flex items-center gap-2">
                   <Icon
                     icon="mdi:map-marker-distance"
@@ -291,31 +509,70 @@ const ReserveCar = () => {
                   </div>
                 </div>
 
+                {/* Travel Time */}
                 <div className="flex items-center gap-2">
-                  <Icon
-                    icon="mdi:clock-fast"
-                    className="w-5 h-5 text-primary"
-                  />
+                  <Icon icon="mdi:clock-fast" className="w-5 h-5 text-primary" />
                   <div>
                     <p className="text-xs text-gray-500">Travel Time</p>
                     <p className="text-sm font-bold text-gray-800">
                       {(() => {
                         const hours = Math.floor(
                           tripData.tripType === "round"
-                            ? tripData.routeSummary
-                                .roundTripDropTravelTimeInSeconds / 3600
+                            ? tripData.routeSummary.roundTripDropTravelTimeInSeconds / 3600
                             : tripData.routeSummary.travelTimeInSeconds / 3600
                         );
                         const minutes = Math.floor(
                           (tripData.tripType === "round"
-                            ? tripData.routeSummary
-                                .roundTripDropTravelTimeInSeconds % 3600
-                            : tripData.routeSummary.travelTimeInSeconds %
-                              3600) / 60
+                            ? tripData.routeSummary.roundTripDropTravelTimeInSeconds % 3600
+                            : tripData.routeSummary.travelTimeInSeconds % 3600) / 60
                         );
-                        return hours > 0
-                          ? `${hours}h ${minutes}m`
-                          : `${minutes} min`;
+                        return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`;
+                      })()}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Est. Arrival - Dynamic based on trip type */}
+                <div className="flex items-center gap-2">
+                  <Icon icon="mdi:map-marker-check" className="w-5 h-5 text-primary" />
+                  <div>
+                    <p className="text-xs text-gray-500">
+                      {tripData.tripType === "round" ? "Return Arrival" : "Est. Arrival"}
+                    </p>
+                    <p className="text-sm font-bold text-gray-800">
+                      {(() => {
+                        let arrivalDate: Date;
+                        
+                        if (tripData.tripType === "round" && tripData.returnDateTime) {
+                          // For round trip: return pickup + travel time back
+                          const returnPickupDate = new Date(tripData.returnDateTime);
+                          
+                          // Use the same travel time property as in calculateNumberOfDays
+                          const returnTravelTime = tripData.routeSummary.travelTimeInSeconds || 
+                                                   tripData.routeSummary.roundTripDropTravelTimeInSeconds || 
+                                                   0;
+                          
+                          arrivalDate = new Date(
+                            returnPickupDate.getTime() + returnTravelTime * 1000
+                          );
+                        } else if (tripData.pickupDateTime) {
+                          // For single/multi trip
+                          const pickupDate = new Date(tripData.pickupDateTime);
+                          arrivalDate = new Date(
+                            pickupDate.getTime() +
+                              tripData.routeSummary.travelTimeInSeconds * 1000
+                          );
+                        } else {
+                          return "N/A";
+                        }
+
+                        return arrivalDate.toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        });
                       })()}
                     </p>
                   </div>
@@ -324,7 +581,6 @@ const ReserveCar = () => {
             </div>
           )}
         </div>
-
 
         {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-6 xl:gap-8 2xl:gap-0">
@@ -360,40 +616,48 @@ const ReserveCar = () => {
           </div>
 
           {/* Cars Column */}
-          <div className="2xl:ml-[30px] flex flex-col gap-6 xl:gap-8">
-            <CarCard
-              title="SCORPIO‑N"
-              subtitle="The Big Daddy of SUVs"
-              image="suv2.png"
-              passengers={7}
-              fuel="Diesel"
-              mileage="Limited Mileage"
-              location="Mercury Car Rentals Priv Ltd floor16, Premch, Row House 214, Ahmedabad, India 380054"
-              price="$219"
-              features={[
-                "Automatic Transmission",
-                "Air Conditioning",
-                "Bluetooth",
-                "Child Seat Available",
-              ]}
-            />
-
-            <CarCard
-              title="XUV700"
-              subtitle="The Smart Beast of SUVs"
-              image="Xuv700.png"
-              passengers={4}
-              fuel="Diesel"
-              mileage="Limited Mileage"
-              location="Mercury Car Rentals Priv Ltd floor16, Premch, Row House 214, Ahmedabad, India 380054"
-              price="$219"
-              features={[
-                "Automatic Transmission",
-                "Premium Sound System",
-                "360° Camera",
-                "Panoramic Sunroof",
-              ]}
-            />
+          <div className="2xl:ml-[30px] flex flex-col gap-6 xl:gap-8 w-full">
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Icon
+                  icon="mdi:loading"
+                  className="w-12 h-12 text-primary animate-spin"
+                />
+              </div>
+            ) : cars.length > 0 ? (
+              cars.map((car) => (
+                <CarCard
+                  key={car.car_id}
+                  title={car.carName}
+                  subtitle={car.carType}
+                  image={car.car_image || IMAGES_ASSETS.TEMP_CAR}
+                  passengers={car.passenger_capacity}
+                  fuel={car.fuelType}
+                  mileage="Limited Mileage"
+                  location={car.driver_address}
+                  price={`$${car.price.toFixed(2)}`}
+                  features={[
+                    "Automatic Transmission",
+                    "Air Conditioning",
+                    "GPS Navigation",
+                    `Free Cancellation (Charge: $${car.cancellation_charge})`,
+                  ]}
+                  onReserve={() => handleCarReservation(car)}
+                />
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">
+                  No cars available for your trip criteria.
+                </p>
+                <button
+                  onClick={() => router.push(ROUTES.PLAN_JOURNEY)}
+                  className="mt-4 text-primary hover:text-primary-dark font-semibold underline"
+                >
+                  Modify Trip Details
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -22,6 +22,21 @@ interface RouteSummary {
   travelTimeInSeconds: number;
 }
 
+// Car interface
+interface SelectedCar {
+  car_id: number;
+  carName: string;
+  carSize: string;
+  carType: string;
+  car_image: string;
+  passenger_capacity: number;
+  fuelType: string;
+  cancellation_charge: string;
+  driver_name: string;
+  driver_address: string;
+  price: number;
+}
+
 interface TripData {
   tripType: "single" | "round" | "multi";
   persons: number;
@@ -44,6 +59,7 @@ interface TripData {
   eventType: string;
   tripName: string;
   routeSummary?: RouteSummary;
+  selectedCar?: SelectedCar; // Add selected car field
 }
 
 interface TripContextType {
@@ -56,6 +72,9 @@ interface TripContextType {
   updateReturnCoordinates: (coordinates: Coordinates) => void;
   updateStopCoordinates: (index: number, coordinates: Coordinates) => void;
   updateRouteSummary: (summary: RouteSummary) => void;
+  // Add method to update selected car
+  updateSelectedCar: (car: SelectedCar) => void;
+  clearSelectedCar: () => void;
   getAllLocationsWithCoordinates: () => Array<{
     location: string;
     coordinates?: Coordinates;
@@ -85,7 +104,8 @@ const defaultTripData: TripData = {
   accessibleVehicle: false,
   eventType: "",
   tripName: "",
-  routeSummary: undefined
+  routeSummary: undefined,
+  selectedCar: undefined // Initialize selected car
 };
 
 const TripContext = createContext<TripContextType | undefined>(undefined);
@@ -147,6 +167,23 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setTripData(prev => ({
       ...prev,
       routeSummary: summary
+    }));
+  };
+
+  // Helper method to update selected car
+  const updateSelectedCar = (car: SelectedCar) => {
+    setTripData(prev => ({
+      ...prev,
+      selectedCar: car
+    }));
+    console.log("Selected car updated:", car);
+  };
+
+  // Helper method to clear selected car
+  const clearSelectedCar = () => {
+    setTripData(prev => ({
+      ...prev,
+      selectedCar: undefined
     }));
   };
 
@@ -213,6 +250,8 @@ export const TripProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       updateReturnCoordinates,
       updateStopCoordinates,
       updateRouteSummary,
+      updateSelectedCar,
+      clearSelectedCar,
       getAllLocationsWithCoordinates
     }}>
       {children}
@@ -229,4 +268,4 @@ export const useTrip = (): TripContextType => {
 };
 
 // Export types for use in other components
-export type { Coordinates, Stop, TripData, RouteSummary };
+export type { Coordinates, Stop, TripData, RouteSummary, SelectedCar };

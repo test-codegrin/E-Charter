@@ -1874,7 +1874,7 @@ const PlanJourney = () => {
                 <div className="relative">
                   <input
                     type="text"
-                    value={tripData.tripName || ""}
+                    value={tripData.tripName || "Test"}
                     onChange={(e) => {
                       updateTripData({ tripName: e.target.value });
                       if (tripNameError) setTripNameError(""); // Clear error on change
@@ -1957,7 +1957,7 @@ const PlanJourney = () => {
                       className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none"
                     />
                     <select
-                      value={tripData.eventType || ""}
+                      value={tripData.eventType || "personal"}
                       onChange={(e) => {
                         updateTripData({ eventType: e.target.value });
                         if (eventTypeError) setEventTypeError(""); // Clear error on change
