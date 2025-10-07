@@ -328,7 +328,7 @@ const Navbar: React.FC = () => {
       <nav className="max-w-[1320px] mx-auto flex items-center justify-between h-[70px]">
         {/* Left: Logo */}
         <div className="flex-shrink-0 w-[70px] sm:w-[80px] md:w-[90px]">
-          <a href="/">
+          <a href={ROUTES.HOME}>
             <img src={IMAGES_ASSETS.LOGO} alt="Logo" className="w-full" />
           </a>
         </div>
@@ -340,7 +340,7 @@ const Navbar: React.FC = () => {
             {/* Nav Links */}
             <div className="flex gap-7 xl:gap-10 text-[14px] xl:text-[18px]">
               <a
-                href="/"
+                href={ROUTES.HOME}
                 className="hover:text-primary text-lg font-semibold text-[#040401] transition-colors duration-200"
               >
                 Home
@@ -352,13 +352,13 @@ const Navbar: React.FC = () => {
                 Service
               </a>
               <a
-                href="/about"
+                href={ROUTES.ABOUT}
                 className="hover:text-primary text-lg font-semibold text-[#040401] transition-colors duration-200"
               >
                 About Us
               </a>
               <a
-                href="/contact"
+                href={ROUTES.CONTACT}
                 className="hover:text-primary text-lg font-semibold text-[#040401] transition-colors duration-200"
               >
                 Contact Us
