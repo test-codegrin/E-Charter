@@ -53,43 +53,54 @@ export default function Hero(): JSX.Element {
   const [isTabDropdownOpen, setIsTabDropdownOpen] = useState(false);
   const [isPersonDropdownOpen, setIsPersonDropdownOpen] = useState(false);
   const [isLuggageDropdownOpen, setIsLuggageDropdownOpen] = useState(false);
-  
+
   // Search functionality state
-  const [pickupSuggestions, setPickupSuggestions] = useState<LocationSuggestion[]>([]);
-  const [dropoffSuggestions, setDropoffSuggestions] = useState<LocationSuggestion[]>([]);
+  const [pickupSuggestions, setPickupSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
+  const [dropoffSuggestions, setDropoffSuggestions] = useState<
+    LocationSuggestion[]
+  >([]);
   const [isPickupDropdownOpen, setIsPickupDropdownOpen] = useState(false);
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
   const [pickupSearchValue, setPickupSearchValue] = useState("");
   const [dropoffSearchValue, setDropoffSearchValue] = useState("");
-  
+
   // Keyboard navigation states
   const [pickupHighlightedIndex, setPickupHighlightedIndex] = useState(-1);
   const [dropoffHighlightedIndex, setDropoffHighlightedIndex] = useState(-1);
-  
+
   // Validation states
   const [pickupValidated, setPickupValidated] = useState(false);
   const [dropoffValidated, setDropoffValidated] = useState(false);
   const [pickupError, setPickupError] = useState("");
   const [dropoffError, setDropoffError] = useState("");
-  
+
   // Current location states
-  const [isGettingCurrentLocation, setIsGettingCurrentLocation] = useState(false);
-  const [currentLocationFor, setCurrentLocationFor] = useState<'pickup' | 'dropoff' | null>(null);
-  
+  const [isGettingCurrentLocation, setIsGettingCurrentLocation] =
+    useState(false);
+  const [currentLocationFor, setCurrentLocationFor] = useState<
+    "pickup" | "dropoff" | null
+  >(null);
+
   // Map modal states
   const [isMapOpen, setIsMapOpen] = useState(false);
   const [mapType, setMapType] = useState<"pickup" | "dropoff" | null>(null);
   const [isSelectingFromDropdown, setIsSelectingFromDropdown] = useState(false);
-  const [selectedCoordinates, setSelectedCoordinates] = useState<{ lat: number; lng: number } | null>(null);
-  
+  const [selectedCoordinates, setSelectedCoordinates] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
   // NEW: Map address display states
   const [currentMapAddress, setCurrentMapAddress] = useState<string>("");
   const [isLoadingAddress, setIsLoadingAddress] = useState(false);
-  
+
   // Local UI states
   const [showDateDropdown, setShowDateDropdown] = useState<boolean>(false);
-  const [showReturnDateDropdown, setShowReturnDateDropdown] = useState<boolean>(false);
-  
+  const [showReturnDateDropdown, setShowReturnDateDropdown] =
+    useState<boolean>(false);
+
   // Refs for dropdowns, search, and map
   const tabDropdownRef = useRef<HTMLDivElement>(null);
   const personDropdownRef = useRef<HTMLDivElement>(null);
@@ -101,17 +112,17 @@ export default function Hero(): JSX.Element {
   const pickupSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const dropoffSearchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressFetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Helper function to get current datetime in local format
-const getCurrentDateTime = (): string => {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
+  const getCurrentDateTime = (): string => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
   // TomTom API Key from environment
   const TOMTOM_API_KEY = process.env.NEXT_PUBLIC_TOMTOM_API_KEY;
@@ -176,7 +187,10 @@ const getCurrentDateTime = (): string => {
       }
 
       if (initialCoordinates) {
-        mapRef.current.setCenter([initialCoordinates.lng, initialCoordinates.lat]);
+        mapRef.current.setCenter([
+          initialCoordinates.lng,
+          initialCoordinates.lat,
+        ]);
         setSelectedCoordinates(initialCoordinates);
       } else {
         mapRef.current.setCenter([-79.3832, 43.6532]);
@@ -192,14 +206,14 @@ const getCurrentDateTime = (): string => {
       // NEW: Function to fetch and update address
       const fetchAddressForCoordinates = async (lat: number, lng: number) => {
         if (!TOMTOM_API_KEY) return;
-        
+
         setIsLoadingAddress(true);
-        
+
         try {
           const response = await fetch(
             `https://api.tomtom.com/search/2/reverseGeocode/${lat},${lng}.json?key=${TOMTOM_API_KEY}`
           );
-          
+
           if (response.ok) {
             const data = await response.json();
             if (data.addresses && data.addresses.length > 0) {
@@ -216,7 +230,10 @@ const getCurrentDateTime = (): string => {
 
       // Fetch initial address
       if (initialCoordinates) {
-        fetchAddressForCoordinates(initialCoordinates.lat, initialCoordinates.lng);
+        fetchAddressForCoordinates(
+          initialCoordinates.lat,
+          initialCoordinates.lng
+        );
       } else {
         fetchAddressForCoordinates(43.6532, -79.3832);
       }
@@ -226,12 +243,12 @@ const getCurrentDateTime = (): string => {
         if (mapRef.current) {
           const center = mapRef.current.getCenter();
           setSelectedCoordinates({ lat: center.lat, lng: center.lng });
-          
+
           // Clear previous timeout
           if (addressFetchTimeoutRef.current) {
             clearTimeout(addressFetchTimeoutRef.current);
           }
-          
+
           // Debounce address fetching to avoid too many API calls
           addressFetchTimeoutRef.current = setTimeout(() => {
             fetchAddressForCoordinates(center.lat, center.lng);
@@ -255,7 +272,13 @@ const getCurrentDateTime = (): string => {
         }
       };
     }
-  }, [isMapOpen, TOMTOM_API_KEY, mapType, tripData.pickupCoordinates, tripData.dropoffCoordinates]);
+  }, [
+    isMapOpen,
+    TOMTOM_API_KEY,
+    mapType,
+    tripData.pickupCoordinates,
+    tripData.dropoffCoordinates,
+  ]);
 
   const handleDoneClick = async () => {
     if (selectedCoordinates && TOMTOM_API_KEY) {
@@ -303,7 +326,7 @@ const getCurrentDateTime = (): string => {
     setCurrentMapAddress("");
   };
 
-  const getCurrentLocation = async (type: 'pickup' | 'dropoff') => {
+  const getCurrentLocation = async (type: "pickup" | "dropoff") => {
     if (!navigator.geolocation) {
       toast.error("Geolocation is not supported by this browser.");
       return;
@@ -344,14 +367,14 @@ const getCurrentDateTime = (): string => {
                 }
                 const coordinates = { latitude, longitude };
 
-                if (type === 'pickup') {
+                if (type === "pickup") {
                   setPickupSearchValue(address);
                   updateTripData({ pickupLocation: address });
                   updatePickupCoordinates(coordinates);
                   setPickupValidated(true);
                   setPickupError("");
                   setIsPickupDropdownOpen(false);
-                } else if (type === 'dropoff') {
+                } else if (type === "dropoff") {
                   setDropoffSearchValue(address);
                   updateTripData({ dropoffLocation: address });
                   updateDropoffCoordinates(coordinates);
@@ -363,8 +386,10 @@ const getCurrentDateTime = (): string => {
             }
           }
         } catch (error) {
-          console.error('Reverse geocoding error:', error);
-          toast.error("Could not get address for your location. Please try again.");
+          console.error("Reverse geocoding error:", error);
+          toast.error(
+            "Could not get address for your location. Please try again."
+          );
         } finally {
           setIsGettingCurrentLocation(false);
           setCurrentLocationFor(null);
@@ -372,7 +397,7 @@ const getCurrentDateTime = (): string => {
         }
       },
       (error) => {
-        console.error('Geolocation error:', error);
+        console.error("Geolocation error:", error);
         let errorMessage = "Could not get your location. ";
 
         switch (error.code) {
@@ -398,11 +423,15 @@ const getCurrentDateTime = (): string => {
     );
   };
 
-  const searchTomTomLocations = async (query: string): Promise<LocationSuggestion[]> => {
+  const searchTomTomLocations = async (
+    query: string
+  ): Promise<LocationSuggestion[]> => {
     if (!query || query.length < 3 || !TOMTOM_API_KEY) return [];
     try {
       const response = await fetch(
-        `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
+        `https://api.tomtom.com/search/2/search/${encodeURIComponent(
+          query
+        )}.json?key=${TOMTOM_API_KEY}&limit=5&typeahead=true&countrySet=CA`
       );
       if (!response.ok) {
         throw new Error("Search request failed");
@@ -428,7 +457,7 @@ const getCurrentDateTime = (): string => {
     setPickupValidated(false);
     setPickupError("");
     setPickupHighlightedIndex(-1);
-    
+
     if (pickupSearchTimeoutRef.current) {
       clearTimeout(pickupSearchTimeoutRef.current);
     }
@@ -449,7 +478,7 @@ const getCurrentDateTime = (): string => {
     setDropoffValidated(false);
     setDropoffError("");
     setDropoffHighlightedIndex(-1);
-    
+
     if (dropoffSearchTimeoutRef.current) {
       clearTimeout(dropoffSearchTimeoutRef.current);
     }
@@ -547,7 +576,7 @@ const getCurrentDateTime = (): string => {
     setIsPickupDropdownOpen(false);
     setPickupSuggestions([]);
     setPickupHighlightedIndex(-1);
-    
+
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
@@ -563,7 +592,7 @@ const getCurrentDateTime = (): string => {
     setIsDropoffDropdownOpen(false);
     setDropoffSuggestions([]);
     setDropoffHighlightedIndex(-1);
-    
+
     setTimeout(() => {
       setIsSelectingFromDropdown(false);
     }, 100);
@@ -577,7 +606,9 @@ const getCurrentDateTime = (): string => {
 
   const handleDropoffBlur = () => {
     if (dropoffSearchValue && !dropoffValidated && !isSelectingFromDropdown) {
-      setDropoffError("Please select a location from the dropdown suggestions.");
+      setDropoffError(
+        "Please select a location from the dropdown suggestions."
+      );
     }
   };
 
@@ -723,7 +754,7 @@ const getCurrentDateTime = (): string => {
   };
 
   const renderLocationDropdown = (
-    type: 'pickup' | 'dropoff',
+    type: "pickup" | "dropoff",
     suggestions: LocationSuggestion[],
     isOpen: boolean,
     searchValue: string,
@@ -738,8 +769,8 @@ const getCurrentDateTime = (): string => {
           onMouseDown={() => setIsSelectingFromDropdown(true)}
           onClick={() => getCurrentLocation(type)}
           onMouseEnter={() => {
-            if (type === 'pickup') setPickupHighlightedIndex(0);
-            if (type === 'dropoff') setDropoffHighlightedIndex(0);
+            if (type === "pickup") setPickupHighlightedIndex(0);
+            if (type === "dropoff") setDropoffHighlightedIndex(0);
           }}
           disabled={isGettingCurrentLocation && currentLocationFor === type}
           className={`w-full text-left px-4 py-3 transition-colors border-b border-gray-100 disabled:opacity-50 ${
@@ -750,7 +781,10 @@ const getCurrentDateTime = (): string => {
         >
           <div className="flex items-center gap-3">
             {isGettingCurrentLocation && currentLocationFor === type ? (
-              <Icon icon="mdi:loading" className="w-4 h-4 text-primary animate-spin flex-shrink-0" />
+              <Icon
+                icon="mdi:loading"
+                className="w-4 h-4 text-primary animate-spin flex-shrink-0"
+              />
             ) : (
               <Icon
                 icon="mdi:crosshairs-gps"
@@ -760,9 +794,8 @@ const getCurrentDateTime = (): string => {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-primary">
                 {isGettingCurrentLocation && currentLocationFor === type
-                  ? 'Getting your location...'
-                  : 'Use current location'
-                }
+                  ? "Getting your location..."
+                  : "Use current location"}
               </p>
               <p className="text-xs text-gray-500">
                 Detect your current position
@@ -779,8 +812,8 @@ const getCurrentDateTime = (): string => {
                 onMouseDown={() => setIsSelectingFromDropdown(true)}
                 onClick={() => onSelect(suggestion)}
                 onMouseEnter={() => {
-                  if (type === 'pickup') setPickupHighlightedIndex(index + 1);
-                  if (type === 'dropoff') setDropoffHighlightedIndex(index + 1);
+                  if (type === "pickup") setPickupHighlightedIndex(index + 1);
+                  if (type === "dropoff") setDropoffHighlightedIndex(index + 1);
                 }}
                 className={`w-full text-left px-4 py-3 transition-colors ${
                   highlightedIndex === index + 1
@@ -1023,17 +1056,23 @@ const getCurrentDateTime = (): string => {
                               {tripData.luggageCount}
                             </span>
                             <button
-                            disabled={tripData.luggageCount === 10}
+                              disabled={tripData.luggageCount === 10}
                               onClick={(e) =>
-                                handleLuggageChange(Math.min(10, tripData.luggageCount + 1), e)
+                                handleLuggageChange(
+                                  Math.min(10, tripData.luggageCount + 1),
+                                  e
+                                )
                               }
-                              className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-white rounded-full ${tripData.luggageCount === 10 ? "bg-primary-gray" : "bg-primary"}`}
+                              className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-white rounded-full ${
+                                tripData.luggageCount === 10
+                                  ? "bg-primary-gray"
+                                  : "bg-primary"
+                              }`}
                             >
                               <i className="fa-solid fa-plus text-xs cursor-pointer" />
                             </button>
                           </div>
                         </div>
-                     
                       </div>
                     )}
                   </div>
@@ -1047,13 +1086,26 @@ const getCurrentDateTime = (): string => {
                 size="sm"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 py-3 md:py-4 items-start">
+
+            {/* Form Fields */}
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2  ${
+                activeTab === "round" ? "xl:grid-cols-4" : "xl:grid-cols-3"
+              } gap-3 sm:gap-4 py-3 md:py-4 items-start`}
+            >
               {(activeTab === "single" || activeTab === "round") && (
                 <>
-                  <div className="relative sm:min-h-[80px] flex flex-col" ref={pickupDropdownRef}>
-                    <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
-                      pickupError ? 'border-red-500' : 'border-primary-gray/50'
-                    }`}>
+                  <div
+                    className="relative sm:min-h-[80px] flex flex-col"
+                    ref={pickupDropdownRef}
+                  >
+                    <div
+                      className={`flex items-center border rounded-xl p-1 sm:p-2 h-12 sm:h-14 ${
+                        pickupError
+                          ? "border-red-500"
+                          : "border-primary-gray/50"
+                      }`}
+                    >
                       <Icon
                         icon={ICON_DATA.HOME}
                         className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
@@ -1072,7 +1124,11 @@ const getCurrentDateTime = (): string => {
                         }}
                         onBlur={(e) => {
                           setTimeout(() => {
-                            if (!pickupDropdownRef.current?.contains(document.activeElement)) {
+                            if (
+                              !pickupDropdownRef.current?.contains(
+                                document.activeElement
+                              )
+                            ) {
                               if (!isSelectingFromDropdown) {
                                 handlePickupBlur();
                               }
@@ -1081,7 +1137,7 @@ const getCurrentDateTime = (): string => {
                           }, 150);
                         }}
                         className={`flex-1 p-1 sm:p-2 focus:outline-none border-none bg-transparent text-xs sm:text-sm md:text-base ${
-                          pickupError ? 'text-red-600' : ''
+                          pickupError ? "text-red-600" : ""
                         }`}
                         autoComplete="off"
                       />
@@ -1094,17 +1150,17 @@ const getCurrentDateTime = (): string => {
                     </div>
                     <button
                       onClick={() => openMap("pickup")}
-                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark cursor-pointer"
+                      className="text-primary text-xs mt-1 ml-2 self-start hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                    
-                      {pickupError && (
-                        <p className="text-red-500 text-xs ml-2">{pickupError}</p>
-                      )}
-                   
+
+                    {pickupError && (
+                      <p className="text-red-500 text-xs ml-2">{pickupError}</p>
+                    )}
+
                     {renderLocationDropdown(
-                      'pickup',
+                      "pickup",
                       pickupSuggestions,
                       isPickupDropdownOpen,
                       pickupSearchValue,
@@ -1112,10 +1168,18 @@ const getCurrentDateTime = (): string => {
                       pickupHighlightedIndex
                     )}
                   </div>
-                  <div className="relative sm:min-h-[80px] flex flex-col" ref={dropoffDropdownRef}>
-                    <div className={`flex items-center border rounded-xl p-1 sm:p-2 ${
-                      dropoffError ? 'border-red-500' : 'border-primary-gray/50'
-                    }`}>
+
+                  <div
+                    className="relative sm:min-h-[80px] flex flex-col"
+                    ref={dropoffDropdownRef}
+                  >
+                    <div
+                      className={`flex items-center border rounded-xl p-1 sm:p-2 h-12 sm:h-14 ${
+                        dropoffError
+                          ? "border-red-500"
+                          : "border-primary-gray/50"
+                      }`}
+                    >
                       <Icon
                         icon={ICON_DATA.DROP_LOCATION}
                         className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 ml-1 sm:ml-2 text-primary-gray"
@@ -1134,7 +1198,11 @@ const getCurrentDateTime = (): string => {
                         }}
                         onBlur={(e) => {
                           setTimeout(() => {
-                            if (!dropoffDropdownRef.current?.contains(document.activeElement)) {
+                            if (
+                              !dropoffDropdownRef.current?.contains(
+                                document.activeElement
+                              )
+                            ) {
                               if (!isSelectingFromDropdown) {
                                 handleDropoffBlur();
                               }
@@ -1143,7 +1211,7 @@ const getCurrentDateTime = (): string => {
                           }, 150);
                         }}
                         className={`flex-1 p-1 sm:p-2 focus:outline-none border-none bg-transparent text-xs sm:text-sm md:text-base ${
-                          dropoffError ? 'text-red-600' : ''
+                          dropoffError ? "text-red-600" : ""
                         }`}
                         autoComplete="off"
                       />
@@ -1156,17 +1224,19 @@ const getCurrentDateTime = (): string => {
                     </div>
                     <button
                       onClick={() => openMap("dropoff")}
-                      className="text-primary text-xs mt-1 ml-2 self-start  hover:text-primary-dark cursor-pointer"
+                      className="text-primary text-xs mt-1 ml-2 self-start hover:text-primary-dark cursor-pointer"
                     >
                       Open Map
                     </button>
-                  
-                      {dropoffError && (
-                        <p className="text-red-500 text-xs ml-2">{dropoffError}</p>
-                      )}
-                    
+
+                    {dropoffError && (
+                      <p className="text-red-500 text-xs ml-2">
+                        {dropoffError}
+                      </p>
+                    )}
+
                     {renderLocationDropdown(
-                      'dropoff',
+                      "dropoff",
                       dropoffSuggestions,
                       isDropoffDropdownOpen,
                       dropoffSearchValue,
@@ -1176,9 +1246,10 @@ const getCurrentDateTime = (): string => {
                   </div>
                 </>
               )}
+
               {activeTab === "single" && (
                 <div className="sm:min-h-[80px] flex flex-col">
-                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
+                  <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2 h-12 sm:h-14">
                     <Icon
                       icon={ICON_DATA.CALENDAR_PICKUP}
                       className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
@@ -1197,15 +1268,14 @@ const getCurrentDateTime = (): string => {
                           : "text-primary-gray"
                       } text-xs sm:text-sm md:text-base`}
                     />
-                    
                   </div>
-                 
                 </div>
               )}
+
               {activeTab === "round" && (
                 <>
                   <div className="sm:min-h-[80px] flex flex-col">
-                    <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
+                    <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2 h-12 sm:h-14">
                       <Icon
                         icon={ICON_DATA.CALENDAR_PICKUP}
                         className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
@@ -1225,10 +1295,10 @@ const getCurrentDateTime = (): string => {
                         } text-xs sm:text-sm md:text-base`}
                       />
                     </div>
-                   
                   </div>
-                  <div className="min-h-[80px] flex flex-col">
-                    <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2">
+
+                  <div className="sm:min-h-[80px] flex flex-col">
+                    <div className="flex items-center border border-primary-gray/50 rounded-xl p-1 sm:p-2 h-12 sm:h-14">
                       <Icon
                         icon={ICON_DATA.CALENDAR_RETURN}
                         className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-primary-gray flex-shrink-0"
@@ -1243,7 +1313,9 @@ const getCurrentDateTime = (): string => {
                             tripData.pickupDateTime &&
                             e.target.value < tripData.pickupDateTime
                           ) {
-                            toast.error("Return date/time cannot be before pickup!");
+                            toast.error(
+                              "Return date/time cannot be before pickup!"
+                            );
                             return;
                           }
                           updateTripData({ returnDateTime: e.target.value });
@@ -1255,11 +1327,12 @@ const getCurrentDateTime = (): string => {
                         } text-xs sm:text-sm md:text-base`}
                       />
                     </div>
-                   
                   </div>
                 </>
               )}
             </div>
+
+            {/* Add Stop Button */}
             <div className="flex items-center justify-between">
               <Button
                 label="Add Stop"
@@ -1301,23 +1374,32 @@ const getCurrentDateTime = (): string => {
                 <div className="mt-2 flex items-center gap-2">
                   {isLoadingAddress ? (
                     <>
-                      <Icon icon="mdi:loading" className="w-4 h-4 text-primary animate-spin" />
-                      <p className="text-sm text-gray-500">Loading address...</p>
+                      <Icon
+                        icon="mdi:loading"
+                        className="w-4 h-4 text-primary animate-spin"
+                      />
+                      <p className="text-sm text-gray-500">
+                        Loading address...
+                      </p>
                     </>
                   ) : (
                     <>
-                      <Icon icon={ICON_DATA.LOCATION} className="w-4 h-4 text-primary flex-shrink-0" />
+                      <Icon
+                        icon={ICON_DATA.LOCATION}
+                        className="w-4 h-4 text-primary flex-shrink-0"
+                      />
                       <p className="text-sm text-gray-700 font-medium truncate">
-                        {currentMapAddress || "Move the map to select a location"}
+                        {currentMapAddress ||
+                          "Move the map to select a location"}
                       </p>
                     </>
                   )}
                 </div>
               </div>
-              <Icon 
-                onClick={handleCloseClick} 
-                icon="mdi:close" 
-                className="w-6 h-6 cursor-pointer hover:bg-gray-100 rounded-full p-1 flex-shrink-0" 
+              <Icon
+                onClick={handleCloseClick}
+                icon="mdi:close"
+                className="w-6 h-6 cursor-pointer hover:bg-gray-100 rounded-full p-1 flex-shrink-0"
               />
             </div>
 

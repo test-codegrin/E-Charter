@@ -28,7 +28,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${epilogue.variable} antialiased`}>
         <Toaster 
-            position="bottom-right"
+            position="top-center"
             toastOptions={{
               duration: 3000,
             }}

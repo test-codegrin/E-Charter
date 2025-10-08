@@ -271,7 +271,7 @@ export default function Page() {
 
                 {/* PASSWORD TAB */}
                 {activeTab === "password" && (
-                  <PasswordPage />
+                  <PasswordPage email={profileData?.email} />
                 )}
               </>
             )}

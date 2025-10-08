@@ -8,5 +8,6 @@ export const API = {
     USER_RESET_PASSWORD: API_BASE_URL+"user/resetpassword",
     USER_PROFILE: API_BASE_URL+"user/getuserprofile",
     CARS_FOR_RESERVE: API_BASE_URL+"trip/recommend",
+    CHANGE_PASSWORD : API_BASE_URL+"user/changepassword",
 
 }
