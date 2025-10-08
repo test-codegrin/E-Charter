@@ -86,7 +86,7 @@ interface TripContextType {
 const defaultTripData: TripData = {
   tripType: "single",
   persons: 1,
-  luggageCount: 1,
+  luggageCount: 0,
   pickupLocation: "",
   pickupCoordinates: undefined,
   returnLocation: "",
